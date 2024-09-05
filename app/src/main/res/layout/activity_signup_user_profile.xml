@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:fillViewport="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/lastNameEditTxt"
+            android:layout_width="350dp"
+            android:layout_height="70dp"
+            android:layout_marginTop="48dp"
+            android:background="@drawable/custom_input"
+            android:ems="10"
+            android:hint="Lastname"
+            android:inputType="textPersonName"
+            android:maxLength="30"
+            android:paddingStart="18dp"
+            android:paddingEnd="18dp"
+            app:layout_constraintEnd_toEndOf="@+id/textView"
+            app:layout_constraintHorizontal_bias="0.504"
+            app:layout_constraintStart_toStartOf="@+id/textView"
+            app:layout_constraintTop_toBottomOf="@+id/textView" />
+
+        <EditText
+            android:id="@+id/middleNameEditTxt"
+            android:layout_width="350dp"
+            android:layout_height="70dp"
+            android:layout_marginTop="52dp"
+            android:background="@drawable/custom_input"
+            android:ems="10"
+            android:hint="Middlename"
+            android:inputType="textPersonName"
+            android:maxLength="30"
+            android:paddingStart="18dp"
+            android:paddingEnd="18dp"
+            app:layout_constraintEnd_toEndOf="@+id/firstNameEditTxt"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/firstNameEditTxt"
+            app:layout_constraintTop_toBottomOf="@+id/firstNameEditTxt" />
+
+        <RadioGroup
+            android:id="@+id/radioGroup"
+            android:layout_width="352dp"
+            android:layout_height="87dp"
+            android:layout_marginTop="56dp"
+            android:background="@drawable/custom_input"
+            android:paddingStart="18dp"
+            app:layout_constraintEnd_toEndOf="@+id/middleNameEditTxt"
+            app:layout_constraintStart_toStartOf="@+id/middleNameEditTxt"
+            app:layout_constraintTop_toBottomOf="@+id/middleNameEditTxt"
+            tools:ignore="MissingConstraints">
+
+            <RadioButton
+                android:id="@+id/maleRadioBtn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="MALE"
+                tools:layout_editor_absoluteX="31dp"
+                tools:layout_editor_absoluteY="491dp" />
+
+            <RadioButton
+                android:id="@+id/femaleRadioBtn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="FEMALE"
+                tools:layout_editor_absoluteX="31dp"
+                tools:layout_editor_absoluteY="539dp" />
+
+        </RadioGroup>
+
+        <EditText
+            android:id="@+id/birthDatePicker"
+            android:layout_width="350dp"
+            android:layout_height="70dp"
+            android:layout_marginTop="52dp"
+            android:layout_marginEnd="32dp"
+            android:background="@drawable/custom_input"
+            android:drawableEnd="@drawable/custom_date_icon"
+            android:ems="10"
+            android:hint="Birth Date"
+            android:inputType="date"
+            android:paddingStart="18dp"
+            android:paddingEnd="18dp"
+            app:layout_constraintEnd_toEndOf="@+id/radioGroup"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/radioGroup"
+            app:layout_constraintTop_toBottomOf="@+id/radioGroup" />
+
+        <EditText
+            android:id="@+id/addressEditTxt"
+            android:layout_width="350dp"
+            android:layout_height="70dp"
+            android:layout_marginTop="50dp"
+            android:background="@drawable/custom_input"
+            android:drawableEnd="@drawable/custom_location_icon"
+            android:ems="10"
+            android:hint="Address"
+            android:inputType="textPersonName"
+            android:maxLength="64"
+            android:paddingStart="18dp"
+            android:paddingEnd="18dp"
+            app:layout_constraintEnd_toEndOf="@+id/birthDatePicker"
+            app:layout_constraintStart_toStartOf="@+id/birthDatePicker"
+            app:layout_constraintTop_toBottomOf="@+id/birthDatePicker" />
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/profileView"
+            android:layout_width="215dp"
+            android:layout_height="179dp"
+            android:layout_marginTop="85dp"
+            android:src="@drawable/user"
+            app:civ_border_color="@color/black"
+            app:civ_border_width="1dp"
+            app:layout_constraintEnd_toEndOf="@+id/addressEditTxt"
+            app:layout_constraintHorizontal_bias="0.503"
+            app:layout_constraintStart_toStartOf="@+id/addressEditTxt"
+            app:layout_constraintTop_toBottomOf="@+id/addressEditTxt" />
+
+        <Button
+            android:id="@+id/selectProfileBtn"
+            android:layout_width="162dp"
+            android:layout_height="55dp"
+            android:layout_marginTop="30dp"
+            android:text="SELECT PROFILE"
+            app:layout_constraintEnd_toEndOf="@+id/profileView"
+            app:layout_constraintHorizontal_bias="0.49"
+            app:layout_constraintStart_toStartOf="@+id/profileView"
+            app:layout_constraintTop_toBottomOf="@+id/profileView" />
+
+        <EditText
+            android:id="@+id/firstNameEditTxt"
+            android:layout_width="350dp"
+            android:layout_height="70dp"
+            android:layout_marginTop="52dp"
+            android:background="@drawable/custom_input"
+            android:ems="10"
+            android:hint="Firstname"
+            android:inputType="textPersonName"
+            android:maxLength="30"
+            android:paddingStart="18dp"
+            android:paddingEnd="18dp"
+            app:layout_constraintEnd_toEndOf="@+id/lastNameEditTxt"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/lastNameEditTxt"
+            app:layout_constraintTop_toBottomOf="@+id/lastNameEditTxt" />
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="52dp"
+            android:text="REGISTER"
+            android:textSize="25sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.498"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/submitBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="44dp"
+            android:text="SUBMIT"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.896"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/selectProfileBtn" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>
