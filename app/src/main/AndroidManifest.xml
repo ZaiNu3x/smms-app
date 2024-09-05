@@ -31,6 +31,7 @@
         <activity android:name=".activities.HomeActivity" />
         <activity android:name=".activities.SignInVerificationActivity" />
         <activity android:name=".activities.SignUpProfileActivity" />
+        <activity android:name=".activities.SignUpVerificationActivity" />
     </application>
 
 </manifest>

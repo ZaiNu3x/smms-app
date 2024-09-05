@@ -2,6 +2,7 @@ package group.intelliboys.smms.activities;
 
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -72,7 +73,7 @@ public class SignUpProfileActivity extends AppCompatActivity {
 
         @SuppressLint("SetTextI18n")
         DatePickerDialog datePicker = new DatePickerDialog(this, (view, y, m, d) -> {
-            birthDatePicker.setText(y+"-"+(m+1)+"-"+d);
+            birthDatePicker.setText(y + "-" + (m + 1) + "-" + d);
         }, year, month, day);
 
         selectProfilePicBtn.setOnClickListener(btn -> {
@@ -267,8 +268,7 @@ public class SignUpProfileActivity extends AppCompatActivity {
         });
 
         submitButton.setOnClickListener(btn -> {
-            Log.i("", "Submit Pressed!");
-
+            String formId = getIntent().getStringExtra("formId");
             String email = getIntent().getStringExtra("email");
             String phoneNumber = getIntent().getStringExtra("phoneNumber");
             String password = getIntent().getStringExtra("password");
@@ -290,6 +290,7 @@ public class SignUpProfileActivity extends AppCompatActivity {
             JSONObject registrationForm = new JSONObject();
 
             try {
+                registrationForm.put("formId", formId);
                 registrationForm.put("email", email);
                 registrationForm.put("password", password);
                 registrationForm.put("phoneNumber", phoneNumber);
@@ -302,9 +303,16 @@ public class SignUpProfileActivity extends AppCompatActivity {
                 registrationForm.put("profilePic", profilePic);
 
                 Log.i("", registrationForm.toString());
+
+                doVerify(registrationForm);
             } catch (JSONException e) {
                 Log.i("", Objects.requireNonNull(e.getMessage()));
             }
         });
+    }
+
+    private void doVerify(JSONObject regForm) {
+        Intent intent = new Intent(getApplicationContext(), SignUpVerificationActivity.class);
+        startActivity(intent);
     }
 }

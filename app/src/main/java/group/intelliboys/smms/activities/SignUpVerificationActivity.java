@@ -35,7 +35,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class SignInVerificationActivity extends AppCompatActivity {
+public class SignUpVerificationActivity extends AppCompatActivity {
 
     private EditText emailOtpEditTxt;
     private EditText smsOtpEditTxt;
@@ -59,6 +59,9 @@ public class SignInVerificationActivity extends AppCompatActivity {
         okHttpClient = CustomOkHttpClient.getOkHttpClient(getApplicationContext());
         Button submitBtn = findViewById(R.id.submitOtpBtn);
 
+        resendEmailOtpTimer();
+        resendSmsOtpTimer();
+
         resendEmailOtpLbl.setOnClickListener(lbl -> {
             resendEmailOtpTimer();
             resendEmailOtp();
@@ -74,20 +77,19 @@ public class SignInVerificationActivity extends AppCompatActivity {
             String emailOtp = emailOtpEditTxt.getText().toString();
             String smsOtp = smsOtpEditTxt.getText().toString();
 
-            JSONObject jsonObject = new JSONObject();
+            JSONObject regForm = new JSONObject();
+
             try {
-                jsonObject.put("formId", formId);
-                jsonObject.put("emailOtp", emailOtp);
-                jsonObject.put("smsOtp", smsOtp);
-
-                doVerify(jsonObject);
-            } catch (JSONException e) {
-                Log.i("", e.getMessage());
+                regForm.put("formId", formId);
+                regForm.put("emailOtp", emailOtp);
+                regForm.put("smsOtp", smsOtp);
             }
-        });
+            catch (JSONException e) {
+                Log.i("", Objects.requireNonNull(e.getMessage()));
+            }
 
-        resendEmailOtpTimer();
-        resendSmsOtpTimer();
+            doVerify(regForm);
+        });
     }
 
     private void resendEmailOtpTimer() {
@@ -132,7 +134,7 @@ public class SignInVerificationActivity extends AppCompatActivity {
 
     private void resendEmailOtp() {
         String formId = getIntent().getStringExtra("formId");
-        final String RESEND_EMAIL_OTP_URL = "https://192.168.1.14:443/login/2fa/resend/email-otp/" + formId;
+        final String RESEND_EMAIL_OTP_URL = "https://192.168.1.14:443/register/resend/email-otp/" + formId;
 
         Request request = new Request.Builder()
                 .get()
@@ -164,7 +166,7 @@ public class SignInVerificationActivity extends AppCompatActivity {
 
     private void resendSmsOtp() {
         String formId = getIntent().getStringExtra("formId");
-        final String RESEND_SMS_OTP_URL = "https://192.168.1.14:443/login/2fa/resend/sms-otp/" + formId;
+        final String RESEND_SMS_OTP_URL = "https://192.168.1.14:443/register/resend/sms-otp/" + formId;
 
         Request request = new Request.Builder()
                 .get()
@@ -194,11 +196,11 @@ public class SignInVerificationActivity extends AppCompatActivity {
         });
     }
 
-    private void doVerify(JSONObject jsonObject) {
-        final String VERIFICATION_URL = "https://192.168.1.14:443/login/2fa/verify";
+    private void doVerify(JSONObject regForm) {
+        final String VERIFICATION_URL = "https://192.168.1.14:443/register/verify";
         final MediaType JSON = MediaType.get("application/json");
 
-        RequestBody requestBody = RequestBody.create(jsonObject.toString(), JSON);
+        RequestBody requestBody = RequestBody.create(regForm.toString(), JSON);
 
         Request request = new Request.Builder()
                 .url(VERIFICATION_URL)
@@ -214,6 +216,7 @@ public class SignInVerificationActivity extends AppCompatActivity {
             @SuppressLint("UseCompatLoadingForDrawables")
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                assert response.body() != null;
                 String responseBody = response.body().string();
 
                 ObjectMapper mapper = new ObjectMapper();
@@ -255,7 +258,7 @@ public class SignInVerificationActivity extends AppCompatActivity {
                     });
                 }
 
-                if (verificationResult.getStatus().equals("VERIFIED")) {
+                if (verificationResult.getStatus().equals("VERIFICATION_SUCCESS")) {
                     runOnUiThread(() -> {
                         Toast.makeText(getApplicationContext(), "VERIFICATION SUCCESS!", Toast.LENGTH_SHORT).show();
 

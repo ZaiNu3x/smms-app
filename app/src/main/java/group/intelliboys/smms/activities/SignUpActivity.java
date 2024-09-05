@@ -25,6 +25,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -272,11 +273,6 @@ public class SignUpActivity extends AppCompatActivity {
             }
 
             verifyCredentialIfNotExists(jsonObject);
-
-            /*
-            Intent intent = new Intent(getApplicationContext(), SignUpProfileActivity.class);
-            startActivity(intent);
-             */
         });
     }
 
@@ -319,12 +315,14 @@ public class SignUpActivity extends AppCompatActivity {
 
                     if (result.getStatus().equals("EMAIL_PHONE_NOT_NUMBER_EXISTS")) {
                         runOnUiThread(() -> {
+                            String formId = UUID.randomUUID().toString();
                             String email = emailEditTxt.getText().toString();
                             String phoneNumber = phoneNumberEditTxt.getText().toString();
                             String password = passwordEditTxt.getText().toString();
 
                             Intent intent = new Intent(getApplicationContext(), SignUpProfileActivity.class);
 
+                            intent.putExtra("formId", formId);
                             intent.putExtra("email", email);
                             intent.putExtra("phoneNumber", phoneNumber);
                             intent.putExtra("password", password);
