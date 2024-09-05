@@ -1,6 +1,7 @@
 package group.intelliboys.smms.activities;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -319,6 +320,7 @@ public class SignUpActivity extends AppCompatActivity {
                             String email = emailEditTxt.getText().toString();
                             String phoneNumber = phoneNumberEditTxt.getText().toString();
                             String password = passwordEditTxt.getText().toString();
+                            String confirmPassword = confirmPasswordEditTxt.getText().toString();
 
                             Intent intent = new Intent(getApplicationContext(), SignUpProfileActivity.class);
 
@@ -326,6 +328,7 @@ public class SignUpActivity extends AppCompatActivity {
                             intent.putExtra("email", email);
                             intent.putExtra("phoneNumber", phoneNumber);
                             intent.putExtra("password", password);
+                            intent.putExtra("confirmPassword", confirmPassword);
 
                             startActivity(intent);
                         });
@@ -377,5 +380,17 @@ public class SignUpActivity extends AppCompatActivity {
                 });
             }
         });
+    }
+
+    @Override
+    public void onBackPressed() {
+        new AlertDialog.Builder(this)
+                .setTitle("Exit")
+                .setMessage("Are you sure you want to exit?")
+                .setPositiveButton(android.R.string.yes, (dialogInterface, i) -> super.onBackPressed())
+                .setNegativeButton(android.R.string.no, ((dialogInterface, i) -> {
+                    // CODE
+                }))
+                .show();
     }
 }

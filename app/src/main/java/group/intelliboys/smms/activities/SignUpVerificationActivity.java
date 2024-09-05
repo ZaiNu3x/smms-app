@@ -83,8 +83,7 @@ public class SignUpVerificationActivity extends AppCompatActivity {
                 regForm.put("formId", formId);
                 regForm.put("emailOtp", emailOtp);
                 regForm.put("smsOtp", smsOtp);
-            }
-            catch (JSONException e) {
+            } catch (JSONException e) {
                 Log.i("", Objects.requireNonNull(e.getMessage()));
             }
 
@@ -261,11 +260,12 @@ public class SignUpVerificationActivity extends AppCompatActivity {
                 if (verificationResult.getStatus().equals("VERIFICATION_SUCCESS")) {
                     runOnUiThread(() -> {
                         Toast.makeText(getApplicationContext(), "VERIFICATION SUCCESS!", Toast.LENGTH_SHORT).show();
-
-                        Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
-                        intent.putExtra("token", verificationResult.getToken());
-                        startActivity(intent);
                     });
+
+                    Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
+                    intent.putExtra("token", verificationResult.getToken());
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
                 }
             }
         });

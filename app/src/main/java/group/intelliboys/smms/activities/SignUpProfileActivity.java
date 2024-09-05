@@ -14,19 +14,34 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import group.intelliboys.smms.R;
+import group.intelliboys.smms.configs.CustomOkHttpClient;
+import group.intelliboys.smms.models.results.RegistrationResult;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class SignUpProfileActivity extends AppCompatActivity {
 
@@ -40,6 +55,8 @@ public class SignUpProfileActivity extends AppCompatActivity {
     private ImageView profileView;
     private Button selectProfilePicBtn;
     private Button submitButton;
+
+    private OkHttpClient okHttpClient;
 
     @SuppressLint("UseCompatLoadingForDrawables")
     private Drawable drawable;
@@ -61,6 +78,8 @@ public class SignUpProfileActivity extends AppCompatActivity {
         selectProfilePicBtn = findViewById(R.id.selectProfileBtn);
         submitButton = findViewById(R.id.submitBtn);
 
+        okHttpClient = CustomOkHttpClient.getOkHttpClient(getApplicationContext());
+
         drawable = getDrawable(R.drawable.error);
         assert drawable != null;
         drawable.setBounds(0, 0, 45, 45);
@@ -73,7 +92,7 @@ public class SignUpProfileActivity extends AppCompatActivity {
 
         @SuppressLint("SetTextI18n")
         DatePickerDialog datePicker = new DatePickerDialog(this, (view, y, m, d) -> {
-            birthDatePicker.setText(y + "-" + (m + 1) + "-" + d);
+            birthDatePicker.setText(LocalDate.of(y, (m + 1), d).toString());
         }, year, month, day);
 
         selectProfilePicBtn.setOnClickListener(btn -> {
@@ -272,6 +291,7 @@ public class SignUpProfileActivity extends AppCompatActivity {
             String email = getIntent().getStringExtra("email");
             String phoneNumber = getIntent().getStringExtra("phoneNumber");
             String password = getIntent().getStringExtra("password");
+            String confirmPassword = getIntent().getStringExtra("confirmPassword");
             String lastName = lastNameEditTxt.getText().toString();
             String firstName = firstNameEditTxt.getText().toString();
             String middleName = middleNameEditTxt.getText().toString();
@@ -293,6 +313,7 @@ public class SignUpProfileActivity extends AppCompatActivity {
                 registrationForm.put("formId", formId);
                 registrationForm.put("email", email);
                 registrationForm.put("password", password);
+                registrationForm.put("confirmPassword", confirmPassword);
                 registrationForm.put("phoneNumber", phoneNumber);
                 registrationForm.put("lastName", lastName);
                 registrationForm.put("firstName", firstName);
@@ -312,7 +333,43 @@ public class SignUpProfileActivity extends AppCompatActivity {
     }
 
     private void doVerify(JSONObject regForm) {
-        Intent intent = new Intent(getApplicationContext(), SignUpVerificationActivity.class);
-        startActivity(intent);
+        final String LOGIN_URL = "https://192.168.1.14:443/register/submit";
+        final MediaType JSON = MediaType.get("application/json");
+
+        RequestBody requestBody = RequestBody.create(regForm.toString(), JSON);
+
+        Request request = new Request.Builder()
+                .url(LOGIN_URL)
+                .post(requestBody)
+                .build();
+
+        okHttpClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Log.i("", Objects.requireNonNull(e.getMessage()));
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                assert response.body() != null;
+                String responseBody = response.body().string();
+
+                ObjectMapper mapper = new ObjectMapper();
+
+                RegistrationResult result = mapper.readValue(responseBody, RegistrationResult.class);
+
+                if (result != null) {
+                    if (result.getStatus().equals("NEED_VERIFICATION")) {
+                        runOnUiThread(() -> {
+                            Toast.makeText(getApplicationContext(), "Please Verify your Registration!", Toast.LENGTH_LONG).show();
+                        });
+
+                        Intent intent = new Intent(getApplicationContext(), SignUpVerificationActivity.class);
+                        intent.putExtra("formId", result.getFormId());
+                        startActivity(intent);
+                    }
+                }
+            }
+        });
     }
 }

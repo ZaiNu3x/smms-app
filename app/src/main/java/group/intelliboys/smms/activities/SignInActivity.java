@@ -217,16 +217,22 @@ public class SignInActivity extends AppCompatActivity {
                     });
                 } else if (signInResult.getStatus().equals("AUTHENTICATION_SUCCESS")) {
                     runOnUiThread(() -> {
-                        Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
-                        intent.putExtra("token", signInResult.getToken());
-                        startActivity(intent);
+                        Toast.makeText(getApplicationContext(), "AUTHENTICATION SUCCESS!", Toast.LENGTH_LONG).show();
                     });
+
+                    Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    intent.putExtra("token", signInResult.getToken());
+                    startActivity(intent);
                 } else if (signInResult.getStatus().equals("NEED_VERIFICATION")) {
+
                     runOnUiThread(() -> {
-                        Intent intent = new Intent(getApplicationContext(), SignInVerificationActivity.class);
-                        intent.putExtra("formId", signInResult.getFormId());
-                        startActivity(intent);
+                        Toast.makeText(getApplicationContext(), "Please Verify your login!", Toast.LENGTH_LONG).show();
                     });
+
+                    Intent intent = new Intent(getApplicationContext(), SignInVerificationActivity.class);
+                    intent.putExtra("formId", signInResult.getFormId());
+                    startActivity(intent);
                 }
 
                 runOnUiThread(() -> {
