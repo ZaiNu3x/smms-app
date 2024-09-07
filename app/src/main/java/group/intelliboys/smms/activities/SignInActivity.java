@@ -1,7 +1,9 @@
 package group.intelliboys.smms.activities;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -20,7 +22,10 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -68,6 +73,8 @@ public class SignInActivity extends AppCompatActivity {
 
         drawable = getDrawable(R.drawable.error);
         drawable.setBounds(0, 0, 45, 45);
+
+        requestPermissions();
 
         emailEditTxt.addTextChangedListener(new TextWatcher() {
             private final Handler handler = new Handler(Looper.getMainLooper());
@@ -242,5 +249,40 @@ public class SignInActivity extends AppCompatActivity {
                 });
             }
         });
+    }
+
+    @Override
+    public void onBackPressed() {
+        new AlertDialog.Builder(this)
+                .setTitle("Exit")
+                .setMessage("Are you sure you want to exit?")
+                .setPositiveButton(android.R.string.yes, (dialogInterface, i) -> finishAffinity())
+                .setNegativeButton(android.R.string.no, ((dialogInterface, i) -> {
+                    // CODE
+                }))
+                .show();
+    }
+
+    private static final int REQUEST_PERMISSIONS = 1;
+
+    private void requestPermissions() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_PERMISSIONS);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == REQUEST_PERMISSIONS) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted
+                Log.i("","Permission Granted!");
+            } else {
+                // Permission denied
+                Log.i("","Permission Denied!");
+            }
+        }
+
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 }

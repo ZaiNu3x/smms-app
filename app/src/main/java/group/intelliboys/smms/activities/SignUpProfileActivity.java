@@ -4,9 +4,11 @@ import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -20,12 +22,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.Objects;
@@ -34,6 +37,7 @@ import java.util.regex.Pattern;
 
 import group.intelliboys.smms.R;
 import group.intelliboys.smms.configs.CustomOkHttpClient;
+import group.intelliboys.smms.models.forms.SignUpForm;
 import group.intelliboys.smms.models.results.RegistrationResult;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -55,6 +59,8 @@ public class SignUpProfileActivity extends AppCompatActivity {
     private ImageView profileView;
     private Button selectProfilePicBtn;
     private Button submitButton;
+
+    private byte[] profilePic;
 
     private OkHttpClient okHttpClient;
 
@@ -96,7 +102,8 @@ public class SignUpProfileActivity extends AppCompatActivity {
         }, year, month, day);
 
         selectProfilePicBtn.setOnClickListener(btn -> {
-            Log.i("", "Select Profile Pressed!");
+            // CODE FOR SELECTING IMAGE FROM GALLERY
+            openImagePicker();
         });
 
         lastNameEditTxt.addTextChangedListener(new TextWatcher() {
@@ -295,48 +302,48 @@ public class SignUpProfileActivity extends AppCompatActivity {
             String lastName = lastNameEditTxt.getText().toString();
             String firstName = firstNameEditTxt.getText().toString();
             String middleName = middleNameEditTxt.getText().toString();
-            String sex = null;
+            char sex = '0';
 
             if (maleRadioButton.isChecked()) {
-                sex = "m";
+                sex = 'm';
             } else if (femaleRadioButton.isChecked()) {
-                sex = "f";
+                sex = 'f';
             }
 
-            String birthDate = birthDatePicker.getText().toString();
+            LocalDate birthDate = LocalDate.parse(birthDatePicker.getText());
             String address = addressEditTxt.getText().toString();
-            byte[] profilePic = null;
 
-            JSONObject registrationForm = new JSONObject();
+            SignUpForm form = new SignUpForm();
+
+            form.setFormId(formId);
+            form.setEmail(email);
+            form.setPhoneNumber(phoneNumber);
+            form.setPassword(password);
+            form.setConfirmPassword(confirmPassword);
+            form.setLastName(lastName);
+            form.setFirstName(firstName);
+            form.setMiddleName(middleName);
+            form.setSex(sex);
+            form.setBirthDate(birthDate);
+            form.setAddress(address);
+            form.setProfilePic(profilePic);
 
             try {
-                registrationForm.put("formId", formId);
-                registrationForm.put("email", email);
-                registrationForm.put("password", password);
-                registrationForm.put("confirmPassword", confirmPassword);
-                registrationForm.put("phoneNumber", phoneNumber);
-                registrationForm.put("lastName", lastName);
-                registrationForm.put("firstName", firstName);
-                registrationForm.put("middleName", middleName);
-                registrationForm.put("sex", sex);
-                registrationForm.put("birthDate", birthDate);
-                registrationForm.put("address", address);
-                registrationForm.put("profilePic", profilePic);
-
-                Log.i("", registrationForm.toString());
-
-                doVerify(registrationForm);
-            } catch (JSONException e) {
-                Log.i("", Objects.requireNonNull(e.getMessage()));
+                doVerify(form);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
             }
         });
     }
 
-    private void doVerify(JSONObject regForm) {
+    private void doVerify(SignUpForm regForm) throws JsonProcessingException {
         final String LOGIN_URL = "https://192.168.1.14:443/register/submit";
         final MediaType JSON = MediaType.get("application/json");
 
-        RequestBody requestBody = RequestBody.create(regForm.toString(), JSON);
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        String form = mapper.writeValueAsString(regForm);
+        RequestBody requestBody = RequestBody.create(form, JSON);
 
         Request request = new Request.Builder()
                 .url(LOGIN_URL)
@@ -371,5 +378,50 @@ public class SignUpProfileActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private static final int PICK_IMAGE_REQUEST = 1;
+
+    private void openImagePicker() {
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(intent, PICK_IMAGE_REQUEST);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            Uri imageUri = data.getData();
+
+            try {
+                profilePic = readBytes(imageUri);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            profileView.setImageURI(imageUri);
+        }
+    }
+
+    public byte[] readBytes(Uri uri) throws IOException {
+        // this dynamically extends to take the bytes you read
+        InputStream inputStream = getContentResolver().openInputStream(uri);
+        ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
+
+        // this is storage overwritten on each iteration with bytes
+        int bufferSize = 1024;
+        byte[] buffer = new byte[bufferSize];
+
+        // we need to know how may bytes were read to write them to the byteBuffer
+        int len = 0;
+        while ((len = inputStream.read(buffer)) != -1) {
+            byteBuffer.write(buffer, 0, len);
+        }
+
+        inputStream.close();
+
+        // and then we can return your byte array.
+        return byteBuffer.toByteArray();
     }
 }
