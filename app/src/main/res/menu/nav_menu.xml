@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/home"
+            android:icon="@drawable/ic_home"
+            android:title="@string/home" />
+
+        <item
+            android:id="@+id/clubs"
+            android:icon="@drawable/ic_group"
+            android:title="@string/clubs" />
+
+        <item
+            android:id="@+id/accident_history"
+            android:icon="@drawable/ic_warning"
+            android:title="@string/accident_history" />
+
+        <item
+            android:id="@+id/travel_history"
+            android:icon="@drawable/ic_travel_history"
+            android:title="@string/travel_history" />
+
+        <item
+            android:id="@+id/settings"
+            android:icon="@drawable/ic_settings"
+            android:title="@string/settings" />
+
+        <item
+            android:id="@+id/logout"
+            android:icon="@drawable/ic_logout"
+            android:title="@string/logout" />
+    </group>
+</menu>
