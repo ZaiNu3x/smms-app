@@ -7,22 +7,22 @@
 
     <fragment
         android:id="@+id/homeFragment"
-        android:name="group.intelliboys.smms.HomeFragment"
+        android:name="group.intelliboys.smms.fragments.HomeFragment"
         android:label="fragment_home"
         tools:layout="@layout/fragment_home" />
     <fragment
         android:id="@+id/settingsFragment"
-        android:name="group.intelliboys.smms.SettingsFragment"
+        android:name="group.intelliboys.smms.fragments.SettingsFragment"
         android:label="fragment_settings"
         tools:layout="@layout/fragment_settings" />
     <fragment
         android:id="@+id/accidentHistoryFragment"
-        android:name="group.intelliboys.smms.AccidentHistoryFragment"
+        android:name="group.intelliboys.smms.fragments.AccidentHistoryFragment"
         android:label="fragment_accident_history"
         tools:layout="@layout/fragment_accident_history" />
     <fragment
         android:id="@+id/travelHistoryFragment"
-        android:name="group.intelliboys.smms.TravelHistoryFragment"
+        android:name="group.intelliboys.smms.fragments.TravelHistoryFragment"
         android:label="fragment_travel_history"
         tools:layout="@layout/fragment_travel_history" />
 </navigation>
