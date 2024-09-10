@@ -3,6 +3,7 @@ package group.intelliboys.smms.activities;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
@@ -10,12 +11,14 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
 
 import group.intelliboys.smms.R;
 import group.intelliboys.smms.fragments.HomeFragment;
+import group.intelliboys.smms.fragments.SettingsFragment;
 
 public class HomeActivity extends AppCompatActivity implements NavigationView
         .OnNavigationItemSelectedListener {
@@ -46,18 +49,28 @@ public class HomeActivity extends AppCompatActivity implements NavigationView
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment_container, new HomeFragment()).commit();
 
-            navigationView.setCheckedItem(R.layout.fragment_home);
+            navigationView.setCheckedItem(R.id.nav_home);
         }
     }
 
+    @SuppressLint("NonConstantResourceId")
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        return false;
-    }
+        Log.i("", String.valueOf(item.getItemId()));
 
-    @Override
-    public void onPointerCaptureChanged(boolean hasCapture) {
-        super.onPointerCaptureChanged(hasCapture);
+        switch (item.getItemId()) {
+            case R.id.nav_home:
+                Log.i("", "Home Selected!");
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new HomeFragment()).commit();
+                break;
+
+            case R.id.nav_settings:
+                Log.i("", "Settings Selected!");
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new SettingsFragment()).commit();
+                break;
+        }
+        drawerLayout.closeDrawer(GravityCompat.START);
+        return true;
     }
 
     @Override
@@ -71,5 +84,4 @@ public class HomeActivity extends AppCompatActivity implements NavigationView
                 }))
                 .show();
     }
-
 }

@@ -5,32 +5,32 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/home"
+            android:id="@+id/nav_home"
             android:icon="@drawable/ic_home"
             android:title="@string/home" />
 
         <item
-            android:id="@+id/clubs"
+            android:id="@+id/nav_clubs"
             android:icon="@drawable/ic_group"
             android:title="@string/clubs" />
 
         <item
-            android:id="@+id/accident_history"
+            android:id="@+id/nav_accident_history"
             android:icon="@drawable/ic_warning"
             android:title="@string/accident_history" />
 
         <item
-            android:id="@+id/travel_history"
+            android:id="@+id/nav_travel_history"
             android:icon="@drawable/ic_travel_history"
             android:title="@string/travel_history" />
 
         <item
-            android:id="@+id/settings"
+            android:id="@+id/nav_settings"
             android:icon="@drawable/ic_settings"
             android:title="@string/settings" />
 
         <item
-            android:id="@+id/logout"
+            android:id="@+id/nav_logout"
             android:icon="@drawable/ic_logout"
             android:title="@string/logout" />
     </group>
