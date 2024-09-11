@@ -26,6 +26,7 @@ import java.util.Objects;
 
 import group.intelliboys.smms.R;
 import group.intelliboys.smms.configs.CustomOkHttpClient;
+import group.intelliboys.smms.configs.NetworkConfig;
 import group.intelliboys.smms.models.results.TwoFAVerificationResult;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -132,7 +133,7 @@ public class SignInVerificationActivity extends AppCompatActivity {
 
     private void resendEmailOtp() {
         String formId = getIntent().getStringExtra("formId");
-        final String RESEND_EMAIL_OTP_URL = "https://192.168.1.14:443/login/2fa/resend/email-otp/" + formId;
+        final String RESEND_EMAIL_OTP_URL = NetworkConfig.HOST + NetworkConfig.PORT + "/login/2fa/resend/email-otp/" + formId;
 
         Request request = new Request.Builder()
                 .get()
@@ -164,7 +165,7 @@ public class SignInVerificationActivity extends AppCompatActivity {
 
     private void resendSmsOtp() {
         String formId = getIntent().getStringExtra("formId");
-        final String RESEND_SMS_OTP_URL = "https://192.168.1.14:443/login/2fa/resend/sms-otp/" + formId;
+        final String RESEND_SMS_OTP_URL = NetworkConfig.HOST + NetworkConfig.PORT + "/login/2fa/resend/sms-otp/" + formId;
 
         Request request = new Request.Builder()
                 .get()
@@ -195,7 +196,7 @@ public class SignInVerificationActivity extends AppCompatActivity {
     }
 
     private void doVerify(JSONObject jsonObject) {
-        final String VERIFICATION_URL = "https://192.168.1.14:443/login/2fa/verify";
+        final String VERIFICATION_URL = NetworkConfig.HOST + NetworkConfig.PORT + "/login/2fa/verify";
         final MediaType JSON = MediaType.get("application/json");
 
         RequestBody requestBody = RequestBody.create(jsonObject.toString(), JSON);

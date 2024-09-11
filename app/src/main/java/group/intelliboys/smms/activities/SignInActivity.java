@@ -37,6 +37,7 @@ import java.util.Objects;
 
 import group.intelliboys.smms.R;
 import group.intelliboys.smms.configs.CustomOkHttpClient;
+import group.intelliboys.smms.configs.NetworkConfig;
 import group.intelliboys.smms.models.results.SignInResult;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -177,8 +178,10 @@ public class SignInActivity extends AppCompatActivity {
         loginButton.setEnabled(false);
         signupButton.setEnabled(false);
 
-        final String LOGIN_URL = "https://192.168.1.14:443/login";
+        final String LOGIN_URL = NetworkConfig.HOST + NetworkConfig.PORT + "/login";
         final MediaType JSON = MediaType.get("application/json");
+
+        Log.i("", "URL: "+LOGIN_URL);
 
         RequestBody requestBody = RequestBody.create(loginForm.toString(), JSON);
 
@@ -190,6 +193,8 @@ public class SignInActivity extends AppCompatActivity {
         okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Log.i("", Objects.requireNonNull(e.getMessage()));
+
                 runOnUiThread(() -> {
                     Toast.makeText(getApplicationContext(), "SERVER ERROR!", Toast.LENGTH_LONG).show();
                     signinProgress.setVisibility(View.INVISIBLE);
@@ -276,10 +281,10 @@ public class SignInActivity extends AppCompatActivity {
         if (requestCode == REQUEST_PERMISSIONS) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Permission granted
-                Log.i("","Permission Granted!");
+                Log.i("", "Permission Granted!");
             } else {
                 // Permission denied
-                Log.i("","Permission Denied!");
+                Log.i("", "Permission Denied!");
             }
         }
 

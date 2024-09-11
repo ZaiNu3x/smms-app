@@ -37,6 +37,7 @@ import java.util.regex.Pattern;
 
 import group.intelliboys.smms.R;
 import group.intelliboys.smms.configs.CustomOkHttpClient;
+import group.intelliboys.smms.configs.NetworkConfig;
 import group.intelliboys.smms.models.forms.SignUpForm;
 import group.intelliboys.smms.models.results.RegistrationResult;
 import okhttp3.Call;
@@ -337,7 +338,7 @@ public class SignUpProfileActivity extends AppCompatActivity {
     }
 
     private void doVerify(SignUpForm regForm) throws JsonProcessingException {
-        final String LOGIN_URL = "https://192.168.1.14:443/register/submit";
+        final String LOGIN_URL = NetworkConfig.HOST + NetworkConfig.PORT + "/register/submit";
         final MediaType JSON = MediaType.get("application/json");
 
         ObjectMapper mapper = new ObjectMapper();

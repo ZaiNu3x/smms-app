@@ -32,6 +32,7 @@ import java.util.regex.Pattern;
 
 import group.intelliboys.smms.R;
 import group.intelliboys.smms.configs.CustomOkHttpClient;
+import group.intelliboys.smms.configs.NetworkConfig;
 import group.intelliboys.smms.models.results.RegistrationResult;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -285,7 +286,7 @@ public class SignUpActivity extends AppCompatActivity {
     private void verifyCredentialIfNotExists(JSONObject regForm) {
         nextBtn.setEnabled(false);
 
-        final String VERIFICATION_URL = "https://192.168.1.14:443/register/is-account-exists";
+        final String VERIFICATION_URL = NetworkConfig.HOST + NetworkConfig.PORT + "/register/is-account-exists";
         final MediaType JSON = MediaType.get("application/json");
 
         RequestBody requestBody = RequestBody.create(regForm.toString(), JSON);
