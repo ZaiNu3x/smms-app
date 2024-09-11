@@ -2,6 +2,7 @@ package group.intelliboys.smms.activities;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -17,37 +18,47 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import com.google.android.material.navigation.NavigationView;
 
 import group.intelliboys.smms.R;
+import group.intelliboys.smms.fragments.AccidentHistoryFragment;
+import group.intelliboys.smms.fragments.ClubsFragment;
 import group.intelliboys.smms.fragments.HomeFragment;
 import group.intelliboys.smms.fragments.SettingsFragment;
+import group.intelliboys.smms.fragments.TravelHistoryFragment;
 
 public class HomeActivity extends AppCompatActivity implements NavigationView
         .OnNavigationItemSelectedListener {
 
     private DrawerLayout drawerLayout;
 
-
     @SuppressLint({"CommitTransaction", "ResourceType"})
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        setTitle(null);
 
         drawerLayout = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setTitle("MotoPotato");
+        toolbar.setTitleTextColor(Color.WHITE);
+        setSupportActionBar(toolbar);
+
         navigationView.setNavigationItemSelectedListener(this);
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout,
                 toolbar, R.string.open_nav, R.string.close_nav);
 
+        toggle.getDrawerArrowDrawable().setColor(Color.WHITE);
+
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
         if (savedInstanceState == null) {
+            Log.i("", "Executed!");
+
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, new HomeFragment()).commit();
+                    .replace(R.id.fragment_container, HomeFragment.class, null).commit();
 
             navigationView.setCheckedItem(R.id.nav_home);
         }
@@ -60,15 +71,26 @@ public class HomeActivity extends AppCompatActivity implements NavigationView
 
         switch (item.getItemId()) {
             case R.id.nav_home:
-                Log.i("", "Home Selected!");
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new HomeFragment()).commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, HomeFragment.class, null).commit();
+                break;
+
+            case R.id.nav_clubs:
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, ClubsFragment.class, null).commit();
+                break;
+
+            case R.id.nav_accident_history:
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, AccidentHistoryFragment.class, null).commit();
+                break;
+
+            case R.id.nav_travel_history:
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, TravelHistoryFragment.class, null).commit();
                 break;
 
             case R.id.nav_settings:
-                Log.i("", "Settings Selected!");
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new SettingsFragment()).commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, SettingsFragment.class, null).commit();
                 break;
         }
+
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
