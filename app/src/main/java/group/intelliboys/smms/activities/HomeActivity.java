@@ -21,6 +21,7 @@ import group.intelliboys.smms.R;
 import group.intelliboys.smms.fragments.AccidentHistoryFragment;
 import group.intelliboys.smms.fragments.ClubsFragment;
 import group.intelliboys.smms.fragments.HomeFragment;
+import group.intelliboys.smms.fragments.MonitoringFragment;
 import group.intelliboys.smms.fragments.SettingsFragment;
 import group.intelliboys.smms.fragments.TravelHistoryFragment;
 
@@ -86,8 +87,23 @@ public class HomeActivity extends AppCompatActivity implements NavigationView
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, TravelHistoryFragment.class, null).commit();
                 break;
 
+            case R.id.nav_monitoring:
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, MonitoringFragment.class, null).commit();
+                break;
+
             case R.id.nav_settings:
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, SettingsFragment.class, null).commit();
+                break;
+
+            case R.id.nav_logout:
+                new AlertDialog.Builder(this)
+                        .setTitle("Logout?")
+                        .setMessage("Are you sure you want to logout?")
+                        .setPositiveButton(android.R.string.yes, (dialogInterface, i) -> finishAffinity())
+                        .setNegativeButton(android.R.string.no, ((dialogInterface, i) -> {
+                            // CODE
+                        }))
+                        .show();
                 break;
         }
 

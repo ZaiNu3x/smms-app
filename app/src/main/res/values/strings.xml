@@ -2,6 +2,7 @@
     <string name="app_name">MotoPotato</string>
     <string name="home">Home</string>
     <string name="settings">Settings</string>
+    <string name="monitoring">Monitoring</string>
     <string name="travel_history">Travel History</string>
     <string name="accident_history">Accident History</string>
     <string name="clubs">Clubs</string>
