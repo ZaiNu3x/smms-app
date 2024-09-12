@@ -73,6 +73,7 @@ public class SignInActivity extends AppCompatActivity {
         okHttpClient = CustomOkHttpClient.getOkHttpClient(getApplicationContext());
 
         drawable = getDrawable(R.drawable.error);
+        assert drawable != null;
         drawable.setBounds(0, 0, 45, 45);
 
         requestPermissions();
@@ -181,7 +182,7 @@ public class SignInActivity extends AppCompatActivity {
         final String LOGIN_URL = NetworkConfig.HOST + NetworkConfig.PORT + "/login";
         final MediaType JSON = MediaType.get("application/json");
 
-        Log.i("", "URL: "+LOGIN_URL);
+        Log.i("", "URL: " + LOGIN_URL);
 
         RequestBody requestBody = RequestBody.create(loginForm.toString(), JSON);
 
@@ -237,7 +238,6 @@ public class SignInActivity extends AppCompatActivity {
                     intent.putExtra("token", signInResult.getToken());
                     startActivity(intent);
                 } else if (signInResult.getStatus().equals("NEED_VERIFICATION")) {
-
                     runOnUiThread(() -> {
                         Toast.makeText(getApplicationContext(), "Please Verify your login!", Toast.LENGTH_LONG).show();
                     });

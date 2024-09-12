@@ -1,6 +1,5 @@
-package group.intelliboys.smms.models.forms;
+package group.intelliboys.smms.models.data;
 
-import java.io.Serializable;
 import java.time.LocalDate;
 
 import lombok.AllArgsConstructor;
@@ -12,17 +11,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class SignUpForm implements Serializable {
-    private String formId;
+public class User {
     private String email;
     private String phoneNumber;
-    private String password;
-    private String confirmPassword;
     private String lastName;
     private String firstName;
     private String middleName;
-    private char sex;
+    private String sex;
     private LocalDate birthDate;
     private String address;
+    private String authToken;
     private byte[] profilePic;
 }

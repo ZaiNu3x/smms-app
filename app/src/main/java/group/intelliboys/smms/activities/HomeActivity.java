@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
@@ -56,8 +55,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView
         toggle.syncState();
 
         if (savedInstanceState == null) {
-            Log.i("", "Executed!");
-
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment_container, HomeFragment.class, null).commit();
 
@@ -68,8 +65,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView
     @SuppressLint("NonConstantResourceId")
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        Log.i("", String.valueOf(item.getItemId()));
-
         switch (item.getItemId()) {
             case R.id.nav_home:
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, HomeFragment.class, null).commit();
