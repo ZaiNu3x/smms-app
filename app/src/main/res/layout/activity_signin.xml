@@ -27,7 +27,7 @@
         android:ems="10"
         android:hint="Email"
         android:inputType="textEmailAddress"
-        android:maxLength="24"
+        android:maxLength="32"
         android:paddingStart="18dp"
         android:paddingEnd="18dp"
         app:layout_constraintBottom_toTopOf="@+id/passwordEditTxt"

@@ -54,7 +54,6 @@ public class SignInActivity extends AppCompatActivity {
     private Button signupButton;
     private Button loginButton;
     private ProgressBar signinProgress;
-
     private Drawable drawable;
     private boolean isEmailValid, isPasswordValid;
     private OkHttpClient okHttpClient;
