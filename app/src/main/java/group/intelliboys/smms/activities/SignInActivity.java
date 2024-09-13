@@ -64,6 +64,10 @@ public class SignInActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signin);
 
+        String ipAddress = NetworkConfig.getInstance().getDeviceIpAddress(getApplicationContext());
+
+        Log.i("", "Device IP Address: " + ipAddress);
+
         emailEditTxt = findViewById(R.id.emailEditTxt);
         passwordEditTxt = findViewById(R.id.passwordEditTxt);
         loginButton = findViewById(R.id.loginButton);
