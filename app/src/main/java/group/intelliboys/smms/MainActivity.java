@@ -1,13 +1,15 @@
 package group.intelliboys.smms;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.appcompat.app.AppCompatActivity;
+
+import group.intelliboys.smms.activities.HomeActivity;
 import group.intelliboys.smms.activities.SignInActivity;
-import group.intelliboys.smms.activities.SignUpProfileActivity;
+import group.intelliboys.smms.models.data.User;
 import group.intelliboys.smms.services.Utils;
+import group.intelliboys.smms.services.local.LocalDbUserService;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -15,10 +17,19 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         Utils.getInstance().setApplicationContext(getApplicationContext());
 
-        Intent intent = new Intent(getApplicationContext(), SignInActivity.class);
-        startActivity(intent);
+        LocalDbUserService userService = new LocalDbUserService(this);
+        User loggedInUser = userService.retrieveLoggedInUser();
+
+        if (loggedInUser != null) {
+            Intent intent = new Intent(this, HomeActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            intent.putExtra("user_details", loggedInUser);
+            startActivity(intent);
+        } else {
+            Intent intent = new Intent(getApplicationContext(), SignInActivity.class);
+            startActivity(intent);
+        }
     }
 }

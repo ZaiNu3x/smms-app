@@ -1,63 +1,48 @@
 package group.intelliboys.smms.configs.local_db;
 
-import android.content.ContentValues;
-import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.widget.Toast;
 
-import androidx.annotation.Nullable;
-
-import group.intelliboys.smms.models.data.User;
+import group.intelliboys.smms.services.Utils;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
+    private static DatabaseHelper databaseHelperInstance;
 
-    private static final String DB_NAME = "motopotato.db";
-    private static final int DB_VERSION = 1;
-    private Context context;
+    private DatabaseHelper() {
+        super(Utils.getInstance().getApplicationContext(),
+                "motopotato.db", null, 1);
+    }
 
-    public DatabaseHelper(@Nullable Context context) {
-        super(context, DB_NAME, null, DB_VERSION);
-        this.context = context;
+    public static DatabaseHelper getInstance() {
+        if (databaseHelperInstance == null) {
+            databaseHelperInstance = new DatabaseHelper();
+        }
+        return databaseHelperInstance;
     }
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        String createUserTableQuery =
-                "CREATE TABLE user (" +
-                        "email VARCHAR(32) PRIMARY KEY, " +
-                        "auth_token VARCHAR(512) NOT NULL, " +
-                        "profile_pic MEDIUMBLOB);";
+        final String createTables = "CREATE TABLE user (" +
+                "email VARCHAR(64) PRIMARY KEY, " +
+                "phone_number VARCHAR(13) NOT NULL, " +
+                "last_name VARCHAR(32) NOT NULL, " +
+                "first_name VARCHAR(32) NOT NULL, " +
+                "middle_name VARCHAR(32), " +
+                "sex VARCHAR(1) NOT NULL, " +
+                "birth_date DATE NOT NULL, " +
+                "age TINYINT NOT NULL, " +
+                "address VARCHAR(255) NOT NULL, " +
+                "profile_pic MEDIUMBLOB, " +
+                "auth_token VARCHAR(512) NOT NULL" +
+                ")";
 
-        sqLiteDatabase.execSQL(createUserTableQuery);
+        sqLiteDatabase.execSQL(createTables);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
-        String dropUserTableQuery = "DROP TABLE IF EXISTS user";
-        sqLiteDatabase.execSQL(dropUserTableQuery);
+        final String dropTables = "DROP TABLE IF EXISTS user";
+        sqLiteDatabase.execSQL(dropTables);
         onCreate(sqLiteDatabase);
-    }
-
-    public void addUser(User user) {
-        SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
-        ContentValues contentValues = new ContentValues();
-
-        contentValues.put("email", user.getEmail());
-        contentValues.put("auth_token", user.getAuthToken());
-        contentValues.put("profile_pic", user.getProfilePic());
-
-        long result = sqLiteDatabase.insert("User", null, contentValues);
-
-        if (result == -1) {
-            Toast.makeText(context, "Insertion Failed!", Toast.LENGTH_LONG).show();
-        } else Toast.makeText(context, "Insertion Success!", Toast.LENGTH_LONG).show();
-    }
-
-    public void deleteUser(String email) {
-        SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
-        ContentValues contentValues = new ContentValues();
-
-        contentValues.remove("email");
     }
 }

@@ -2,6 +2,7 @@ package group.intelliboys.smms.activities;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
@@ -38,7 +39,9 @@ import java.util.Objects;
 import group.intelliboys.smms.R;
 import group.intelliboys.smms.configs.CustomOkHttpClient;
 import group.intelliboys.smms.configs.NetworkConfig;
+import group.intelliboys.smms.models.forms.UserCredential;
 import group.intelliboys.smms.models.results.SignInResult;
+import group.intelliboys.smms.services.remote.RemoteUserService;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.MediaType;
@@ -48,7 +51,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class SignInActivity extends AppCompatActivity {
-
+    private Activity activityRef;
     private EditText emailEditTxt;
     private EditText passwordEditTxt;
     private Button signupButton;
@@ -63,9 +66,13 @@ public class SignInActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        activityRef = this;
         setContentView(R.layout.activity_signin);
 
-        ipAddress = NetworkConfig.getInstance().getServerIpAddress();
+        if (NetworkConfig.getInstance().isNetworkActive()) {
+            ipAddress = NetworkConfig.getInstance().getServerIpAddress();
+        }
+
         emailEditTxt = findViewById(R.id.emailEditTxt);
         passwordEditTxt = findViewById(R.id.passwordEditTxt);
         loginButton = findViewById(R.id.loginButton);
@@ -144,30 +151,36 @@ public class SignInActivity extends AppCompatActivity {
                 handler.postDelayed(runnable, DELAY);
             }
         });
-
         loginButton.setOnClickListener(btn -> {
-            signinProgress.setVisibility(View.VISIBLE);
-
-            @SuppressLint("HardwareIds")
-            String deviceId = Settings.Secure.getString(getApplicationContext()
-                    .getContentResolver(), Settings.Secure.ANDROID_ID);
-            String deviceName = Build.MANUFACTURER + " " + Build.MODEL;
-            String email = emailEditTxt.getText().toString();
-            String password = passwordEditTxt.getText().toString();
-
-            JSONObject jsonObject = new JSONObject();
-
-            try {
-                jsonObject.put("deviceId", deviceId);
-                jsonObject.put("deviceName", deviceName);
-                jsonObject.put("email", email);
-                jsonObject.put("password", password);
-
-                doLogin(jsonObject);
-            } catch (JSONException e) {
-                Log.i("", Objects.requireNonNull(e.getMessage()));
+            if (NetworkConfig.getInstance().isNetworkActive()) {
+                ipAddress = NetworkConfig.getInstance().getServerIpAddress();
             }
 
+            if (NetworkConfig.getInstance().isNetworkActive() && ipAddress != null) {
+                signinProgress.setVisibility(View.VISIBLE);
+
+                @SuppressLint("HardwareIds")
+                String deviceId = Settings.Secure.getString(getApplicationContext()
+                        .getContentResolver(), Settings.Secure.ANDROID_ID);
+                String deviceName = Build.MANUFACTURER + " " + Build.MODEL;
+                String email = emailEditTxt.getText().toString();
+                String password = passwordEditTxt.getText().toString();
+
+                JSONObject jsonObject = new JSONObject();
+
+                try {
+                    jsonObject.put("deviceId", deviceId);
+                    jsonObject.put("deviceName", deviceName);
+                    jsonObject.put("email", email);
+                    jsonObject.put("password", password);
+
+                    doLogin(jsonObject);
+                } catch (JSONException e) {
+                    Log.i("", Objects.requireNonNull(e.getMessage()));
+                }
+            } else {
+                Toast.makeText(this, "NO INTERNET CONNECTION!", Toast.LENGTH_LONG).show();
+            }
         });
 
         signupButton.setOnClickListener(btn -> {
@@ -230,14 +243,19 @@ public class SignInActivity extends AppCompatActivity {
                         toast.show();
                     });
                 } else if (signInResult.getStatus().equals("AUTHENTICATION_SUCCESS")) {
-                    runOnUiThread(() -> {
-                        Toast.makeText(getApplicationContext(), "AUTHENTICATION SUCCESS!", Toast.LENGTH_LONG).show();
-                    });
+                    @SuppressLint("HardwareIds")
+                    String deviceId = Settings.Secure.getString(getApplicationContext()
+                            .getContentResolver(), Settings.Secure.ANDROID_ID);
+                    String deviceName = Build.MANUFACTURER + " " + Build.MODEL;
 
-                    Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    intent.putExtra("token", signInResult.getToken());
-                    startActivity(intent);
+                    RemoteUserService remoteUserService = new RemoteUserService(activityRef);
+                    UserCredential credential = UserCredential.builder()
+                            .token(signInResult.getToken())
+                            .deviceId(deviceId)
+                            .deviceName(deviceName)
+                            .build();
+
+                    remoteUserService.fetchUserData(credential);
                 } else if (signInResult.getStatus().equals("NEED_VERIFICATION")) {
                     runOnUiThread(() -> {
                         Toast.makeText(getApplicationContext(), "Please Verify your login!", Toast.LENGTH_LONG).show();

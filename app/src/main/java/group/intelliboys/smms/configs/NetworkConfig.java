@@ -21,10 +21,8 @@ public class NetworkConfig {
     public static NetworkConfig getInstance() {
         if (networkConfigInstance == null) {
             networkConfigInstance = new NetworkConfig();
-            return networkConfigInstance;
-        } else {
-            return networkConfigInstance;
         }
+        return networkConfigInstance;
     }
 
     @SuppressLint("DefaultLocale")
@@ -49,6 +47,14 @@ public class NetworkConfig {
                 return deviceIpAddress;
             } else return null;
         } else return deviceIpAddress;
+    }
+
+    public boolean isNetworkActive() {
+        Context context = Utils.getInstance().getApplicationContext();
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        Network network = connectivityManager.getActiveNetwork();
+
+        return network != null;
     }
 
     public String getServerIpAddress() {

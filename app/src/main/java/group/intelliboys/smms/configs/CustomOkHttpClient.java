@@ -18,8 +18,6 @@ import group.intelliboys.smms.R;
 import okhttp3.OkHttpClient;
 
 public class CustomOkHttpClient {
-    private OkHttpClient httpClient;
-
     public static OkHttpClient getOkHttpClient(Context context) {
         try {
             Resources resources = context.getResources();
@@ -39,7 +37,6 @@ public class CustomOkHttpClient {
             SSLContext sslContext = SSLContext.getInstance("TLS");
             sslContext.init(null, new TrustManager[]{trustManager}, null);
 
-            // Create OkHttpClient with custom SSL configuration
             OkHttpClient.Builder builder = new OkHttpClient.Builder()
                     .connectTimeout(5, TimeUnit.SECONDS)
                     .sslSocketFactory(sslContext.getSocketFactory(), trustManager);

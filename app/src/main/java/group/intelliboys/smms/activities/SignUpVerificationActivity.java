@@ -1,10 +1,13 @@
 package group.intelliboys.smms.activities;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -27,7 +30,9 @@ import java.util.Objects;
 import group.intelliboys.smms.R;
 import group.intelliboys.smms.configs.CustomOkHttpClient;
 import group.intelliboys.smms.configs.NetworkConfig;
+import group.intelliboys.smms.models.forms.UserCredential;
 import group.intelliboys.smms.models.results.TwoFAVerificationResult;
+import group.intelliboys.smms.services.remote.RemoteUserService;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.MediaType;
@@ -37,7 +42,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class SignUpVerificationActivity extends AppCompatActivity {
-
+    private Activity activityRef;
     private EditText emailOtpEditTxt;
     private EditText smsOtpEditTxt;
     private TextView resendEmailOtpLbl;
@@ -51,6 +56,7 @@ public class SignUpVerificationActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_otp_verification);
+        activityRef = this;
 
         ipAddress = NetworkConfig.getInstance().getServerIpAddress();
         emailOtpEditTxt = findViewById(R.id.emailOtpEditTxt);
@@ -261,6 +267,20 @@ public class SignUpVerificationActivity extends AppCompatActivity {
                 }
 
                 if (verificationResult.getStatus().equals("VERIFICATION_SUCCESS")) {
+                    @SuppressLint("HardwareIds")
+                    String deviceId = Settings.Secure.getString(getApplicationContext()
+                            .getContentResolver(), Settings.Secure.ANDROID_ID);
+                    String deviceName = Build.MANUFACTURER + " " + Build.MODEL;
+
+                    RemoteUserService remoteUserService = new RemoteUserService(activityRef);
+                    UserCredential credential = UserCredential.builder()
+                            .token(verificationResult.getToken())
+                            .deviceId(deviceId)
+                            .deviceName(deviceName)
+                            .build();
+
+                    remoteUserService.fetchUserData(credential);
+
                     runOnUiThread(() -> {
                         Toast.makeText(getApplicationContext(), "VERIFICATION SUCCESS!", Toast.LENGTH_SHORT).show();
                     });
