@@ -57,6 +57,7 @@ public class SignInActivity extends AppCompatActivity {
     private Drawable drawable;
     private boolean isEmailValid, isPasswordValid;
     private OkHttpClient okHttpClient;
+    private String ipAddress;
 
     @SuppressLint({"MissingInflatedId", "UseCompatLoadingForDrawables"})
     @Override
@@ -64,10 +65,7 @@ public class SignInActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signin);
 
-        String ipAddress = NetworkConfig.getInstance().getDeviceIpAddress(getApplicationContext());
-
-        Log.i("", "Device IP Address: " + ipAddress);
-
+        ipAddress = NetworkConfig.getInstance().getServerIpAddress();
         emailEditTxt = findViewById(R.id.emailEditTxt);
         passwordEditTxt = findViewById(R.id.passwordEditTxt);
         loginButton = findViewById(R.id.loginButton);
@@ -182,7 +180,7 @@ public class SignInActivity extends AppCompatActivity {
         loginButton.setEnabled(false);
         signupButton.setEnabled(false);
 
-        final String LOGIN_URL = NetworkConfig.HOST + NetworkConfig.PORT + "/login";
+        final String LOGIN_URL = ipAddress + "/login";
         final MediaType JSON = MediaType.get("application/json");
 
         Log.i("", "URL: " + LOGIN_URL);

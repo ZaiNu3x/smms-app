@@ -52,13 +52,16 @@ public class SignUpActivity extends AppCompatActivity {
     private boolean isEmailValid, isPhoneNumberValid, isPasswordValid, isConfirmPasswordValid;
     private OkHttpClient okHttpClient;
 
+    private String ipAddress;
+
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
-        nextBtn = findViewById(R.id.nextBtn);
 
+        ipAddress = NetworkConfig.getInstance().getServerIpAddress();
+        nextBtn = findViewById(R.id.nextBtn);
         emailEditTxt = findViewById(R.id.signUpEmailEditTxt);
         passwordEditTxt = findViewById(R.id.signUpPasswordEditTxt);
         confirmPasswordEditTxt = findViewById(R.id.signUpConfirmPasswordEditTxt);
@@ -286,7 +289,7 @@ public class SignUpActivity extends AppCompatActivity {
     private void verifyCredentialIfNotExists(JSONObject regForm) {
         nextBtn.setEnabled(false);
 
-        final String VERIFICATION_URL = NetworkConfig.HOST + NetworkConfig.PORT + "/register/is-account-exists";
+        final String VERIFICATION_URL = ipAddress + "/register/is-account-exists";
         final MediaType JSON = MediaType.get("application/json");
 
         RequestBody requestBody = RequestBody.create(regForm.toString(), JSON);

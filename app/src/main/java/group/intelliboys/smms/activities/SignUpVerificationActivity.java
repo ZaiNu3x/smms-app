@@ -45,12 +45,14 @@ public class SignUpVerificationActivity extends AppCompatActivity {
     private TextView emailOtpTimer;
     private TextView smsOtpTimer;
     private OkHttpClient okHttpClient;
+    private String ipAddress;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_otp_verification);
 
+        ipAddress = NetworkConfig.getInstance().getServerIpAddress();
         emailOtpEditTxt = findViewById(R.id.emailOtpEditTxt);
         smsOtpEditTxt = findViewById(R.id.smsOtpEditTxt);
         resendEmailOtpLbl = findViewById(R.id.resendEmailOtpLbl);
@@ -134,7 +136,7 @@ public class SignUpVerificationActivity extends AppCompatActivity {
 
     private void resendEmailOtp() {
         String formId = getIntent().getStringExtra("formId");
-        final String RESEND_EMAIL_OTP_URL = NetworkConfig.HOST + NetworkConfig.PORT + "/register/resend/email-otp/" + formId;
+        final String RESEND_EMAIL_OTP_URL = ipAddress + "/register/resend/email-otp/" + formId;
 
         Request request = new Request.Builder()
                 .get()
@@ -166,7 +168,7 @@ public class SignUpVerificationActivity extends AppCompatActivity {
 
     private void resendSmsOtp() {
         String formId = getIntent().getStringExtra("formId");
-        final String RESEND_SMS_OTP_URL = NetworkConfig.HOST + NetworkConfig.PORT + "/register/resend/sms-otp/" + formId;
+        final String RESEND_SMS_OTP_URL = ipAddress + "/register/resend/sms-otp/" + formId;
 
         Request request = new Request.Builder()
                 .get()
@@ -197,7 +199,7 @@ public class SignUpVerificationActivity extends AppCompatActivity {
     }
 
     private void doVerify(JSONObject regForm) {
-        final String VERIFICATION_URL = NetworkConfig.HOST + NetworkConfig.PORT + "/register/verify";
+        final String VERIFICATION_URL = ipAddress + "/register/verify";
         final MediaType JSON = MediaType.get("application/json");
 
         RequestBody requestBody = RequestBody.create(regForm.toString(), JSON);

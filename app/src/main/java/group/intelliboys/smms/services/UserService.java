@@ -21,7 +21,9 @@ public class UserService {
     }
 
     public User fetchUserData(String authToken) {
-        final String FETCH_USER_URL = NetworkConfig.HOST + NetworkConfig.PORT + "/user/profile";
+        String ipAddress = NetworkConfig.getInstance().getServerIpAddress();
+
+        final String FETCH_USER_URL = ipAddress + "/user/profile";
         final MediaType JSON = MediaType.get("application/json");
 
         Request request = new Request.Builder()

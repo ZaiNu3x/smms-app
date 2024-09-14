@@ -8,14 +8,14 @@ import android.net.NetworkCapabilities;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 
+import group.intelliboys.smms.services.Utils;
+
 public class NetworkConfig {
     private static NetworkConfig networkConfigInstance;
     private String deviceIpAddress;
 
-    public static String HOST = "192.168.1.254:";
-    public static String PORT = "433";
-
     private NetworkConfig() {
+
     }
 
     public static NetworkConfig getInstance() {
@@ -28,7 +28,9 @@ public class NetworkConfig {
     }
 
     @SuppressLint("DefaultLocale")
-    public String getDeviceIpAddress(Context context) {
+    public String getDeviceIpAddress() {
+        Context context = Utils.getInstance().getApplicationContext();
+
         if (deviceIpAddress == null) {
             ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
@@ -39,11 +41,37 @@ public class NetworkConfig {
                 WifiManager wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
                 WifiInfo wifiInfo = wifiManager.getConnectionInfo();
                 int ipAddress = wifiInfo.getIpAddress();
-                return String.format("%d.%d.%d.%d",
+                deviceIpAddress = String.format("%d.%d.%d.%d",
                         (ipAddress & 0xff),
                         (ipAddress >> 8 & 0xff),
                         (ipAddress >> 16 & 0xff),
                         (ipAddress >> 24 & 0xff));
+                return deviceIpAddress;
+            } else return null;
+        } else return deviceIpAddress;
+    }
+
+    public String getServerIpAddress() {
+        Context context = Utils.getInstance().getApplicationContext();
+
+        if (deviceIpAddress == null) {
+            ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+            Network network = connectivityManager.getActiveNetwork();
+            NetworkCapabilities capabilities = connectivityManager.getNetworkCapabilities(network);
+
+            if (capabilities != null && capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                WifiManager wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+                WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+                int ipAddress = wifiInfo.getIpAddress();
+                @SuppressLint("DefaultLocale")
+                String[] ipSubParts = String.format("%d.%d.%d.%d",
+                        (ipAddress & 0xff),
+                        (ipAddress >> 8 & 0xff),
+                        (ipAddress >> 16 & 0xff),
+                        (ipAddress >> 24 & 0xff)).split("\\.");
+
+                return "https://192.168." + ipSubParts[2] + ".254:443";
             } else return null;
         } else return deviceIpAddress;
     }

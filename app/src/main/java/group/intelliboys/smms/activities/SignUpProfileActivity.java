@@ -60,10 +60,9 @@ public class SignUpProfileActivity extends AppCompatActivity {
     private ImageView profileView;
     private Button selectProfilePicBtn;
     private Button submitButton;
-
     private byte[] profilePic;
-
     private OkHttpClient okHttpClient;
+    private String ipAddress;
 
     @SuppressLint("UseCompatLoadingForDrawables")
     private Drawable drawable;
@@ -74,6 +73,7 @@ public class SignUpProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup_user_profile);
 
+        ipAddress = NetworkConfig.getInstance().getServerIpAddress();
         lastNameEditTxt = findViewById(R.id.lastNameEditTxt);
         firstNameEditTxt = findViewById(R.id.firstNameEditTxt);
         middleNameEditTxt = findViewById(R.id.middleNameEditTxt);
@@ -338,7 +338,7 @@ public class SignUpProfileActivity extends AppCompatActivity {
     }
 
     private void doVerify(SignUpForm regForm) throws JsonProcessingException {
-        final String LOGIN_URL = NetworkConfig.HOST + NetworkConfig.PORT + "/register/submit";
+        final String LOGIN_URL = ipAddress + "/register/submit";
         final MediaType JSON = MediaType.get("application/json");
 
         ObjectMapper mapper = new ObjectMapper();
