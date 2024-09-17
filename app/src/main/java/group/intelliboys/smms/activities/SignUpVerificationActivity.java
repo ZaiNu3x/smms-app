@@ -4,10 +4,8 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -30,9 +28,7 @@ import java.util.Objects;
 import group.intelliboys.smms.R;
 import group.intelliboys.smms.configs.CustomOkHttpClient;
 import group.intelliboys.smms.configs.NetworkConfig;
-import group.intelliboys.smms.models.forms.UserCredential;
 import group.intelliboys.smms.models.results.TwoFAVerificationResult;
-import group.intelliboys.smms.services.remote.RemoteUserService;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.MediaType;
@@ -229,6 +225,7 @@ public class SignUpVerificationActivity extends AppCompatActivity {
 
                 ObjectMapper mapper = new ObjectMapper();
                 TwoFAVerificationResult verificationResult = mapper.readValue(responseBody, TwoFAVerificationResult.class);
+                Log.i("", "Result: " + verificationResult.toString());
 
                 if (verificationResult.isEmailOtpMatches()) {
                     Drawable drawable = getDrawable(R.drawable.check);
@@ -267,26 +264,11 @@ public class SignUpVerificationActivity extends AppCompatActivity {
                 }
 
                 if (verificationResult.getStatus().equals("VERIFICATION_SUCCESS")) {
-                    @SuppressLint("HardwareIds")
-                    String deviceId = Settings.Secure.getString(getApplicationContext()
-                            .getContentResolver(), Settings.Secure.ANDROID_ID);
-                    String deviceName = Build.MANUFACTURER + " " + Build.MODEL;
-
-                    RemoteUserService remoteUserService = new RemoteUserService(activityRef);
-                    UserCredential credential = UserCredential.builder()
-                            .token(verificationResult.getToken())
-                            .deviceId(deviceId)
-                            .deviceName(deviceName)
-                            .build();
-
-                    remoteUserService.fetchUserData(credential);
-
                     runOnUiThread(() -> {
-                        Toast.makeText(getApplicationContext(), "VERIFICATION SUCCESS!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "REGISTRATION SUCCESS!", Toast.LENGTH_SHORT).show();
                     });
 
-                    Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
-                    intent.putExtra("token", verificationResult.getToken());
+                    Intent intent = new Intent(getApplicationContext(), SignInActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
                 }
