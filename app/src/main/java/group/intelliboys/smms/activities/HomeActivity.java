@@ -27,6 +27,7 @@ import group.intelliboys.smms.fragments.AccidentHistoryFragment;
 import group.intelliboys.smms.fragments.ClubsFragment;
 import group.intelliboys.smms.fragments.HomeFragment;
 import group.intelliboys.smms.fragments.MonitoringFragment;
+import group.intelliboys.smms.fragments.ProfileFragment;
 import group.intelliboys.smms.fragments.SettingsFragment;
 import group.intelliboys.smms.fragments.TravelHistoryFragment;
 import group.intelliboys.smms.models.data.User;
@@ -92,6 +93,11 @@ public class HomeActivity extends AppCompatActivity implements NavigationView
 
         navUsername.setText(new String(builder));
         navUserEmail.setText(user.getEmail());
+
+        profilePic.setOnClickListener((view) -> {
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, ProfileFragment.class, null).commit();
+            drawerLayout.closeDrawer(GravityCompat.START);
+        });
     }
 
     @SuppressLint("NonConstantResourceId")
