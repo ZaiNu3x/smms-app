@@ -1,6 +1,7 @@
 package group.intelliboys.smms.activities;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -37,7 +38,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class SignUpVerificationActivity extends AppCompatActivity {
-
+    private Activity activityRef;
     private EditText emailOtpEditTxt;
     private EditText smsOtpEditTxt;
     private TextView resendEmailOtpLbl;
@@ -51,6 +52,7 @@ public class SignUpVerificationActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_otp_verification);
+        activityRef = this;
 
         ipAddress = NetworkConfig.getInstance().getServerIpAddress();
         emailOtpEditTxt = findViewById(R.id.emailOtpEditTxt);
@@ -223,6 +225,7 @@ public class SignUpVerificationActivity extends AppCompatActivity {
 
                 ObjectMapper mapper = new ObjectMapper();
                 TwoFAVerificationResult verificationResult = mapper.readValue(responseBody, TwoFAVerificationResult.class);
+                Log.i("", "Result: " + verificationResult.toString());
 
                 if (verificationResult.isEmailOtpMatches()) {
                     Drawable drawable = getDrawable(R.drawable.check);
@@ -262,11 +265,10 @@ public class SignUpVerificationActivity extends AppCompatActivity {
 
                 if (verificationResult.getStatus().equals("VERIFICATION_SUCCESS")) {
                     runOnUiThread(() -> {
-                        Toast.makeText(getApplicationContext(), "VERIFICATION SUCCESS!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "REGISTRATION SUCCESS!", Toast.LENGTH_SHORT).show();
                     });
 
-                    Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
-                    intent.putExtra("token", verificationResult.getToken());
+                    Intent intent = new Intent(getApplicationContext(), SignInActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
                 }
