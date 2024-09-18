@@ -95,7 +95,10 @@ public class HomeActivity extends AppCompatActivity implements NavigationView
         navUserEmail.setText(user.getEmail());
 
         profilePic.setOnClickListener((view) -> {
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, ProfileFragment.class, null).commit();
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("user_details", user);
+
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, ProfileFragment.class, bundle).commit();
             drawerLayout.closeDrawer(GravityCompat.START);
         });
     }

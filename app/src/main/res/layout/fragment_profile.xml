@@ -11,7 +11,7 @@
         android:layout_height="wrap_content">
 
         <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/imageView2"
+            android:id="@+id/userProfilePic"
             android:layout_width="117dp"
             android:layout_height="128dp"
             android:layout_marginStart="45dp"
@@ -22,32 +22,44 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <ImageView
+            android:id="@+id/changeProfilePic"
+            android:layout_width="24dp"
+            android:layout_height="26dp"
+            android:src="@drawable/ic_edit"
+            app:layout_constraintBottom_toBottomOf="@+id/userProfilePic"
+            app:layout_constraintEnd_toEndOf="@+id/userProfilePic"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="@+id/userProfilePic"
+            app:layout_constraintTop_toTopOf="@+id/userProfilePic"
+            app:layout_constraintVertical_bias="1.0" />
+
         <TextView
-            android:id="@+id/textView4"
+            android:id="@+id/userDisplayName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="30dp"
             android:layout_marginTop="44dp"
-            android:text="MARAON, JEROME D."
+            android:text="@string/user_name"
             android:textSize="18sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toEndOf="@+id/imageView2"
+            app:layout_constraintStart_toEndOf="@+id/userProfilePic"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/textView6"
+            android:id="@+id/userDisplayEmail"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="zainu3x007@gmail.com"
-            app:layout_constraintEnd_toEndOf="@+id/textView4"
+            android:text="@string/email"
+            app:layout_constraintEnd_toEndOf="@+id/userDisplayName"
             app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toStartOf="@+id/textView4"
-            app:layout_constraintTop_toBottomOf="@+id/textView4" />
+            app:layout_constraintStart_toStartOf="@+id/userDisplayName"
+            app:layout_constraintTop_toBottomOf="@+id/userDisplayName" />
 
         <EditText
-            android:id="@+id/editTextText2"
+            android:id="@+id/editLastName"
             android:layout_width="330dp"
             android:layout_height="70dp"
             android:layout_marginTop="28dp"
@@ -58,13 +70,13 @@
             android:inputType="text"
             android:paddingStart="18dp"
             android:paddingEnd="18dp"
-            app:layout_constraintEnd_toEndOf="@+id/textView4"
+            app:layout_constraintEnd_toEndOf="@+id/userDisplayName"
             app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@+id/imageView2"
-            app:layout_constraintTop_toBottomOf="@+id/imageView2" />
+            app:layout_constraintStart_toStartOf="@+id/userProfilePic"
+            app:layout_constraintTop_toBottomOf="@+id/userProfilePic" />
 
         <EditText
-            android:id="@+id/editTextText3"
+            android:id="@+id/editFirstName"
             android:layout_width="330dp"
             android:layout_height="70dp"
             android:layout_marginTop="30dp"
@@ -75,13 +87,13 @@
             android:inputType="text"
             android:paddingStart="18dp"
             android:paddingEnd="18dp"
-            app:layout_constraintEnd_toEndOf="@+id/editTextText2"
+            app:layout_constraintEnd_toEndOf="@+id/editLastName"
             app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@+id/editTextText2"
-            app:layout_constraintTop_toBottomOf="@+id/editTextText2" />
+            app:layout_constraintStart_toStartOf="@+id/editLastName"
+            app:layout_constraintTop_toBottomOf="@+id/editLastName" />
 
         <EditText
-            android:id="@+id/editTextText4"
+            android:id="@+id/editMiddleName"
             android:layout_width="330dp"
             android:layout_height="70dp"
             android:layout_marginTop="30dp"
@@ -92,9 +104,9 @@
             android:inputType="text"
             android:paddingStart="18dp"
             android:paddingEnd="18dp"
-            app:layout_constraintEnd_toEndOf="@+id/editTextText3"
-            app:layout_constraintStart_toStartOf="@+id/editTextText3"
-            app:layout_constraintTop_toBottomOf="@+id/editTextText3" />
+            app:layout_constraintEnd_toEndOf="@+id/editFirstName"
+            app:layout_constraintStart_toStartOf="@+id/editFirstName"
+            app:layout_constraintTop_toBottomOf="@+id/editFirstName" />
 
         <RadioGroup
             android:id="@+id/radioGroup2"
@@ -103,26 +115,26 @@
             android:layout_marginTop="30dp"
             android:background="@drawable/custom_input"
             android:paddingStart="18dp"
-            app:layout_constraintEnd_toEndOf="@+id/editTextText4"
-            app:layout_constraintStart_toStartOf="@+id/editTextText4"
-            app:layout_constraintTop_toBottomOf="@+id/editTextText4"
+            app:layout_constraintEnd_toEndOf="@+id/editMiddleName"
+            app:layout_constraintStart_toStartOf="@+id/editMiddleName"
+            app:layout_constraintTop_toBottomOf="@+id/editMiddleName"
             tools:ignore="RtlSymmetry">
 
             <RadioButton
-                android:id="@+id/radioButton2"
+                android:id="@+id/male"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/male" />
 
             <RadioButton
-                android:id="@+id/radioButton"
+                android:id="@+id/female"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Female" />
+                android:text="@string/female" />
         </RadioGroup>
 
         <EditText
-            android:id="@+id/editTextText5"
+            android:id="@+id/userBirthDate"
             android:layout_width="330dp"
             android:layout_height="70dp"
             android:layout_marginTop="30dp"
@@ -138,7 +150,7 @@
             app:layout_constraintTop_toBottomOf="@+id/radioGroup2" />
 
         <EditText
-            android:id="@+id/editTextText6"
+            android:id="@+id/userAddress"
             android:layout_width="330dp"
             android:layout_height="70dp"
             android:layout_marginTop="30dp"
@@ -149,23 +161,23 @@
             android:inputType="text"
             android:paddingStart="18dp"
             android:paddingEnd="18dp"
-            app:layout_constraintEnd_toEndOf="@+id/editTextText5"
-            app:layout_constraintStart_toStartOf="@+id/editTextText5"
-            app:layout_constraintTop_toBottomOf="@+id/editTextText5"
+            app:layout_constraintEnd_toEndOf="@+id/userBirthDate"
+            app:layout_constraintStart_toStartOf="@+id/userBirthDate"
+            app:layout_constraintTop_toBottomOf="@+id/userBirthDate"
             tools:ignore="HardcodedText" />
 
         <Button
-            android:id="@+id/button"
+            android:id="@+id/saveButton"
             android:layout_width="128dp"
             android:layout_height="56dp"
             android:layout_marginTop="30dp"
             android:layout_marginBottom="30dp"
             android:text="@string/save"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@+id/editTextText6"
+            app:layout_constraintEnd_toEndOf="@+id/userAddress"
             app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toStartOf="@+id/editTextText6"
-            app:layout_constraintTop_toBottomOf="@+id/editTextText6"
+            app:layout_constraintStart_toStartOf="@+id/userAddress"
+            app:layout_constraintTop_toBottomOf="@+id/userAddress"
             tools:ignore="HardcodedText" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
