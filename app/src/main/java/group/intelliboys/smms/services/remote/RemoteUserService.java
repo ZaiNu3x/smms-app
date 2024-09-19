@@ -3,7 +3,6 @@ package group.intelliboys.smms.services.remote;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -12,7 +11,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import java.io.IOException;
-import java.util.Objects;
 
 import group.intelliboys.smms.activities.HomeActivity;
 import group.intelliboys.smms.configs.CustomOkHttpClient;
@@ -75,15 +73,16 @@ public class RemoteUserService {
 
                             activityRef.runOnUiThread(() -> {
                                 Toast.makeText(activityRef, "AUTHENTICATION SUCCESS!", Toast.LENGTH_LONG).show();
+                                Utils.getInstance().setLoggedInUser(user);
+                                Intent intent = new Intent(activityRef, HomeActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                activityRef.startActivity(intent);
                             });
 
-                            Utils.getInstance().setLoggedInUser(user);
-                            Intent intent = new Intent(activityRef, HomeActivity.class);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                            activityRef.startActivity(intent);
                         } catch (Exception e) {
-                            Toast.makeText(activityRef, "SOMETHING WENT WRONG!", Toast.LENGTH_LONG).show();
-                            Log.i("", Objects.requireNonNull(e.getMessage()));
+                            activityRef.runOnUiThread(() -> {
+                                Toast.makeText(activityRef, "SOMETHING WENT WRONG!", Toast.LENGTH_LONG).show();
+                            });
                         }
 
                     } else {

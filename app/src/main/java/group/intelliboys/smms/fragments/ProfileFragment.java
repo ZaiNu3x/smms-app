@@ -20,6 +20,7 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LiveData;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -48,7 +49,6 @@ public class ProfileFragment extends Fragment {
     private EditText birthDate;
     private EditText address;
     private Button saveButton;
-    private User loggedInUser;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -69,36 +69,6 @@ public class ProfileFragment extends Fragment {
         address = view.findViewById(R.id.userAddress);
         saveButton = view.findViewById(R.id.saveButton);
 
-        loggedInUser = Utils.getInstance().getLoggedInUser();
-
-        if (loggedInUser != null) {
-            Bitmap bitmap = BitmapFactory.decodeByteArray(loggedInUser.getProfilePic(),
-                    0, loggedInUser.getProfilePic().length);
-            profilePic.setImageBitmap(bitmap);
-
-            StringBuilder builder = new StringBuilder();
-            builder.append(loggedInUser.getLastName())
-                    .append(" ")
-                    .append(loggedInUser.getFirstName()).append(" ")
-                    .append(loggedInUser.getMiddleName().charAt(0))
-                    .append(".");
-
-            userName.setText(new String(builder));
-            userEmail.setText(loggedInUser.getEmail());
-            lastName.setText(loggedInUser.getLastName());
-            firstName.setText(loggedInUser.getFirstName());
-            middleName.setText(loggedInUser.getMiddleName());
-
-            if (loggedInUser.getSex().equals("m")) {
-                male.setChecked(true);
-            } else if (loggedInUser.getSex().equals("f")) {
-                female.setChecked(true);
-            }
-
-            birthDate.setText(loggedInUser.getBirthDate().toString());
-            address.setText(loggedInUser.getAddress());
-        }
-
         changeProfilePic.setOnClickListener((v) -> {
             openImagePicker();
         });
@@ -109,6 +79,38 @@ public class ProfileFragment extends Fragment {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+        });
+
+        LiveData<User> liveUserData = Utils.getInstance().getLoggedInUser().getUserModel();
+
+        liveUserData.observe(getViewLifecycleOwner(), userData -> {
+            if (userData.getProfilePic() != null) {
+                Bitmap bitmap = BitmapFactory.decodeByteArray(userData.getProfilePic(),
+                        0, userData.getProfilePic().length);
+                profilePic.setImageBitmap(bitmap);
+            }
+
+            StringBuilder builder = new StringBuilder();
+            builder.append(userData.getLastName())
+                    .append(" ")
+                    .append(userData.getFirstName()).append(" ")
+                    .append(userData.getMiddleName().charAt(0))
+                    .append(".");
+
+            userName.setText(new String(builder));
+            userEmail.setText(userData.getEmail());
+            lastName.setText(userData.getLastName());
+            firstName.setText(userData.getFirstName());
+            middleName.setText(userData.getMiddleName());
+
+            if (userData.getSex().equals("m")) {
+                male.setChecked(true);
+            } else if (userData.getSex().equals("f")) {
+                female.setChecked(true);
+            }
+
+            birthDate.setText(userData.getBirthDate().toString());
+            address.setText(userData.getAddress());
         });
 
         return view;
@@ -168,19 +170,18 @@ public class ProfileFragment extends Fragment {
             sex = 'f';
         }
 
-        User user = User.builder()
-                .email(loggedInUser.getEmail())
-                .lastName(lastName.getText().toString())
-                .firstName(firstName.getText().toString())
-                .middleName(middleName.getText().toString())
-                .sex(Character.toString(sex))
-                .birthDate(LocalDate.parse(birthDate.getText().toString()))
-                .address(address.getText().toString())
-                .build();
+        User userInfo = Utils.getInstance().getLoggedInUser().getUserModel().getValue();
+        userInfo.setLastName(lastName.getText().toString());
+        userInfo.setFirstName(firstName.getText().toString());
+        userInfo.setMiddleName(middleName.getText().toString());
+        userInfo.setSex(Character.toString(sex));
+        userInfo.setBirthDate(LocalDate.parse(birthDate.getText().toString()));
+        userInfo.setAddress(address.getText().toString());
 
-        Log.i("", user.toString());
+        Log.i("", userInfo.toString());
 
         LocalDbUserService userService = new LocalDbUserService(this.getActivity());
-        userService.updateLoggedInUserInfo(user);
+        userService.updateLoggedInUserInfo(userInfo);
+        Utils.getInstance().setLoggedInUser(userInfo);
     }
 }

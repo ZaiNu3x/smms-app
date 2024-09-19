@@ -17,13 +17,15 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         Utils.getInstance().setApplicationContext(getApplicationContext());
 
         LocalDbUserService userService = new LocalDbUserService(this);
         User loggedInUser = userService.retrieveLoggedInUser();
 
         if (loggedInUser != null) {
-            Utils.getInstance().setLoggedInUser(loggedInUser);
+            Utils.getInstance().getLoggedInUser().updateUserModel(loggedInUser);
+
             Intent intent = new Intent(this, HomeActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
