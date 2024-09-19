@@ -6,6 +6,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.widget.Toast;
 
 import java.time.LocalDate;
 
@@ -75,6 +76,38 @@ public class LocalDbUserService {
             }
             while (cursor.moveToNext());
         } else return null;
+    }
+
+    public void updateLoggedInUserInfo(User user) {
+        SQLiteDatabase sqLiteDatabase = databaseHelper.getReadableDatabase();
+
+        ContentValues contentValues = new ContentValues();
+
+        contentValues.put("email", user.getEmail());
+        //contentValues.put("phone_number", user.getPhoneNumber());
+        contentValues.put("last_name", user.getLastName());
+        contentValues.put("first_name", user.getFirstName());
+        contentValues.put("middle_name", user.getMiddleName());
+        contentValues.put("sex", user.getSex());
+        contentValues.put("birth_date", String.valueOf(user.getBirthDate()));
+        contentValues.put("age", user.getAge());
+        contentValues.put("address", user.getAddress());
+        //contentValues.put("profile_pic", user.getProfilePic());
+        //contentValues.put("auth_token", user.getAuthToken());
+
+        int result = sqLiteDatabase.update("User", contentValues, "email = ?",
+                new String[]{user.getEmail()});
+
+        if (result > 0) {
+            activityRef.runOnUiThread(() -> {
+                Toast.makeText(context, "User Update Success!", Toast.LENGTH_LONG).show();
+            });
+        }
+        else {
+            activityRef.runOnUiThread(() -> {
+                Toast.makeText(context, "User Update Fail!", Toast.LENGTH_LONG).show();
+            });
+        }
     }
 
     public void addUser(User user) {

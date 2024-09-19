@@ -19,6 +19,7 @@ import group.intelliboys.smms.configs.CustomOkHttpClient;
 import group.intelliboys.smms.configs.NetworkConfig;
 import group.intelliboys.smms.models.data.User;
 import group.intelliboys.smms.models.forms.UserCredential;
+import group.intelliboys.smms.services.Utils;
 import group.intelliboys.smms.services.local.LocalDbUserService;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -76,9 +77,9 @@ public class RemoteUserService {
                                 Toast.makeText(activityRef, "AUTHENTICATION SUCCESS!", Toast.LENGTH_LONG).show();
                             });
 
+                            Utils.getInstance().setLoggedInUser(user);
                             Intent intent = new Intent(activityRef, HomeActivity.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                            intent.putExtra("user_details", user);
                             activityRef.startActivity(intent);
                         } catch (Exception e) {
                             Toast.makeText(activityRef, "SOMETHING WENT WRONG!", Toast.LENGTH_LONG).show();

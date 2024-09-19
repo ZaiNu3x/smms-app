@@ -31,17 +31,18 @@ import group.intelliboys.smms.fragments.ProfileFragment;
 import group.intelliboys.smms.fragments.SettingsFragment;
 import group.intelliboys.smms.fragments.TravelHistoryFragment;
 import group.intelliboys.smms.models.data.User;
+import group.intelliboys.smms.services.Utils;
 import group.intelliboys.smms.services.local.LocalDbUserService;
 
 public class HomeActivity extends AppCompatActivity implements NavigationView
         .OnNavigationItemSelectedListener {
 
     private DrawerLayout drawerLayout;
-    private User user;
     private View navHeader;
     private CircleImageView profilePic;
     private TextView navUsername;
     private TextView navUserEmail;
+    private User user;
 
     @SuppressLint({"CommitTransaction", "ResourceType", "MissingInflatedId", "SetTextI18n"})
     @Override
@@ -49,7 +50,8 @@ public class HomeActivity extends AppCompatActivity implements NavigationView
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
         setTitle(null);
-        user = (User) getIntent().getSerializableExtra("user_details");
+
+        user = Utils.getInstance().getLoggedInUser();
 
         drawerLayout = findViewById(R.id.drawer_layout);
         NavigationView navigationView = drawerLayout.findViewById(R.id.nav_view);
@@ -95,10 +97,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView
         navUserEmail.setText(user.getEmail());
 
         profilePic.setOnClickListener((view) -> {
-            Bundle bundle = new Bundle();
-            bundle.putSerializable("user_details", user);
-
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, ProfileFragment.class, bundle).commit();
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, ProfileFragment.class, null).commit();
             drawerLayout.closeDrawer(GravityCompat.START);
         });
     }

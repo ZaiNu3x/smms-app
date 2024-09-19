@@ -23,9 +23,9 @@ public class MainActivity extends AppCompatActivity {
         User loggedInUser = userService.retrieveLoggedInUser();
 
         if (loggedInUser != null) {
+            Utils.getInstance().setLoggedInUser(loggedInUser);
             Intent intent = new Intent(this, HomeActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            intent.putExtra("user_details", loggedInUser);
             startActivity(intent);
         } else {
             Intent intent = new Intent(getApplicationContext(), SignInActivity.class);

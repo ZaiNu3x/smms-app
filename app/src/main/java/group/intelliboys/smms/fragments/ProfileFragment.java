@@ -3,6 +3,8 @@ package group.intelliboys.smms.fragments;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -28,6 +30,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 import group.intelliboys.smms.R;
 import group.intelliboys.smms.models.data.User;
 import group.intelliboys.smms.services.Utils;
+import group.intelliboys.smms.services.local.LocalDbUserService;
 
 public class ProfileFragment extends Fragment {
 
@@ -45,6 +48,7 @@ public class ProfileFragment extends Fragment {
     private EditText birthDate;
     private EditText address;
     private Button saveButton;
+    private User loggedInUser;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -65,23 +69,34 @@ public class ProfileFragment extends Fragment {
         address = view.findViewById(R.id.userAddress);
         saveButton = view.findViewById(R.id.saveButton);
 
-        assert getArguments() != null;
-        User user = (User) getArguments().get("user_details");
+        loggedInUser = Utils.getInstance().getLoggedInUser();
 
-        if (user != null) {
-            lastName.setText(user.getLastName());
-            firstName.setText(user.getFirstName());
-            middleName.setText(user.getMiddleName());
+        if (loggedInUser != null) {
+            Bitmap bitmap = BitmapFactory.decodeByteArray(loggedInUser.getProfilePic(),
+                    0, loggedInUser.getProfilePic().length);
+            profilePic.setImageBitmap(bitmap);
 
-            if (user.getSex().equals("m")) {
+            StringBuilder builder = new StringBuilder();
+            builder.append(loggedInUser.getLastName())
+                    .append(" ")
+                    .append(loggedInUser.getFirstName()).append(" ")
+                    .append(loggedInUser.getMiddleName().charAt(0))
+                    .append(".");
+
+            userName.setText(new String(builder));
+            userEmail.setText(loggedInUser.getEmail());
+            lastName.setText(loggedInUser.getLastName());
+            firstName.setText(loggedInUser.getFirstName());
+            middleName.setText(loggedInUser.getMiddleName());
+
+            if (loggedInUser.getSex().equals("m")) {
                 male.setChecked(true);
-            }
-            else if (user.getSex().equals("f")) {
+            } else if (loggedInUser.getSex().equals("f")) {
                 female.setChecked(true);
             }
 
-            birthDate.setText(user.getBirthDate().toString());
-            address.setText(user.getAddress());
+            birthDate.setText(loggedInUser.getBirthDate().toString());
+            address.setText(loggedInUser.getAddress());
         }
 
         changeProfilePic.setOnClickListener((v) -> {
@@ -154,6 +169,7 @@ public class ProfileFragment extends Fragment {
         }
 
         User user = User.builder()
+                .email(loggedInUser.getEmail())
                 .lastName(lastName.getText().toString())
                 .firstName(firstName.getText().toString())
                 .middleName(middleName.getText().toString())
@@ -163,5 +179,8 @@ public class ProfileFragment extends Fragment {
                 .build();
 
         Log.i("", user.toString());
+
+        LocalDbUserService userService = new LocalDbUserService(this.getActivity());
+        userService.updateLoggedInUserInfo(user);
     }
 }

@@ -1,10 +1,12 @@
 package group.intelliboys.smms.services;
 
 import android.content.Context;
+import group.intelliboys.smms.models.data.User;
 
 public class Utils {
     private static Utils utilsInstance;
     private Context applicationContext;
+    private User loggedInUser;
 
     private Utils() {
     }
@@ -22,5 +24,13 @@ public class Utils {
 
     public Context getApplicationContext() {
         return applicationContext;
+    }
+
+    public User getLoggedInUser() {
+        return loggedInUser;
+    }
+
+    public void setLoggedInUser(User loggedInUser) {
+        this.loggedInUser = loggedInUser;
     }
 }
