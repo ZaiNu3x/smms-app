@@ -14,10 +14,6 @@ public class NetworkConfig {
     private static NetworkConfig networkConfigInstance;
     private String deviceIpAddress;
 
-    private NetworkConfig() {
-
-    }
-
     public static NetworkConfig getInstance() {
         if (networkConfigInstance == null) {
             networkConfigInstance = new NetworkConfig();
