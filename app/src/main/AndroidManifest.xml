@@ -34,6 +34,7 @@
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
+
         </activity>
         <activity android:name=".activities.SignInActivity" />
         <activity android:name=".activities.SignUpActivity" />
@@ -41,6 +42,10 @@
         <activity android:name=".activities.SignInVerificationActivity" />
         <activity android:name=".activities.SignUpProfileActivity" />
         <activity android:name=".activities.SignUpVerificationActivity" />
+        <activity android:name=".fragments.NextActivity"/>
+        <activity android:name=".fragments.list_of_clubs"/>
+
+
     </application>
 
 </manifest>

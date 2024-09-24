@@ -9,6 +9,34 @@
     <string name="logout">Logout</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="location_format">%1$f, %2$f</string>
     <string name="close_nav">Close Drawer</string>
     <string name="open_nav">Open Drawer</string>
+    <!-- Clubs xml -->
+    <string name="ninja_motorcycle_image1">\@string/ninja_motorcycle_image!</string>
+    <string name="ninja_motorcycle_image">Ninja motorcycle image</string>
+    <string name="our_motors">Motors</string>
+    <string name="clubs_motor_logo">Clubs Motor Logo</string>
+    <string name="our_clubs">OUR_CLUBS</string>
+    <string name="motor">motor</string>
+    <string name="motor1">motor1</string>
+    <string name="click_here_to_see_more">About</string>
+    <string name="you_ve_reached_the_next_screen">You\'ve reached the next screen!</string>
+    <string name="about_intelliboys">ABOUT INTELLIBOYS</string>
+    <string name="our_mission">OUR MISSION</string>
+    <string name="contact_us">Contact us</string>
+    <string name="about">Welcome to intelliboys, where passion for motors and the open road come together! Established in 2020, our club is a community of motor enthusiasts who share a love for everything on wheels, whether it\'s motorcycles, cars, or even off-road vehicles.</string>
+    <string name="mission">Our mission is to unite motor lovers under one banner, fostering camaraderie, safety, and adventure through organized rides. We believe in celebrating the spirit of freedom, the art of mechanics, and the joy of being on the road.</string>
+    <string name="address">Address: 123 main street city state zip</string>
+    <string name="phone">Phone: 123 456 7890</string>
+    <string name="email">Email: intelliboy@gmail.com</string>
+    <string name="joined">Join us today and become part of a family that shares your passion for motors! At intelliboys, it\'s not just about the destination—it\'s about the journey and the people you meet along the way.</string>
+   <!-- Clubs list -->
+
+    <string name="indios_club"><u>INDIOS CLUB</u></string>
+    <string name="royale_club"><u>ROYALE CLUB</u></string>
+    <string name="list_of_clubs">LIST OF CLUBS</string>
+    <string name="mad_dog_club">MAD DOG CLUB</string>
+
+
 </resources>

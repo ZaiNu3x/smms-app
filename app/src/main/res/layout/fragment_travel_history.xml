@@ -3,13 +3,28 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:gravity="top">
+
 
     <TextView
         android:id="@+id/locationTextView"
-        android:layout_width="312dp"
-        android:layout_height="154dp"
-        android:text="Location will be displayed here"
-        android:textSize="18sp" />
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="8dp"
+        android:text="Location will appear here"
+        android:textColor="@android:color/black"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/dateTimeTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Date and Time"
+        android:textSize="16sp"
+        android:textColor="@android:color/black"
+        android:gravity="center"
+        android:padding="8dp" />
 
 </LinearLayout>

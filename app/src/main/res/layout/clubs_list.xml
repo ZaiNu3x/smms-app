@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_club">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="5dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:shadowColor="@color/purple_200"
+            android:text="@string/list_of_clubs"
+            android:textColor="@color/white"
+            android:textColorHighlight="@color/purple_700"
+            android:textColorHint="@color/purple_700"
+            android:textSize="25sp"
+            android:textStyle="bold"
+            tools:layout_editor_absoluteX="23dp"
+            tools:layout_editor_absoluteY="17dp" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="168dp"
+            android:layout_marginTop="35dp"
+            android:orientation="vertical">
+
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:contentDescription="@string/mad_dog_club"
+                android:scaleType="centerCrop"
+                android:src="@drawable/maddog"
+                app:srcCompat="@drawable/maddog" />
+
+        </FrameLayout>
+
+
+        <TextView
+            android:id="@+id/maddog"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="5dp"
+            android:text="@string/mad_dog_club"
+            android:textColor="@color/teal_200"
+            android:textSize="25sp"
+            android:textStyle="bold|italic" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="168dp"
+            android:layout_marginTop="15dp"
+            android:orientation="vertical">
+
+
+            <ImageView
+                android:layout_width="165dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:contentDescription="@string/indios_club"
+                android:scaleType="centerCrop"
+                android:src="@drawable/indios_club"
+                app:srcCompat="@drawable/indios_club" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/indios_club"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="5dp"
+            android:text="@string/indios_club"
+            android:textColor="@color/teal_200"
+            android:textSize="25sp"
+            android:textStyle="bold|italic" />
+
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="168dp"
+            android:layout_marginTop="15dp"
+            android:orientation="vertical">
+
+
+            <ImageView
+                android:layout_width="165dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:contentDescription="@string/royale_club"
+                android:scaleType="centerCrop"
+                android:src="@drawable/royale"
+                app:srcCompat="@drawable/royale" />
+        </FrameLayout>
+
+
+        <TextView
+            android:id="@+id/royale_club"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="5dp"
+            android:text="@string/royale_club"
+            android:textColor="@color/teal_200"
+            android:textSize="25sp"
+            android:textStyle="bold|italic" />
+
+
+    </LinearLayout>
+
+</ScrollView>
