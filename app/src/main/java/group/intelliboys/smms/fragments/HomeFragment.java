@@ -9,7 +9,6 @@ import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -26,11 +25,12 @@ import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import group.intelliboys.smms.R;
 
 public class HomeFragment extends Fragment {
     private MapView mapView;
-    private ImageButton showMyLocationBtn;
+    private CircleImageView showMyLocationBtn;
     private static final int REQUEST_LOCATION_PERMISSION = 1;
     private FusedLocationProviderClient fusedLocationClient;
 
@@ -44,6 +44,7 @@ public class HomeFragment extends Fragment {
         Configuration.getInstance().load(getActivity(), PreferenceManager.getDefaultSharedPreferences(getActivity()));
         mapView = view.findViewById(R.id.home_map);
         showMyLocationBtn = view.findViewById(R.id.show_location_btn);
+        showMyLocationBtn.setTooltipText("Show My Location");
         mapView.setTileSource(TileSourceFactory.MAPNIK);
 
         GeoPoint startPoint = new GeoPoint(14.6091, 121.0223);

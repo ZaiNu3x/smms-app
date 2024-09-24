@@ -11,18 +11,19 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <ImageButton
+    <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/show_location_btn"
-        android:layout_width="50dp"
-        android:layout_height="51dp"
-        android:background="@android:color/transparent"
+        android:layout_width="29dp"
+        android:layout_height="32dp"
         android:contentDescription="@string/show_my_location"
         android:src="@drawable/ic_my_location"
+        app:civ_border_color="@color/black"
+        app:civ_border_width="1dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.955"
+        app:layout_constraintHorizontal_bias="0.986"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.205" />
+        app:layout_constraintVertical_bias="0.179" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
