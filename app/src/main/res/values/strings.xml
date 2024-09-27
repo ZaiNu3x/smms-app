@@ -31,12 +31,21 @@
     <string name="phone">Phone: 123 456 7890</string>
     <string name="email">Email: intelliboy@gmail.com</string>
     <string name="joined">Join us today and become part of a family that shares your passion for motors! At intelliboys, it\'s not just about the destination—it\'s about the journey and the people you meet along the way.</string>
-   <!-- Clubs list -->
+    <!-- Clubs list -->
 
     <string name="indios_club"><u>INDIOS CLUB</u></string>
     <string name="royale_club"><u>ROYALE CLUB</u></string>
     <string name="list_of_clubs">LIST OF CLUBS</string>
     <string name="mad_dog_club">MAD DOG CLUB</string>
+    <string name="lastname">Lastname</string>
+    <string name="firstname">Firstname</string>
+    <string name="middlename">Middlename</string>
+    <string name="male">Male</string>
+    <string name="birth_date">Birth Date</string>
 
+    <string name="save">SAVE</string>
 
+    <string name="user_name">MARAON, JEROME D.</string>
+    <string name="female">Female</string>
+    <string name="show_my_location">SHOW MY LOCATION</string>
 </resources>

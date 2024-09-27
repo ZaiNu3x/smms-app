@@ -27,20 +27,23 @@ import group.intelliboys.smms.fragments.AccidentHistoryFragment;
 import group.intelliboys.smms.fragments.ClubsFragment;
 import group.intelliboys.smms.fragments.HomeFragment;
 import group.intelliboys.smms.fragments.MonitoringFragment;
+import group.intelliboys.smms.fragments.ProfileFragment;
 import group.intelliboys.smms.fragments.SettingsFragment;
 import group.intelliboys.smms.fragments.TravelHistoryFragment;
-import group.intelliboys.smms.models.data.User;
+import group.intelliboys.smms.models.view_models.UserViewModel;
+import group.intelliboys.smms.services.Utils;
 import group.intelliboys.smms.services.local.LocalDbUserService;
 
 public class HomeActivity extends AppCompatActivity implements NavigationView
         .OnNavigationItemSelectedListener {
 
     private DrawerLayout drawerLayout;
-    private User user;
     private View navHeader;
     private CircleImageView profilePic;
     private TextView navUsername;
     private TextView navUserEmail;
+    private UserViewModel userViewModel;
+    private String userEmail;
 
     @SuppressLint({"CommitTransaction", "ResourceType", "MissingInflatedId", "SetTextI18n"})
     @Override
@@ -48,7 +51,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
         setTitle(null);
-        user = (User) getIntent().getSerializableExtra("user_details");
 
         drawerLayout = findViewById(R.id.drawer_layout);
         NavigationView navigationView = drawerLayout.findViewById(R.id.nav_view);
@@ -79,19 +81,32 @@ public class HomeActivity extends AppCompatActivity implements NavigationView
             navigationView.setCheckedItem(R.id.nav_home);
         }
 
-        Bitmap bitmap = BitmapFactory.decodeByteArray(user.getProfilePic(),
-                0, user.getProfilePic().length);
-        profilePic.setImageBitmap(bitmap);
+        userViewModel = Utils.getInstance().getLoggedInUser();
 
-        StringBuilder builder = new StringBuilder();
-        builder.append(user.getLastName())
-                .append(" ")
-                .append(user.getFirstName()).append(" ")
-                .append(user.getMiddleName().charAt(0))
-                .append(".");
+        userViewModel.getUserModel().observe(this, newData -> {
+            userEmail = newData.getEmail();
 
-        navUsername.setText(new String(builder));
-        navUserEmail.setText(user.getEmail());
+            if (newData.getProfilePic() != null) {
+                Bitmap bitmap = BitmapFactory.decodeByteArray(newData.getProfilePic(),
+                        0, newData.getProfilePic().length);
+                profilePic.setImageBitmap(bitmap);
+            }
+
+            StringBuilder builder = new StringBuilder();
+            builder.append(newData.getLastName())
+                    .append(" ")
+                    .append(newData.getFirstName()).append(" ")
+                    .append(newData.getMiddleName().charAt(0))
+                    .append(".");
+
+            navUsername.setText(new String(builder));
+            navUserEmail.setText(newData.getEmail());
+        });
+
+        profilePic.setOnClickListener((view) -> {
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, ProfileFragment.class, null).commit();
+            drawerLayout.closeDrawer(GravityCompat.START);
+        });
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -128,7 +143,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView
                         .setMessage("Are you sure you want to logout?")
                         .setPositiveButton(android.R.string.yes, (dialogInterface, i) -> {
                             LocalDbUserService userService = new LocalDbUserService(this);
-                            userService.deleteUser(user.getEmail());
+                            userService.deleteUser(userEmail);
 
                             Intent intent = new Intent(getApplicationContext(), SignInActivity.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

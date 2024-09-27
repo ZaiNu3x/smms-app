@@ -30,7 +30,6 @@ import java.util.List;
 import group.intelliboys.smms.R;
 
 public class TravelHistoryFragment extends Fragment {
-
     private FusedLocationProviderClient fusedLocationClient;
     private TextView locationTextView;
     private TextView dateTimeTextView;

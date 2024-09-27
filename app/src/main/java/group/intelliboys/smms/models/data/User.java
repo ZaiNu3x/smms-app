@@ -2,6 +2,7 @@ package group.intelliboys.smms.models.data;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.Observer;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

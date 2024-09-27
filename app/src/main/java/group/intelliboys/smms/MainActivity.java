@@ -16,16 +16,16 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.club_about);
+        setContentView(R.layout.activity_main);
         Utils.getInstance().setApplicationContext(getApplicationContext());
 
         LocalDbUserService userService = new LocalDbUserService(this);
         User loggedInUser = userService.retrieveLoggedInUser();
 
         if (loggedInUser != null) {
+            Utils.getInstance().getLoggedInUser().updateUserModel(loggedInUser);
             Intent intent = new Intent(this, HomeActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            intent.putExtra("user_details", loggedInUser);
             startActivity(intent);
         } else {
             Intent intent = new Intent(getApplicationContext(), SignInActivity.class);
