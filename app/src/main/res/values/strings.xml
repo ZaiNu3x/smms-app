@@ -13,13 +13,6 @@
     <string name="close_nav">Close Drawer</string>
     <string name="open_nav">Open Drawer</string>
     <!-- Clubs xml -->
-    <string name="ninja_motorcycle_image1">\@string/ninja_motorcycle_image!</string>
-    <string name="ninja_motorcycle_image">Ninja motorcycle image</string>
-    <string name="our_motors">Motors</string>
-    <string name="clubs_motor_logo">Clubs Motor Logo</string>
-    <string name="our_clubs">OUR_CLUBS</string>
-    <string name="motor">motor</string>
-    <string name="motor1">motor1</string>
     <string name="click_here_to_see_more">About</string>
     <string name="you_ve_reached_the_next_screen">You\'ve reached the next screen!</string>
     <string name="about_intelliboys">ABOUT INTELLIBOYS</string>
@@ -33,19 +26,32 @@
     <string name="joined">Join us today and become part of a family that shares your passion for motors! At intelliboys, it\'s not just about the destination—it\'s about the journey and the people you meet along the way.</string>
     <!-- Clubs list -->
 
-    <string name="indios_club"><u>INDIOS CLUB</u></string>
-    <string name="royale_club"><u>ROYALE CLUB</u></string>
-    <string name="list_of_clubs">LIST OF CLUBS</string>
-    <string name="mad_dog_club">MAD DOG CLUB</string>
     <string name="lastname">Lastname</string>
     <string name="firstname">Firstname</string>
     <string name="middlename">Middlename</string>
     <string name="male">Male</string>
     <string name="birth_date">Birth Date</string>
-
     <string name="save">SAVE</string>
 
     <string name="user_name">MARAON, JEROME D.</string>
     <string name="female">Female</string>
     <string name="show_my_location">SHOW MY LOCATION</string>
+    <string name="button">Create</string>
+    <string name="my_clubs">MY CLUBS</string>
+    <string name="member_logo">Member Logo</string>
+    <string name="intelliboys_club">INTELLIBOYS CLUB</string>
+    <string name="member_logo1">Member Logo1</string>
+    <string name="maddog_club">MADDOG CLUB</string>
+    <string name="member_logo2">Member Logo2</string>
+    <string name="indios_club">INDIOS CLUB</string>
+    <string name="member_logo3">Member Logo3</string>
+    <string name="royale_club">ROYALE CLUB</string>
+    <string name="create">Create</string>
+    <string name="enter_club_name">Enter Club Name</string>
+    <string name="enter_club_theme">Enter Club Theme</string>
+    <string name="choose_logo">Choose Logo</string>
+    <string name="club_logo">Club Logo</string>
+    <string name="create_club">Create Club</string>
+    <string name="speed_0_km_h">Speed: 0 km/h</string>
+    <string name="status_normal">Status: Normal</string>
 </resources>

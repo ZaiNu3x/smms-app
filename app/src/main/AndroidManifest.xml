@@ -48,7 +48,7 @@
         <activity android:name=".activities.SignUpProfileActivity" />
         <activity android:name=".activities.SignUpVerificationActivity" />
         <activity android:name=".fragments.NextActivity"/>
-        <activity android:name=".fragments.list_of_clubs"/>
+        <activity android:name=".fragments.ClubCreationActivity"/>
     </application>
 
 </manifest>
