@@ -277,7 +277,13 @@ public class SignUpActivity extends AppCompatActivity {
                 Log.i("", Objects.requireNonNull(e.getMessage()));
             }
 
-            verifyCredentialIfNotExists(jsonObject);
+            NetworkConfig networkConfig = NetworkConfig.getInstance();
+
+            if (networkConfig.isNetworkActive()) {
+                verifyCredentialIfNotExists(jsonObject);
+            } else {
+                Toast.makeText(this, "NO INTERNET CONNECTION", Toast.LENGTH_LONG).show();
+            }
         });
     }
 
@@ -288,6 +294,10 @@ public class SignUpActivity extends AppCompatActivity {
 
     private void verifyCredentialIfNotExists(JSONObject regForm) {
         nextBtn.setEnabled(false);
+
+        if (ipAddress == null) {
+            ipAddress = NetworkConfig.getInstance().getServerIpAddress();
+        }
 
         final String VERIFICATION_URL = ipAddress + "/register/is-account-exists";
         final MediaType JSON = MediaType.get("application/json");

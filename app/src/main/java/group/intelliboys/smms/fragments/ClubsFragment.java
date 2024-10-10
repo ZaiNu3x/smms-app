@@ -1,6 +1,7 @@
 package group.intelliboys.smms.fragments;
 
 import android.content.Intent;
+
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -81,5 +82,6 @@ public class ClubsFragment extends Fragment {
         });
 
         return view;
+
     }
 }

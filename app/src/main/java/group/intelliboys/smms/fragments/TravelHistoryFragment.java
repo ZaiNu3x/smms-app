@@ -73,6 +73,7 @@ public class TravelHistoryFragment extends Fragment {
         startAutoRefresh();
 
         return view;
+
     }
 
     private void getLocation() {
