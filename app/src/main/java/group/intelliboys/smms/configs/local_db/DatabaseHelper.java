@@ -22,7 +22,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        final String createTables = "CREATE TABLE user (" +
+        final String createUserTable = "CREATE TABLE user (" +
                 "email VARCHAR(64) PRIMARY KEY, " +
                 "phone_number VARCHAR(13) NOT NULL, " +
                 "last_name VARCHAR(32) NOT NULL, " +
@@ -36,13 +36,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "auth_token VARCHAR(512) NOT NULL" +
                 ")";
 
-        sqLiteDatabase.execSQL(createTables);
+        final String createSearchedPlaceTable = "CREATE TABLE searched_place (" +
+                "name VARCHAR(255) NOT NULL, " +
+                "display_name VARCHAR(255) PRIMARY KEY, " +
+                "latitude DOUBLE NOT NULL, " +
+                "longitude DOUBLE NOT NULL, " +
+                "bounding_box VARCHAR(255) NOT NULL" +
+                ")";
+
+        sqLiteDatabase.execSQL(createUserTable);
+        sqLiteDatabase.execSQL(createSearchedPlaceTable);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
-        final String dropTables = "DROP TABLE IF EXISTS user";
-        sqLiteDatabase.execSQL(dropTables);
+        final String dropUserTable = "DROP TABLE IF EXISTS user";
+        final String dropSearchedPlaceTable = "DROP TABLE IF EXISTS user";
+
+        sqLiteDatabase.execSQL(dropUserTable);
+        sqLiteDatabase.execSQL(dropSearchedPlaceTable);
         onCreate(sqLiteDatabase);
     }
 }

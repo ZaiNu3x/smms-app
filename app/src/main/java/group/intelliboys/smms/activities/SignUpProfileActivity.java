@@ -330,7 +330,13 @@ public class SignUpProfileActivity extends AppCompatActivity {
             form.setProfilePic(profilePic);
 
             try {
-                doVerify(form);
+                NetworkConfig networkConfig = NetworkConfig.getInstance();
+
+                if (networkConfig.isNetworkActive()) {
+                    doVerify(form);
+                } else {
+                    Toast.makeText(this, "NO INTERNET CONNECTION", Toast.LENGTH_LONG).show();
+                }
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }

@@ -22,4 +22,6 @@
     <string name="user_name">MARAON, JEROME D.</string>
     <string name="female">Female</string>
     <string name="show_my_location">SHOW MY LOCATION</string>
+    <string name="choose_where_to_start">Choose where to start</string>
+    <string name="choose_destination">Choose destination</string>
 </resources>
