@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -39,7 +40,7 @@
         android:id="@+id/passwordEditTxt"
         android:layout_width="350dp"
         android:layout_height="70dp"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="8dp"
         android:background="@drawable/custom_input"
         android:drawableStart="@drawable/custom_lock_icon"
         android:drawablePadding="12dp"
@@ -49,7 +50,24 @@
         android:maxLength="16"
         android:paddingStart="18dp"
         android:paddingEnd="18dp"
-        app:layout_constraintBottom_toTopOf="@+id/loginButton"
+        app:layout_constraintBottom_toTopOf="@+id/forgotPasswordLbl"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.491"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/signupButton"
+        android:layout_width="350dp"
+        android:layout_height="65dp"
+        android:layout_marginBottom="12dp"
+        android:background="@drawable/custom_button"
+        android:drawableRight="@drawable/ic_register"
+        android:paddingStart="125dp"
+        android:paddingEnd="120dp"
+        android:text="SIGNUP"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@+id/signinProgress"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.508"
         app:layout_constraintStart_toStartOf="parent" />
@@ -69,24 +87,7 @@
         android:textSize="18sp"
         app:layout_constraintBottom_toTopOf="@+id/signupButton"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.491"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/signupButton"
-        android:layout_width="350dp"
-        android:layout_height="65dp"
-        android:layout_marginBottom="28dp"
-        android:background="@drawable/custom_button"
-        android:drawableRight="@drawable/ic_register"
-        android:paddingStart="125dp"
-        android:paddingEnd="120dp"
-        android:text="SIGNUP"
-        android:textColor="#FFFFFF"
-        android:textSize="18sp"
-        app:layout_constraintBottom_toTopOf="@+id/signinProgress"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.491"
+        app:layout_constraintHorizontal_bias="0.508"
         app:layout_constraintStart_toStartOf="parent" />
 
     <ImageView
@@ -110,5 +111,17 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/signupButton"
         app:layout_constraintStart_toStartOf="@+id/signupButton" />
+
+    <TextView
+        android:id="@+id/forgotPasswordLbl"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:text="FORGOT PASSWORD"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@+id/loginButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.153"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

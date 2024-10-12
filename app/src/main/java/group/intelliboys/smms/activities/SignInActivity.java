@@ -19,6 +19,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -61,6 +62,7 @@ public class SignInActivity extends AppCompatActivity {
     private boolean isEmailValid, isPasswordValid;
     private OkHttpClient okHttpClient;
     private String ipAddress;
+    private TextView forgotPasswordLbl;
 
     @SuppressLint({"MissingInflatedId", "UseCompatLoadingForDrawables"})
     @Override
@@ -78,8 +80,8 @@ public class SignInActivity extends AppCompatActivity {
         loginButton = findViewById(R.id.loginButton);
         signupButton = findViewById(R.id.signupButton);
         signinProgress = findViewById(R.id.signinProgress);
+        forgotPasswordLbl = findViewById(R.id.forgotPasswordLbl);
         okHttpClient = CustomOkHttpClient.getOkHttpClient(getApplicationContext());
-
         drawable = getDrawable(R.drawable.error);
         assert drawable != null;
         drawable.setBounds(0, 0, 45, 45);
@@ -185,6 +187,11 @@ public class SignInActivity extends AppCompatActivity {
 
         signupButton.setOnClickListener(btn -> {
             Intent intent = new Intent(getApplicationContext(), SignUpActivity.class);
+            startActivity(intent);
+        });
+
+        forgotPasswordLbl.setOnClickListener(v -> {
+            Intent intent = new Intent(this, ForgotPasswordActivity.class);
             startActivity(intent);
         });
     }
