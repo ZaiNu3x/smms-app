@@ -53,7 +53,12 @@
     <string name="club_logo">Club Logo</string>
     <string name="create_club">Create Club</string>
     <string name="speed_0_km_h">Speed: 0 km/h</string>
-    <string name="status_normal">Status: Normal</string>
     <string name="choose_where_to_start">Choose where to start</string>
     <string name="choose_destination">Choose destination</string>
+    <string name="circle">circle</string>
+
+    <string name="speed_text">Speed: %1$.2f km/h</string>
+    <string name="status_over_speeding">Status: Over Speeding!</string>
+    <string name="status_normal">Status: Normal</string>
+
 </resources>

@@ -30,6 +30,10 @@ import java.util.List;
 import group.intelliboys.smms.R;
 
 public class TravelHistoryFragment extends Fragment {
+
+    //fragment_travel_history.xml
+
+
     private FusedLocationProviderClient fusedLocationClient;
     private TextView locationTextView;
     private TextView dateTimeTextView;
@@ -37,9 +41,10 @@ public class TravelHistoryFragment extends Fragment {
     private final Handler handler = new Handler(Looper.getMainLooper());
     private static final long REFRESH_INTERVAL = 3000;
 
+
     private final ActivityResultLauncher<String[]> requestPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
-                if (getActivity() != null) {
+                if (isAdded() && getActivity() != null) {
                     boolean allPermissionsGranted = true;
                     for (Boolean granted : result.values()) {
                         if (!granted) {
@@ -64,6 +69,7 @@ public class TravelHistoryFragment extends Fragment {
         dateTimeTextView = view.findViewById(R.id.dateTimeTextView);
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
 
+        // Check location permissions
         if (ContextCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             requestPermissionLauncher.launch(new String[]{Manifest.permission.ACCESS_FINE_LOCATION});
         } else {
@@ -73,14 +79,15 @@ public class TravelHistoryFragment extends Fragment {
         startAutoRefresh();
 
         return view;
-
     }
 
     private void getLocation() {
-        if (requireActivity() != null && ContextCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (isAdded() && requireActivity() != null &&
+                ContextCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
             fusedLocationClient.getLastLocation()
                     .addOnSuccessListener(requireActivity(), location -> {
-                        if (location != null) {
+                        if (location != null && isAdded()) {
                             double latitude = location.getLatitude();
                             double longitude = location.getLongitude();
                             String locationRecord = getString(R.string.location_format, latitude, longitude) + " - " + getCurrentDateTime();
@@ -97,30 +104,42 @@ public class TravelHistoryFragment extends Fragment {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                updateDateTime();
-                getLocation();
-                handler.postDelayed(this, REFRESH_INTERVAL);
+                if (isAdded()) {
+                    updateDateTime();
+                    getLocation();
+                    handler.postDelayed(this, REFRESH_INTERVAL);
+                }
             }
         }, REFRESH_INTERVAL);
     }
 
     private void updateDateTime() {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-        String currentDateAndTime = sdf.format(new Date());
-        dateTimeTextView.setText(currentDateAndTime);
+        if (isAdded()) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+            String currentDateAndTime = sdf.format(new Date());
+            dateTimeTextView.setText(currentDateAndTime);
+        }
     }
 
     private void updateLocationRecords() {
-        StringBuilder records = new StringBuilder();
-        for (String record : locationRecords) {
-            records.append(record).append("\n");
+        if (isAdded()) {
+            StringBuilder records = new StringBuilder();
+            for (String record : locationRecords) {
+                records.append(record).append("\n");
+            }
+            locationTextView.setText(records.toString());
         }
-        locationTextView.setText(records.toString());
     }
 
     private String getCurrentDateTime() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
         return sdf.format(new Date());
     }
-}
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        handler.removeCallbacksAndMessages(null);
+    }
+}
