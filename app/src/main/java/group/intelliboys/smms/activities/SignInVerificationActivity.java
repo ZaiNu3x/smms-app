@@ -53,14 +53,14 @@ public class SignInVerificationActivity extends AppCompatActivity {
         setContentView(R.layout.activity_otp_verification);
 
         ipAddress = NetworkConfig.getInstance().getServerIpAddress();
-        emailOtpEditTxt = findViewById(R.id.emailOtpEditTxt);
-        smsOtpEditTxt = findViewById(R.id.smsOtpEditTxt);
-        resendEmailOtpLbl = findViewById(R.id.resendEmailOtpLbl);
-        resendSmsOtpLbl = findViewById(R.id.resendSmsOtpLbl);
-        emailOtpTimer = findViewById(R.id.emailOtpTimer);
-        smsOtpTimer = findViewById(R.id.smsOtpTimer);
+        emailOtpEditTxt = findViewById(R.id.fgpEmailOtpEditTxt);
+        smsOtpEditTxt = findViewById(R.id.fgpSmsOtpEditTxt);
+        resendEmailOtpLbl = findViewById(R.id.fgpResendEmailOtpLbl);
+        resendSmsOtpLbl = findViewById(R.id.fgpResendSmsOtpLbl);
+        emailOtpTimer = findViewById(R.id.fgpEmailOtpTimer);
+        smsOtpTimer = findViewById(R.id.fgpSmsOtpTimer);
         okHttpClient = CustomOkHttpClient.getOkHttpClient(getApplicationContext());
-        Button submitBtn = findViewById(R.id.submitOtpBtn);
+        Button submitBtn = findViewById(R.id.fgpSubmitOtpBtn);
 
         resendEmailOtpLbl.setOnClickListener(lbl -> {
             resendEmailOtpTimer();
