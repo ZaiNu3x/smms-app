@@ -19,7 +19,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.IOException;
 
-public class ClubCreationActivity extends AppCompatActivity {
+public class CreateClub extends AppCompatActivity {
+
+    //create_club.xml
 
     private EditText clubNameEditText, clubThemeEditText;
     private ImageView clubLogoImageView;

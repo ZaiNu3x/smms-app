@@ -9,6 +9,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.HIGH_SAMPLING_RATE_SENSORS" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"
         tools:ignore="SelectedPhotoAccess" />
 
@@ -50,6 +51,8 @@
         <activity android:name=".fragments.NextActivity"/>
         <activity android:name=".fragments.ClubCreationActivity"/>
         <activity android:name=".activities.ForgotPasswordActivity" />
+        <activity android:name=".fragments.Clubinfo"/>
+        <activity android:name=".fragments.CreateClub"/>
     </application>
 
 </manifest>

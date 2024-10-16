@@ -33,7 +33,7 @@ public class ClubsFragment extends Fragment {
 
 
         clubsLogoImageView.setOnClickListener(view1 -> {
-            Intent intent = new Intent(getActivity(), ClubCreationActivity.class);
+            Intent intent = new Intent(getActivity(), Clubinfo.class);
             startActivity(intent);
         });
 
@@ -58,7 +58,7 @@ public class ClubsFragment extends Fragment {
                 @Override
                 public void onAnimationEnd(Animation animation) {
 
-                    Intent intent = new Intent(getActivity(), ClubCreationActivity.class);
+                    Intent intent = new Intent(getActivity(), Clubinfo.class);
                     startActivity(intent);
                 }
 
@@ -71,13 +71,13 @@ public class ClubsFragment extends Fragment {
 
 
         memberListLinearLayout.setOnClickListener(view1 -> {
-            Intent intent = new Intent(getActivity(), ClubCreationActivity.class);
+            Intent intent = new Intent(getActivity(), Clubinfo.class);
             startActivity(intent);
         });
 
 
         createButton.setOnClickListener(view1 -> {
-            Intent intent = new Intent(getActivity(), ClubCreationActivity.class);
+            Intent intent = new Intent(getActivity(), CreateClub.class);
             startActivity(intent);
         });
 
