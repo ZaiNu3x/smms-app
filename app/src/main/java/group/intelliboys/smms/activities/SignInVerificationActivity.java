@@ -53,14 +53,14 @@ public class SignInVerificationActivity extends AppCompatActivity {
         setContentView(R.layout.activity_otp_verification);
 
         ipAddress = NetworkConfig.getInstance().getServerIpAddress();
-        emailOtpEditTxt = findViewById(R.id.fgpEmailOtpEditTxt);
-        smsOtpEditTxt = findViewById(R.id.fgpSmsOtpEditTxt);
+        emailOtpEditTxt = findViewById(R.id.fgpNewPassEditTxt);
+        smsOtpEditTxt = findViewById(R.id.fgpConfirmPassEditTxt);
         resendEmailOtpLbl = findViewById(R.id.fgpResendEmailOtpLbl);
         resendSmsOtpLbl = findViewById(R.id.fgpResendSmsOtpLbl);
         emailOtpTimer = findViewById(R.id.fgpEmailOtpTimer);
         smsOtpTimer = findViewById(R.id.fgpSmsOtpTimer);
         okHttpClient = CustomOkHttpClient.getOkHttpClient(getApplicationContext());
-        Button submitBtn = findViewById(R.id.fgpSubmitOtpBtn);
+        Button submitBtn = findViewById(R.id.fgpSubmitBtn);
 
         resendEmailOtpLbl.setOnClickListener(lbl -> {
             resendEmailOtpTimer();

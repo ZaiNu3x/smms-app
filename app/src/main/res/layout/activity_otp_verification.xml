@@ -6,7 +6,7 @@
     android:layout_height="match_parent">
 
     <EditText
-        android:id="@+id/fgpEmailOtpEditTxt"
+        android:id="@+id/fgpNewPassEditTxt"
         android:layout_width="353dp"
         android:layout_height="70dp"
         android:layout_marginTop="64dp"
@@ -28,10 +28,10 @@
         android:layout_marginTop="16dp"
         android:text="RESEND OTP"
         android:textSize="18sp"
-        app:layout_constraintEnd_toEndOf="@+id/fgpEmailOtpEditTxt"
+        app:layout_constraintEnd_toEndOf="@+id/fgpNewPassEditTxt"
         app:layout_constraintHorizontal_bias="0.06"
-        app:layout_constraintStart_toStartOf="@+id/fgpEmailOtpEditTxt"
-        app:layout_constraintTop_toBottomOf="@+id/fgpEmailOtpEditTxt" />
+        app:layout_constraintStart_toStartOf="@+id/fgpNewPassEditTxt"
+        app:layout_constraintTop_toBottomOf="@+id/fgpNewPassEditTxt" />
 
     <TextView
         android:id="@+id/fgpEmailOtpTimer"
@@ -41,13 +41,13 @@
         android:text="30"
         android:textColor="#E83A3A"
         android:textSize="18sp"
-        app:layout_constraintEnd_toEndOf="@+id/fgpEmailOtpEditTxt"
+        app:layout_constraintEnd_toEndOf="@+id/fgpNewPassEditTxt"
         app:layout_constraintHorizontal_bias="0.972"
-        app:layout_constraintStart_toStartOf="@+id/fgpEmailOtpEditTxt"
-        app:layout_constraintTop_toBottomOf="@+id/fgpEmailOtpEditTxt" />
+        app:layout_constraintStart_toStartOf="@+id/fgpNewPassEditTxt"
+        app:layout_constraintTop_toBottomOf="@+id/fgpNewPassEditTxt" />
 
     <EditText
-        android:id="@+id/fgpSmsOtpEditTxt"
+        android:id="@+id/fgpConfirmPassEditTxt"
         android:layout_width="351dp"
         android:layout_height="70dp"
         android:layout_marginTop="84dp"
@@ -58,9 +58,9 @@
         android:maxLength="6"
         android:padding="18dp"
         android:paddingLeft="18dp"
-        app:layout_constraintEnd_toEndOf="@+id/fgpEmailOtpEditTxt"
-        app:layout_constraintStart_toStartOf="@+id/fgpEmailOtpEditTxt"
-        app:layout_constraintTop_toBottomOf="@+id/fgpEmailOtpEditTxt" />
+        app:layout_constraintEnd_toEndOf="@+id/fgpNewPassEditTxt"
+        app:layout_constraintStart_toStartOf="@+id/fgpNewPassEditTxt"
+        app:layout_constraintTop_toBottomOf="@+id/fgpNewPassEditTxt" />
 
     <TextView
         android:id="@+id/fgpResendSmsOtpLbl"
@@ -69,10 +69,10 @@
         android:layout_marginTop="20dp"
         android:text="RESEND OTP"
         android:textSize="18sp"
-        app:layout_constraintEnd_toEndOf="@+id/fgpSmsOtpEditTxt"
+        app:layout_constraintEnd_toEndOf="@+id/fgpConfirmPassEditTxt"
         app:layout_constraintHorizontal_bias="0.057"
-        app:layout_constraintStart_toStartOf="@+id/fgpSmsOtpEditTxt"
-        app:layout_constraintTop_toBottomOf="@+id/fgpSmsOtpEditTxt" />
+        app:layout_constraintStart_toStartOf="@+id/fgpConfirmPassEditTxt"
+        app:layout_constraintTop_toBottomOf="@+id/fgpConfirmPassEditTxt" />
 
     <TextView
         android:id="@+id/fgpSmsOtpTimer"
@@ -82,20 +82,20 @@
         android:text="30"
         android:textColor="#E83A3A"
         android:textSize="18sp"
-        app:layout_constraintEnd_toEndOf="@+id/fgpSmsOtpEditTxt"
+        app:layout_constraintEnd_toEndOf="@+id/fgpConfirmPassEditTxt"
         app:layout_constraintHorizontal_bias="0.975"
-        app:layout_constraintStart_toStartOf="@+id/fgpSmsOtpEditTxt"
-        app:layout_constraintTop_toBottomOf="@+id/fgpSmsOtpEditTxt" />
+        app:layout_constraintStart_toStartOf="@+id/fgpConfirmPassEditTxt"
+        app:layout_constraintTop_toBottomOf="@+id/fgpConfirmPassEditTxt" />
 
     <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/fgpSubmitOtpBtn"
+        android:id="@+id/fgpSubmitBtn"
         android:layout_width="130dp"
         android:layout_height="60dp"
         android:layout_marginTop="76dp"
         android:layout_marginEnd="36dp"
         android:text="SUBMIT"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fgpSmsOtpEditTxt" />
+        app:layout_constraintTop_toBottomOf="@+id/fgpConfirmPassEditTxt" />
 
     <TextView
         android:id="@+id/textView3"

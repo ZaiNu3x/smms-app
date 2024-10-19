@@ -22,15 +22,13 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 
 import group.intelliboys.smms.R;
 import group.intelliboys.smms.configs.CustomOkHttpClient;
+import group.intelliboys.smms.configs.NetworkConfig;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -41,6 +39,7 @@ public class SearchAccountFragment extends Fragment {
     private EditText searchAccountEditTxt;
     private Button searchAccountBtn;
     private OkHttpClient okHttpClient;
+    private String ipAddress;
 
     @SuppressLint("MissingInflatedId")
     @Nullable
@@ -50,6 +49,10 @@ public class SearchAccountFragment extends Fragment {
         searchAccountEditTxt = view.findViewById(R.id.searchAccountEditTxt);
         searchAccountBtn = view.findViewById(R.id.searchAccountBtn);
         okHttpClient = CustomOkHttpClient.getOkHttpClient(requireContext());
+
+        if (NetworkConfig.getInstance().isNetworkActive()) {
+            ipAddress = NetworkConfig.getInstance().getServerIpAddress();
+        }
 
         searchAccountEditTxt.addTextChangedListener(new TextWatcher() {
             private final Handler handler = new Handler(Looper.getMainLooper());
@@ -101,7 +104,7 @@ public class SearchAccountFragment extends Fragment {
     }
 
     public void searchAccount(String email) {
-        final String URL = "https://192.168.1.254:443/forgot-password/search-account/" + email;
+        final String URL = ipAddress + "/forgot-password/search-account/" + email;
 
         Request request = new Request.Builder()
                 .get()
@@ -126,7 +129,7 @@ public class SearchAccountFragment extends Fragment {
                     Bundle bundle = new Bundle();
                     bundle.putString("id", id);
                     requireActivity().getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.forgotPasswordContainer, ForgotPasswordFragment.class, bundle)
+                            .replace(R.id.forgotPasswordContainer, ForgotPasswordVerificationFragment.class, bundle)
                             .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN).commit();
                 } else if (!(boolean) map.get("isExists")) {
                     @SuppressLint("UseCompatLoadingForDrawables")

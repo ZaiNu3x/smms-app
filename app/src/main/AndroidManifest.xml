@@ -48,8 +48,6 @@
         <activity android:name=".activities.SignInVerificationActivity" />
         <activity android:name=".activities.SignUpProfileActivity" />
         <activity android:name=".activities.SignUpVerificationActivity" />
-        <activity android:name=".fragments.NextActivity"/>
-        <activity android:name=".fragments.ClubCreationActivity"/>
         <activity android:name=".activities.ForgotPasswordActivity" />
         <activity android:name=".fragments.Clubinfo"/>
         <activity android:name=".fragments.CreateClub"/>

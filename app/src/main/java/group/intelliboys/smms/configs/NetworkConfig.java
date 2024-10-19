@@ -73,7 +73,7 @@ public class NetworkConfig {
                         (ipAddress >> 16 & 0xff),
                         (ipAddress >> 24 & 0xff)).split("\\.");
 
-                return "https://192.168." + ipSubParts[2] + ".253:443";
+                return "https://192.168." + ipSubParts[2] + ".254:443";
             } else return null;
         } else return deviceIpAddress;
     }

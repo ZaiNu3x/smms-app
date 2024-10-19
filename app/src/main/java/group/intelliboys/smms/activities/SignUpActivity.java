@@ -205,8 +205,8 @@ public class SignUpActivity extends AppCompatActivity {
                         assert drawable != null;
                         drawable.setBounds(0, 0, 45, 45);
 
-                        passwordEditTxt.setError("INVALID PASSWOD! \n" +
-                                "Password Must Constains; \n" +
+                        passwordEditTxt.setError("INVALID PASSWORD! \n" +
+                                "Password Must Contains; \n" +
                                 "1. 8+ characters \n" +
                                 "2. Uppercase Letter \n" +
                                 "3. Lowercase Character \n" +
