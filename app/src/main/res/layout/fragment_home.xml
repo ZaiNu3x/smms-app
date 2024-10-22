@@ -11,6 +11,18 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/drivingBtn"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:src="@drawable/car_icon"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.984"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/navigateBtn"
+        app:layout_constraintVertical_bias="0.041" />
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/navigateContainer"
         android:layout_width="382dp"
@@ -92,5 +104,19 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/show_location_btn"
         app:layout_constraintVertical_bias="0.033" />
+
+    <Button
+        android:id="@+id/startDrivingBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="START DRIVING"
+        android:textSize="18sp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.496"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/navigateContainer"
+        app:layout_constraintVertical_bias="0.947" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

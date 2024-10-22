@@ -19,8 +19,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.Button;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
@@ -60,6 +62,8 @@ public class HomeFragment extends Fragment {
     private CircleImageView showMyLocationBtn;
     private CircleImageView navContainerBtn;
     private ConstraintLayout navContainer;
+    private Button startDrivingBtn;
+    private CircleImageView drivingBtn;
     private Marker markerA;
     private Marker markerB;
     private Marker myLocation;
@@ -69,7 +73,7 @@ public class HomeFragment extends Fragment {
     private LocationCallback locationCallback;
     private static final int LOCATION_REQUEST_CODE = 1;
 
-    @SuppressLint("ClickableViewAccessibility")
+    @SuppressLint({"ClickableViewAccessibility", "MissingInflatedId"})
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -83,7 +87,8 @@ public class HomeFragment extends Fragment {
         showMyLocationBtn = view.findViewById(R.id.show_location_btn);
         navContainerBtn = view.findViewById(R.id.navigateBtn);
         navContainer = view.findViewById(R.id.navigateContainer);
-
+        startDrivingBtn = view.findViewById(R.id.startDrivingBtn);
+        drivingBtn = view.findViewById(R.id.drivingBtn);
         navContainer.setVisibility(View.INVISIBLE);
         navContainer.setAlpha(0f);
 
@@ -337,6 +342,7 @@ public class HomeFragment extends Fragment {
                 runnable = () -> {
                     if (value.length() == 0) {
                         deleteMarkerA();
+                        showStartDrivingButton();
                     } else {
                         List<SearchedPlace> searchedPlaces = searchedPlaceService
                                 .getSearchedPlaces(value.toString());
@@ -362,6 +368,7 @@ public class HomeFragment extends Fragment {
             double latitude = selectedPlace.getLatitude();
             double longitude = selectedPlace.getLongitude();
             setMarkerA(new GeoPoint(latitude, longitude));
+            showStartDrivingButton();
         });
 
         pointB.setOnLongClickListener(v -> {
@@ -386,6 +393,7 @@ public class HomeFragment extends Fragment {
             double latitude = selectedPlace.getLatitude();
             double longitude = selectedPlace.getLongitude();
             setMarkerB(new GeoPoint(latitude, longitude));
+            showStartDrivingButton();
         });
 
         pointB.addTextChangedListener(new TextWatcher() {
@@ -410,6 +418,7 @@ public class HomeFragment extends Fragment {
                 runnable = () -> {
                     if (value.length() == 0) {
                         deleteMarkerB();
+                        showStartDrivingButton();
                     } else {
                         List<SearchedPlace> searchedPlaces = searchedPlaceService
                                 .getSearchedPlaces(value.toString());
@@ -422,6 +431,34 @@ public class HomeFragment extends Fragment {
 
                 handler.postDelayed(runnable, DELAY);
             }
+        });
+
+        drivingBtn.setOnClickListener(v -> {
+            new AlertDialog.Builder(requireActivity())
+                    .setTitle("ENTER DRIVING MODE?")
+                    .setMessage("Are you sure to enter driving mode?")
+                    .setPositiveButton(android.R.string.yes, (dialogInterface, i) -> {
+                        requireActivity().getSupportFragmentManager().beginTransaction()
+                                .replace(R.id.fragment_container, DrivingModeFragment.class, null).commit();
+                    })
+                    .setNegativeButton(android.R.string.no, ((dialogInterface, i) -> {
+                        // CODE
+                    }))
+                    .show();
+        });
+
+        startDrivingBtn.setOnClickListener(v -> {
+            new AlertDialog.Builder(requireActivity())
+                    .setTitle("ENTER DRIVING MODE?")
+                    .setMessage("Are you sure to enter driving mode?")
+                    .setPositiveButton(android.R.string.yes, (dialogInterface, i) -> {
+                        requireActivity().getSupportFragmentManager().beginTransaction()
+                                .replace(R.id.fragment_container, DrivingModeFragment.class, null).commit();
+                    })
+                    .setNegativeButton(android.R.string.no, ((dialogInterface, i) -> {
+                        // CODE
+                    }))
+                    .show();
         });
 
         return view;
@@ -487,6 +524,14 @@ public class HomeFragment extends Fragment {
         viewModel.setPointBValue(null);
         viewModel.getMarkerB().setLatitude(0d);
         viewModel.getMarkerB().setLongitude(0d);
+    }
+
+    public void showStartDrivingButton() {
+        if (markerA != null && markerB != null) {
+            startDrivingBtn.setVisibility(View.VISIBLE);
+        } else {
+            startDrivingBtn.setVisibility(View.INVISIBLE);
+        }
     }
 
     @Override

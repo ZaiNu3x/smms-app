@@ -14,6 +14,7 @@ import org.osmdroid.util.GeoPoint;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -38,10 +39,36 @@ public class OSRMService {
     }
 
     // GET ROUTE FROM POINT A TO POINT B
-    public void getRoute() {
+    public void getRoute(GeoPoint sp, GeoPoint ep) {
         String URL = "https://routing.openstreetmap.de/routed-car/route/v1/driving" +
-                "/121.04677955852198,14.5064614;121.05535712896216,14.4912287?" +
-                "overview=false&alternatives=true&steps=true";
+                "/" + sp.getLongitude() + "," + sp.getLatitude() + ";" + ep.getLongitude() + ","
+                + ep.getLatitude() + "?" + "overview=false&alternatives=true&steps=true";
+
+        Request request = new Request.Builder()
+                .get()
+                .url(URL)
+                .build();
+
+        httpClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Log.i("", Objects.requireNonNull(e.getMessage()));
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                assert response.body() != null;
+                String body = response.body().string();
+                ObjectMapper mapper = new ObjectMapper();
+
+                try {
+                    Map<?, ?> jsonResponse = mapper.readValue(body, Map.class);
+                    Log.i("", jsonResponse.toString());
+                } catch (Exception e) {
+                    Log.i("", Objects.requireNonNull(e.getMessage()));
+                }
+            }
+        });
     }
 
     // GET FULL ADDRESS NAME FROM ADDRESS KEYWORDS
@@ -106,6 +133,7 @@ public class OSRMService {
                             homeFragment.getPointA().setText(value);
                             viewModel.setPointAValue(value);
                             homeFragment.setMarkerA(geoPoint);
+                            homeFragment.showStartDrivingButton();
                         });
                     } else {
                         activity.runOnUiThread(() -> {
@@ -179,6 +207,7 @@ public class OSRMService {
                             homeFragment.getPointB().setText(value);
                             viewModel.setPointBValue(value);
                             homeFragment.setMarkerB(geoPoint);
+                            homeFragment.showStartDrivingButton();
                         });
                     } else {
                         activity.runOnUiThread(() -> {
