@@ -16,7 +16,6 @@ import java.util.List;
 import group.intelliboys.smms.R;
 
 public class AccidentHistoryFragment extends Fragment {
-
     private RecyclerView recyclerView;
     private AccidentHistoryAdapter adapter;
     private List<Accident> accidentList;

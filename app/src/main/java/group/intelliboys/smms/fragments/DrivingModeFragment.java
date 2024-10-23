@@ -38,7 +38,14 @@ import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 import group.intelliboys.smms.R;
+import group.intelliboys.smms.models.data.TravelHistory;
+import group.intelliboys.smms.models.data.User;
+import group.intelliboys.smms.services.Utils;
+import group.intelliboys.smms.services.local.LocalDbTravelHistoryService;
 
 public class DrivingModeFragment extends Fragment implements SensorEventListener {
     private MapView mapView;
@@ -51,6 +58,11 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
     private static final int SPEED_LIMIT = 45;
     private ImageButton circleButton, circleButton1;
     private Marker myLocation;
+    private LocalDbTravelHistoryService travelHistoryService;
+    private String travelUUID;
+    private TravelHistory travelHistory;
+    private User loggedInUser;
+    private Location lastLocation;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -73,6 +85,12 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
         sensorManager = (SensorManager) requireActivity().getSystemService(Context.SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
+        travelHistoryService = new LocalDbTravelHistoryService(requireActivity());
+
+        travelUUID = UUID.randomUUID().toString();
+        loggedInUser = Utils.getInstance().getLoggedInUser().getUserModel().getValue();
+        assert loggedInUser != null;
+        Log.i("", loggedInUser.toString());
 
         ActivityResultLauncher<String> requestPermissionLauncher =
                 registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
@@ -111,7 +129,23 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
                     Location location = locationResult.getLastLocation();
 
                     if (location != null) {
-                        Log.i("", "Coordinates: " + location);
+                        lastLocation = location;
+
+                        if (loggedInUser != null && travelHistory == null) {
+                            GeoPoint point = new GeoPoint(location);
+
+                            travelHistory = TravelHistory.builder()
+                                    .id(travelUUID)
+                                    .userId(loggedInUser.getEmail())
+                                    .startTime(LocalDateTime.now())
+                                    .endTime(null)
+                                    .startLocation(point)
+                                    .endLocation(null)
+                                    .createdAt(LocalDateTime.now())
+                                    .build();
+
+                            travelHistoryService.addTravelHistory(travelHistory);
+                        }
 
                         requireActivity().runOnUiThread(() -> {
                             GeoPoint geoPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
@@ -164,6 +198,7 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
     public void onDestroy() {
         super.onDestroy();
         mapView.onDetach();
+        fusedLocationClient.removeLocationUpdates(locationCallback);
 
         if (mediaPlayer != null) {
             mediaPlayer.release();
@@ -172,6 +207,10 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
         if (sensorManager != null) {
             sensorManager.unregisterListener(this);
         }
+
+        travelHistory.setEndLocation(new GeoPoint(lastLocation));
+        travelHistory.setEndTime(LocalDateTime.now());
+        travelHistoryService.updateTravelHistoryById(travelHistory);
     }
 
     @Override

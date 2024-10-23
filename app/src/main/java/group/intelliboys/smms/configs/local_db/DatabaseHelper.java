@@ -44,8 +44,44 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "bounding_box VARCHAR(255) NOT NULL" +
                 ")";
 
+        final String createTravelHistoryTable = "CREATE TABLE travel_history (" +
+                "id VARCHAR(36) PRIMARY KEY, " +
+                "user_id VARCHAR(64) NOT NULL, " +
+                "start_time TIMESTAMP NOT NULL, " +
+                "end_time TIMESTAMP," +
+                "start_location VARCHAR(255) NOT NULL, " +
+                "end_location VARCHAR(255)," +
+                "created_at TIMESTAMP NOT NULL," +
+                "FOREIGN KEY (user_id) REFERENCES user(email)" +
+                ")";
+
+        final String createStatusUpdateTable = "CREATE TABLE status_update (" +
+                "id VARCHAR(36) PRIMARY KEY, " +
+                "latitude VARCHAR(32) NOT NULL," +
+                "longitude VARCHAR(32) NOT NULL," +
+                "altitude VARCHAR(32) NOT NULL," +
+                "speed INT NOT NULL," +
+                "direction VARCHAR(32) NOT NULL," +
+                "date_create TIMESTAMP NOT NULL," +
+                "is_wearing_helmet BIT(1) NOT NULL," +
+                "fk_travel_history VARCHAR(36) NOT NULL," +
+                "FOREIGN KEY (fk_travel_history) REFERENCES travel_history(id)" +
+                ")";
+
+        final String createAccidentHistoryTable = "CREATE TABLE accident_history (" +
+                "id VARCHAR(36) PRIMARY KEY, " +
+                "front_camera_snap MEDIUMBLOB," +
+                "back_camera_snap MEDIUMBLOB," +
+                "message VARCHAR(255) NOT NULL," +
+                "fk_status_update VARCHAR(36) NOT NULL," +
+                "FOREIGN KEY (fk_status_update) REFERENCES status_update(id)" +
+                ")";
+
         sqLiteDatabase.execSQL(createUserTable);
         sqLiteDatabase.execSQL(createSearchedPlaceTable);
+        sqLiteDatabase.execSQL(createTravelHistoryTable);
+        sqLiteDatabase.execSQL(createStatusUpdateTable);
+        sqLiteDatabase.execSQL(createAccidentHistoryTable);
     }
 
     @Override
