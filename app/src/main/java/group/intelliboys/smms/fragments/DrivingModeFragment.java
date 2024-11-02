@@ -33,6 +33,7 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
 
+import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
@@ -41,10 +42,13 @@ import org.osmdroid.views.overlay.Marker;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import group.intelliboys.smms.BuildConfig;
 import group.intelliboys.smms.R;
+import group.intelliboys.smms.models.data.StatusUpdate;
 import group.intelliboys.smms.models.data.TravelHistory;
 import group.intelliboys.smms.models.data.User;
 import group.intelliboys.smms.services.Utils;
+import group.intelliboys.smms.services.local.LocalDbStatusUpdateService;
 import group.intelliboys.smms.services.local.LocalDbTravelHistoryService;
 
 public class DrivingModeFragment extends Fragment implements SensorEventListener {
@@ -59,13 +63,16 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
     private ImageButton circleButton, circleButton1;
     private Marker myLocation;
     private LocalDbTravelHistoryService travelHistoryService;
+    private LocalDbStatusUpdateService statusUpdateService;
     private String travelUUID;
     private TravelHistory travelHistory;
     private User loggedInUser;
     private Location lastLocation;
+    private float corneringAngle;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        Configuration.getInstance().setUserAgentValue(BuildConfig.APPLICATION_ID);
         View view = inflater.inflate(R.layout.fragment_driving_mode, container, false);
 
         mapView = view.findViewById(R.id.map_view);
@@ -86,6 +93,7 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
         travelHistoryService = new LocalDbTravelHistoryService(requireActivity());
+        statusUpdateService = new LocalDbStatusUpdateService(requireActivity());
 
         travelUUID = UUID.randomUUID().toString();
         loggedInUser = Utils.getInstance().getLoggedInUser().getUserModel().getValue();
@@ -129,22 +137,43 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
                     Location location = locationResult.getLastLocation();
 
                     if (location != null) {
+                        int speedInKmh = (int) (location.getSpeed() * 3.6f);
                         lastLocation = location;
 
                         if (loggedInUser != null && travelHistory == null) {
-                            GeoPoint point = new GeoPoint(location);
+                            String point = location.getLatitude() + "," + location.getLongitude()
+                                    + "," + location.getAltitude();
 
                             travelHistory = TravelHistory.builder()
                                     .id(travelUUID)
                                     .userId(loggedInUser.getEmail())
                                     .startTime(LocalDateTime.now())
                                     .endTime(null)
-                                    .startLocation(point)
-                                    .endLocation(null)
+                                    .startCoordinates(point)
+                                    .endCoordinates(null)
                                     .createdAt(LocalDateTime.now())
                                     .build();
 
                             travelHistoryService.addTravelHistory(travelHistory);
+                        }
+
+                        if (travelHistory != null && speedInKmh > 0) {
+                            String id = UUID.randomUUID().toString();
+
+                            StatusUpdate statusUpdate = StatusUpdate.builder()
+                                    .id(id)
+                                    .latitude(location.getLatitude())
+                                    .longitude(location.getLongitude())
+                                    .altitude(location.getAltitude())
+                                    .corneringAngle(corneringAngle)
+                                    .speed(speedInKmh)
+                                    .direction("WEST")
+                                    .createdAt(LocalDateTime.now())
+                                    .isWearingHelmet(false)
+                                    .travelHistoryId(travelHistory.getId())
+                                    .build();
+
+                            statusUpdateService.insertStatusUpdate(statusUpdate);
                         }
 
                         requireActivity().runOnUiThread(() -> {
@@ -165,8 +194,6 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
                                 }
                                 isAnimated = false;
                             }
-
-                            int speedInKmh = (int) (location.getSpeed() * 3.6f);
                             speedTextView.setText("Speed: " + speedInKmh + " Km/h");
 
                             if (speedInKmh > SPEED_LIMIT) {
@@ -208,7 +235,10 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
             sensorManager.unregisterListener(this);
         }
 
-        travelHistory.setEndLocation(new GeoPoint(lastLocation));
+        String point = lastLocation.getLatitude() + "," + lastLocation.getLongitude()
+                + "," + lastLocation.getAltitude();
+
+        travelHistory.setEndCoordinates(point);
         travelHistory.setEndTime(LocalDateTime.now());
         travelHistoryService.updateTravelHistoryById(travelHistory);
     }
@@ -237,14 +267,37 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             float x = event.values[0];
+            corneringAngle = x;
 
             if (x < -8) {
                 circleButton1.setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
+
+                statusTextView.setText(R.string.agrresive_cornering);
+                if (mediaPlayer != null) {
+                    if (!mediaPlayer.isPlaying()) {
+                        mediaPlayer.setLooping(true);
+                        mediaPlayer.start();
+                    }
+                }
             } else if (x > 8) {
                 circleButton.setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
+
+                statusTextView.setText(R.string.agrresive_cornering);
+                if (mediaPlayer != null) {
+                    if (!mediaPlayer.isPlaying()) {
+                        mediaPlayer.setLooping(true);
+                        mediaPlayer.start();
+                    }
+                }
             } else {
                 circleButton.setBackgroundColor(getResources().getColor(android.R.color.holo_blue_dark));
                 circleButton1.setBackgroundColor(getResources().getColor(android.R.color.holo_blue_dark));
+
+                statusTextView.setText(R.string.status_normal);
+                if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+                    mediaPlayer.setLooping(false);
+                    mediaPlayer.pause();
+                }
             }
         }
     }

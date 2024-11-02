@@ -6,13 +6,13 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 import android.widget.Toast;
-
-import org.osmdroid.util.GeoPoint;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import group.intelliboys.smms.configs.local_db.DatabaseHelper;
 import group.intelliboys.smms.models.data.TravelHistory;
@@ -29,6 +29,14 @@ public class LocalDbTravelHistoryService {
         this.activityRef = activity;
     }
 
+    /*
+        THIS BLOCK OF CODE WILL SET THE LOCATION NAME
+        IN THE TRAVEL HISTORY TABLE.
+     */
+    public void setLocationNames() {
+
+    }
+
     public void addTravelHistory(TravelHistory travelHistory) {
         SQLiteDatabase sqLiteDatabase = databaseHelper.getReadableDatabase();
         ContentValues cv = new ContentValues();
@@ -37,8 +45,8 @@ public class LocalDbTravelHistoryService {
         cv.put("user_id", travelHistory.getUserId());
         cv.put("start_time", String.valueOf(travelHistory.getStartTime()));
         cv.put("end_time", String.valueOf(travelHistory.getEndTime()));
-        cv.put("start_location", String.valueOf(travelHistory.getStartLocation()));
-        cv.put("end_location", String.valueOf(travelHistory.getEndLocation()));
+        cv.put("start_coordinates", String.valueOf(travelHistory.getStartCoordinates()));
+        cv.put("end_coordinates", String.valueOf(travelHistory.getEndCoordinates()));
         cv.put("created_at", String.valueOf(travelHistory.getCreatedAt()));
 
         long result = sqLiteDatabase.insert("travel_history", null, cv);
@@ -66,40 +74,23 @@ public class LocalDbTravelHistoryService {
 
         if (cursor.moveToFirst()) {
             do {
-                @SuppressLint("Range")
-                String startLocationInStr = cursor.getString(cursor.getColumnIndex("start_location"));
-                @SuppressLint("Range")
-                String endLocationInStr = cursor.getString(cursor.getColumnIndex("end_location"));
+                try {
+                    @SuppressLint("Range") TravelHistory travel = TravelHistory.builder()
+                            .id(cursor.getString(cursor.getColumnIndex("id")))
+                            .userId(cursor.getString(cursor.getColumnIndex("user_id")))
+                            .startTime(LocalDateTime.parse(cursor.getString(cursor.getColumnIndex("start_time"))))
+                            .startCoordinates(cursor.getString(cursor.getColumnIndex("start_coordinates")))
+                            .startLocationName(cursor.getString(cursor.getColumnIndex("start_location_name")))
+                            .endTime(LocalDateTime.parse(cursor.getString(cursor.getColumnIndex("end_time"))))
+                            .endCoordinates(cursor.getString(cursor.getColumnIndex("end_coordinates")))
+                            .endLocationName(cursor.getString(cursor.getColumnIndex("end_location_name")))
+                            .createdAt(LocalDateTime.parse(cursor.getString(cursor.getColumnIndex("created_at"))))
+                            .build();
 
-
-                GeoPoint startLocation = new GeoPoint(0f, 0f, 0f);
-                GeoPoint endLocation = new GeoPoint(0f, 0f, 0f);
-
-                if (startLocationInStr != null) {
-                    String[] strArr = startLocationInStr.split(",");
-                    startLocation.setLatitude(Double.parseDouble(strArr[0]));
-                    startLocation.setLongitude(Double.parseDouble(strArr[1]));
-                    startLocation.setAltitude(Double.parseDouble(strArr[2]));
+                    travelHistories.add(travel);
+                } catch (Exception e) {
+                    Log.i("", Objects.requireNonNull(e.getMessage()));
                 }
-
-                if (endLocationInStr != null) {
-                    String[] strArr = endLocationInStr.split(",");
-                    endLocation.setLatitude(Double.parseDouble(strArr[0]));
-                    endLocation.setLongitude(Double.parseDouble(strArr[1]));
-                    endLocation.setAltitude(Double.parseDouble(strArr[2]));
-                }
-
-                @SuppressLint("Range")
-                TravelHistory travelHistory = TravelHistory.builder()
-                        .id(cursor.getString(cursor.getColumnIndex("id")))
-                        .userId(cursor.getString(cursor.getColumnIndex("user_id")))
-                        .startTime(LocalDateTime.parse(cursor.getString(cursor.getColumnIndex("start_time"))))
-                        .endTime(LocalDateTime.parse(cursor.getString(cursor.getColumnIndex("end_time"))))
-                        .startLocation(startLocation)
-                        .endLocation(endLocation)
-                        .build();
-
-                travelHistories.add(travelHistory);
             }
             while (cursor.moveToNext());
         }
@@ -111,8 +102,8 @@ public class LocalDbTravelHistoryService {
         ContentValues cv = new ContentValues();
         cv.put("start_time", String.valueOf(travelHistory.getStartTime()));
         cv.put("end_time", String.valueOf(travelHistory.getEndTime()));
-        cv.put("start_location", String.valueOf(travelHistory.getStartLocation()));
-        cv.put("end_location", String.valueOf(travelHistory.getEndLocation()));
+        cv.put("start_coordinates", String.valueOf(travelHistory.getStartCoordinates()));
+        cv.put("end_coordinates", String.valueOf(travelHistory.getEndCoordinates()));
 
         int result = sqLiteDatabase.update("travel_history", cv, "id = ?",
                 new String[]{travelHistory.getId()});

@@ -49,10 +49,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "user_id VARCHAR(64) NOT NULL, " +
                 "start_time TIMESTAMP NOT NULL, " +
                 "end_time TIMESTAMP," +
-                "start_location VARCHAR(255) NOT NULL, " +
-                "end_location VARCHAR(255)," +
+                "start_coordinates VARCHAR(255) NOT NULL, " +
+                "start_location_name VARCHAR(255)," +
+                "end_location_name VARCHAR(255)," +
+                "end_coordinates VARCHAR(255)," +
                 "created_at TIMESTAMP NOT NULL," +
-                "FOREIGN KEY (user_id) REFERENCES user(email)" +
+                "FOREIGN KEY (user_id) REFERENCES user(email) ON DELETE CASCADE" +
                 ")";
 
         final String createStatusUpdateTable = "CREATE TABLE status_update (" +
@@ -60,12 +62,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "latitude VARCHAR(32) NOT NULL," +
                 "longitude VARCHAR(32) NOT NULL," +
                 "altitude VARCHAR(32) NOT NULL," +
+                "cornering_angle DECIMAL(3, 2) NOT NULL," +
                 "speed INT NOT NULL," +
                 "direction VARCHAR(32) NOT NULL," +
-                "date_create TIMESTAMP NOT NULL," +
+                "created_at TIMESTAMP NOT NULL," +
                 "is_wearing_helmet BIT(1) NOT NULL," +
                 "fk_travel_history VARCHAR(36) NOT NULL," +
-                "FOREIGN KEY (fk_travel_history) REFERENCES travel_history(id)" +
+                "FOREIGN KEY (fk_travel_history) REFERENCES travel_history(id) ON DELETE CASCADE" +
                 ")";
 
         final String createAccidentHistoryTable = "CREATE TABLE accident_history (" +
@@ -74,7 +77,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "back_camera_snap MEDIUMBLOB," +
                 "message VARCHAR(255) NOT NULL," +
                 "fk_status_update VARCHAR(36) NOT NULL," +
-                "FOREIGN KEY (fk_status_update) REFERENCES status_update(id)" +
+                "FOREIGN KEY (fk_status_update) REFERENCES status_update(id) ON DELETE CASCADE" +
                 ")";
 
         sqLiteDatabase.execSQL(createUserTable);

@@ -11,7 +11,6 @@ import java.util.List;
 import group.intelliboys.smms.R;
 
 public class AccidentHistoryAdapter extends RecyclerView.Adapter<AccidentHistoryAdapter.AccidentViewHolder> {
-
     private List<Accident> accidentList;
 
     public AccidentHistoryAdapter(List<Accident> accidentList) {
