@@ -51,6 +51,7 @@ import group.intelliboys.smms.R;
 import group.intelliboys.smms.models.data.SearchedPlace;
 import group.intelliboys.smms.models.view_models.HomeFragmentViewModel;
 import group.intelliboys.smms.services.local.LocalDbSearchedPlaceService;
+import group.intelliboys.smms.services.local.LocalDbUserService;
 import group.intelliboys.smms.services.remote.OSRMService;
 import lombok.Getter;
 

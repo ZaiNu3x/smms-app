@@ -3,6 +3,7 @@ package group.intelliboys.smms.models.data;
 import org.osmdroid.util.GeoPoint;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,4 +24,5 @@ public class TravelHistory {
     private String startLocationName;
     private String endLocationName;
     private LocalDateTime createdAt;
+    private List<StatusUpdate> statusUpdates;
 }

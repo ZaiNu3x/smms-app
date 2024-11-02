@@ -3,6 +3,7 @@ package group.intelliboys.smms.services.remote;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -11,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import group.intelliboys.smms.activities.HomeActivity;
 import group.intelliboys.smms.configs.CustomOkHttpClient;
@@ -51,7 +53,7 @@ public class RemoteUserService {
         okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-
+                Log.i("", Objects.requireNonNull(e.getMessage()));
             }
 
             @Override

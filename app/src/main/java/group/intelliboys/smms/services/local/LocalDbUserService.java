@@ -6,13 +6,16 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 import android.widget.Toast;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 import group.intelliboys.smms.configs.local_db.DatabaseHelper;
 import group.intelliboys.smms.models.data.User;
 import group.intelliboys.smms.services.Utils;
+import okhttp3.internal.Util;
 
 public class LocalDbUserService {
     private final DatabaseHelper databaseHelper;
@@ -114,6 +117,7 @@ public class LocalDbUserService {
         SQLiteDatabase sqLiteDatabase = databaseHelper.getReadableDatabase();
         ContentValues contentValues = new ContentValues();
 
+        contentValues.put("version", user.getVersion());
         contentValues.put("email", user.getEmail());
         contentValues.put("phone_number", user.getPhoneNumber());
         contentValues.put("last_name", user.getLastName());
@@ -137,6 +141,15 @@ public class LocalDbUserService {
                 //Toast.makeText(context, "User Insertion Failed!", Toast.LENGTH_LONG).show();
             });
         }
+    }
+
+    public void incrementUserVersion() {
+        String email = Objects.requireNonNull(Utils.getInstance().getLoggedInUser().getUserModel()
+                .getValue()).getEmail();
+
+        SQLiteDatabase sqLiteDatabase = databaseHelper.getReadableDatabase();
+        final String query = "UPDATE user SET version = version + 1 WHERE email = '" + email + "';";
+        sqLiteDatabase.execSQL(query);
     }
 
     @SuppressLint("Recycle")

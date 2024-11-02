@@ -2,6 +2,7 @@ package group.intelliboys.smms.models.data;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Observer;
 
 import lombok.AllArgsConstructor;
@@ -14,7 +15,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class User implements Serializable {
-    private static final long serialVersionUID = 1L;
+    private int version;
     private String email;
     private String phoneNumber;
     private String lastName;
@@ -26,4 +27,5 @@ public class User implements Serializable {
     private String address;
     private String authToken;
     private byte[] profilePic;
+    private List<TravelHistory> travelHistories;
 }

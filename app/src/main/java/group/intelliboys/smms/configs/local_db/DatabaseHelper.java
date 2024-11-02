@@ -23,6 +23,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         final String createUserTable = "CREATE TABLE user (" +
+                "version BIGINT NOT NULL, " +
                 "email VARCHAR(64) PRIMARY KEY, " +
                 "phone_number VARCHAR(13) NOT NULL, " +
                 "last_name VARCHAR(32) NOT NULL, " +
@@ -41,7 +42,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "display_name VARCHAR(255) PRIMARY KEY, " +
                 "latitude DOUBLE NOT NULL, " +
                 "longitude DOUBLE NOT NULL, " +
-                "bounding_box VARCHAR(255) NOT NULL" +
+                "bounding_box VARCHAR(255) NOT NULL, " +
+                "user_id VARCHAR(64) NOT NULL," +
+                "FOREIGN KEY (user_id) REFERENCES user (email) ON DELETE CASCADE" +
                 ")";
 
         final String createTravelHistoryTable = "CREATE TABLE travel_history (" +
@@ -63,7 +66,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "longitude VARCHAR(32) NOT NULL," +
                 "altitude VARCHAR(32) NOT NULL," +
                 "cornering_angle DECIMAL(3, 2) NOT NULL," +
-                "speed INT NOT NULL," +
+                "speed INTEGER NOT NULL," +
                 "direction VARCHAR(32) NOT NULL," +
                 "created_at TIMESTAMP NOT NULL," +
                 "is_wearing_helmet BIT(1) NOT NULL," +
