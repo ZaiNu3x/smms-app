@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class User implements Serializable {
-    private int version;
+    private long version;
     private String email;
     private String phoneNumber;
     private String lastName;

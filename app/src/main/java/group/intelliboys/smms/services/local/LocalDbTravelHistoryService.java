@@ -22,11 +22,13 @@ public class LocalDbTravelHistoryService {
     private final DatabaseHelper databaseHelper;
     private final Context context;
     private Activity activityRef;
+    private LocalDbUserService userService;
 
     public LocalDbTravelHistoryService(Activity activity) {
         this.databaseHelper = DatabaseHelper.getInstance();
         this.context = Utils.getInstance().getApplicationContext();
         this.activityRef = activity;
+        this.userService = new LocalDbUserService(activity);
     }
 
     /*
@@ -41,12 +43,26 @@ public class LocalDbTravelHistoryService {
         SQLiteDatabase sqLiteDatabase = databaseHelper.getReadableDatabase();
         ContentValues cv = new ContentValues();
 
+        StringBuilder startCoordinatesBuilder = new StringBuilder();
+        startCoordinatesBuilder.append(travelHistory.getStartLatitude())
+                .append(",").append(travelHistory.getStartLongitude()).append(",")
+                .append(travelHistory.getStartAltitude());
+
+        String startCoordinates = new String(startCoordinatesBuilder);
+
+        StringBuilder endCoordinatesBuilder = new StringBuilder();
+        endCoordinatesBuilder.append(travelHistory.getEndLatitude())
+                .append(",").append(travelHistory.getEndLongitude()).append(",")
+                .append(travelHistory.getEndAltitude());
+
+        String endCoordinates = new String(endCoordinatesBuilder);
+
         cv.put("id", travelHistory.getId());
         cv.put("user_id", travelHistory.getUserId());
         cv.put("start_time", String.valueOf(travelHistory.getStartTime()));
         cv.put("end_time", String.valueOf(travelHistory.getEndTime()));
-        cv.put("start_coordinates", String.valueOf(travelHistory.getStartCoordinates()));
-        cv.put("end_coordinates", String.valueOf(travelHistory.getEndCoordinates()));
+        cv.put("start_coordinates", startCoordinates);
+        cv.put("end_coordinates", endCoordinates);
         cv.put("created_at", String.valueOf(travelHistory.getCreatedAt()));
 
         long result = sqLiteDatabase.insert("travel_history", null, cv);
@@ -56,6 +72,8 @@ public class LocalDbTravelHistoryService {
             activityRef.runOnUiThread(() -> {
                 Toast.makeText(activityRef, "INSERTION SUCCESS!", Toast.LENGTH_LONG).show();
             });
+
+            userService.incrementUserVersion();
         } else {
             // CODE FOR FAILED INSERTION
             activityRef.runOnUiThread(() -> {
@@ -75,14 +93,23 @@ public class LocalDbTravelHistoryService {
         if (cursor.moveToFirst()) {
             do {
                 try {
+                    @SuppressLint("Range")
+                    String[] startCoordinates = cursor.getString(cursor.getColumnIndex("start_coordinates")).split(",");
+                    @SuppressLint("Range")
+                    String[] endCoordinates = cursor.getString(cursor.getColumnIndex("end_coordinates")).split(",");
+
                     @SuppressLint("Range") TravelHistory travel = TravelHistory.builder()
                             .id(cursor.getString(cursor.getColumnIndex("id")))
                             .userId(cursor.getString(cursor.getColumnIndex("user_id")))
                             .startTime(LocalDateTime.parse(cursor.getString(cursor.getColumnIndex("start_time"))))
-                            .startCoordinates(cursor.getString(cursor.getColumnIndex("start_coordinates")))
+                            .startLatitude(Float.parseFloat(startCoordinates[0]))
+                            .startLongitude(Float.parseFloat(startCoordinates[1]))
+                            .startAltitude(Float.parseFloat(startCoordinates[2]))
+                            .endLatitude(Float.parseFloat(endCoordinates[0]))
+                            .endLongitude(Float.parseFloat(endCoordinates[1]))
+                            .endAltitude(Float.parseFloat(endCoordinates[2]))
                             .startLocationName(cursor.getString(cursor.getColumnIndex("start_location_name")))
                             .endTime(LocalDateTime.parse(cursor.getString(cursor.getColumnIndex("end_time"))))
-                            .endCoordinates(cursor.getString(cursor.getColumnIndex("end_coordinates")))
                             .endLocationName(cursor.getString(cursor.getColumnIndex("end_location_name")))
                             .createdAt(LocalDateTime.parse(cursor.getString(cursor.getColumnIndex("created_at"))))
                             .build();
@@ -100,10 +127,25 @@ public class LocalDbTravelHistoryService {
     public void updateTravelHistoryById(TravelHistory travelHistory) {
         SQLiteDatabase sqLiteDatabase = databaseHelper.getReadableDatabase();
         ContentValues cv = new ContentValues();
+
+        StringBuilder startCoordinatesBuilder = new StringBuilder();
+        startCoordinatesBuilder.append(travelHistory.getStartLatitude())
+                .append(",").append(travelHistory.getStartLongitude()).append(",")
+                .append(travelHistory.getStartAltitude());
+
+        String startCoordinates = new String(startCoordinatesBuilder);
+
+        StringBuilder endCoordinatesBuilder = new StringBuilder();
+        endCoordinatesBuilder.append(travelHistory.getEndLatitude())
+                .append(",").append(travelHistory.getEndLongitude()).append(",")
+                .append(travelHistory.getEndAltitude());
+
+        String endCoordinates = new String(endCoordinatesBuilder);
+
         cv.put("start_time", String.valueOf(travelHistory.getStartTime()));
         cv.put("end_time", String.valueOf(travelHistory.getEndTime()));
-        cv.put("start_coordinates", String.valueOf(travelHistory.getStartCoordinates()));
-        cv.put("end_coordinates", String.valueOf(travelHistory.getEndCoordinates()));
+        cv.put("start_coordinates", startCoordinates);
+        cv.put("end_coordinates", endCoordinates);
 
         int result = sqLiteDatabase.update("travel_history", cv, "id = ?",
                 new String[]{travelHistory.getId()});
@@ -112,6 +154,8 @@ public class LocalDbTravelHistoryService {
             activityRef.runOnUiThread(() -> {
                 Toast.makeText(context, "Update Success!", Toast.LENGTH_LONG).show();
             });
+
+            userService.incrementUserVersion();
         } else {
             activityRef.runOnUiThread(() -> {
                 Toast.makeText(context, "Update Fail!", Toast.LENGTH_LONG).show();

@@ -11,6 +11,8 @@ import androidx.annotation.NonNull;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.util.Objects;
 
@@ -23,8 +25,10 @@ import group.intelliboys.smms.services.Utils;
 import group.intelliboys.smms.services.local.LocalDbUserService;
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class RemoteUserService {
@@ -92,6 +96,37 @@ public class RemoteUserService {
                             Toast.makeText(activityRef, "SOMETHING WENT WRONG!", Toast.LENGTH_LONG).show();
                         });
                     }
+                }
+            }
+        });
+    }
+
+    public void synchronizedData(UserCredential credential, JSONObject user) {
+        String ipAddress = NetworkConfig.getInstance().getServerIpAddress();
+        final String FETCH_USER_URL = ipAddress + "/user/sync";
+
+        final MediaType JSON = MediaType.get("application/json");
+        RequestBody requestBody = RequestBody.create(user.toString(), JSON);
+
+        Request request = new Request.Builder()
+                .url(FETCH_USER_URL)
+                .addHeader("Authorization", "Bearer " + credential.getToken())
+                .addHeader("Device-ID", credential.getDeviceId())
+                .addHeader("Device-Name", credential.getDeviceName())
+                .post(requestBody)
+                .build();
+
+        okHttpClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Log.i("", Objects.requireNonNull(e.getMessage()));
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (response.body() != null) {
+                    String body = response.body().string();
+                    ObjectMapper mapper = new ObjectMapper();
                 }
             }
         });

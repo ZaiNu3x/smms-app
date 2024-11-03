@@ -32,8 +32,15 @@ public class TravelHistoryAdapter extends RecyclerView.Adapter<TravelHistoryAdap
     public void onBindViewHolder(@NonNull TravelHistoryAdapter.TravelHistoryViewHolder holder, int position) {
         TravelHistory travelHistory = travelHistories.get(position);
 
+        StringBuilder startCoordinatesBuilder = new StringBuilder();
+        startCoordinatesBuilder.append(travelHistory.getStartLatitude())
+                .append(",").append(travelHistory.getStartLongitude()).append(",")
+                .append(travelHistory.getStartAltitude());
+
+        String startCoordinates = new String(startCoordinatesBuilder);
+
         // Set the data to the views
-        holder.locationTextView.setText(travelHistory.getStartCoordinates().toString());
+        holder.locationTextView.setText(startCoordinates);
         holder.timeTextView.setText(travelHistory.getStartTime().toString());
         holder.dateTextView.setText(String.valueOf(travelHistory.getStartTime().getDayOfMonth()));
         holder.mapImageView.setImageResource(R.drawable.ic_map);

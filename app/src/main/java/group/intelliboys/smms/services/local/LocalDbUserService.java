@@ -6,7 +6,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 import android.widget.Toast;
 
 import java.time.LocalDate;
@@ -15,7 +14,6 @@ import java.util.Objects;
 import group.intelliboys.smms.configs.local_db.DatabaseHelper;
 import group.intelliboys.smms.models.data.User;
 import group.intelliboys.smms.services.Utils;
-import okhttp3.internal.Util;
 
 public class LocalDbUserService {
     private final DatabaseHelper databaseHelper;
@@ -105,8 +103,9 @@ public class LocalDbUserService {
             activityRef.runOnUiThread(() -> {
                 Toast.makeText(context, "User Update Success!", Toast.LENGTH_LONG).show();
             });
-        }
-        else {
+
+            incrementUserVersion();
+        } else {
             activityRef.runOnUiThread(() -> {
                 Toast.makeText(context, "User Update Fail!", Toast.LENGTH_LONG).show();
             });
@@ -150,6 +149,18 @@ public class LocalDbUserService {
         SQLiteDatabase sqLiteDatabase = databaseHelper.getReadableDatabase();
         final String query = "UPDATE user SET version = version + 1 WHERE email = '" + email + "';";
         sqLiteDatabase.execSQL(query);
+    }
+
+    @SuppressLint("Range")
+    public long getUserAccountVersion(String email) {
+        SQLiteDatabase sqLiteDatabase = databaseHelper.getReadableDatabase();
+        final String query = "SELECT version FROM user WHERE email = ?";
+        @SuppressLint("Recycle")
+        Cursor cursor = sqLiteDatabase.rawQuery(query, new String[]{email});
+
+        if (cursor.moveToNext()) {
+            return cursor.getLong(cursor.getColumnIndex("version"));
+        } else return 0;
     }
 
     @SuppressLint("Recycle")

@@ -149,8 +149,9 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
                                     .userId(loggedInUser.getEmail())
                                     .startTime(LocalDateTime.now())
                                     .endTime(null)
-                                    .startCoordinates(point)
-                                    .endCoordinates(null)
+                                    .startLatitude((float) location.getLatitude())
+                                    .startLongitude((float) location.getLongitude())
+                                    .startAltitude((float) location.getAltitude())
                                     .createdAt(LocalDateTime.now())
                                     .build();
 
@@ -235,10 +236,10 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
             sensorManager.unregisterListener(this);
         }
 
-        String point = lastLocation.getLatitude() + "," + lastLocation.getLongitude()
-                + "," + lastLocation.getAltitude();
 
-        travelHistory.setEndCoordinates(point);
+        travelHistory.setEndLatitude((float) lastLocation.getLatitude());
+        travelHistory.setEndLongitude((float) lastLocation.getLongitude());
+        travelHistory.setEndAltitude((float) lastLocation.getAltitude());
         travelHistory.setEndTime(LocalDateTime.now());
         travelHistoryService.updateTravelHistoryById(travelHistory);
     }

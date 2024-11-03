@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -44,6 +45,7 @@ import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
 
 import java.util.List;
+import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import group.intelliboys.smms.BuildConfig;
@@ -51,7 +53,7 @@ import group.intelliboys.smms.R;
 import group.intelliboys.smms.models.data.SearchedPlace;
 import group.intelliboys.smms.models.view_models.HomeFragmentViewModel;
 import group.intelliboys.smms.services.local.LocalDbSearchedPlaceService;
-import group.intelliboys.smms.services.local.LocalDbUserService;
+import group.intelliboys.smms.services.remote.DataSynchronizationService;
 import group.intelliboys.smms.services.remote.OSRMService;
 import lombok.Getter;
 
@@ -266,6 +268,15 @@ public class HomeFragment extends Fragment {
                     public void onAnimationEnd(@NonNull Animator animator) {
                         navContainer.setVisibility(View.INVISIBLE);
                         viewModel.setNavigateContainerVisible(false);
+
+                        DataSynchronizationService service = new DataSynchronizationService(HomeFragment.this);
+
+                        try {
+                            service.synchronizeUserData();
+                        }
+                        catch (Exception e) {
+                            Log.i("", Objects.requireNonNull(e.getMessage()));
+                        }
                     }
 
                     @Override
