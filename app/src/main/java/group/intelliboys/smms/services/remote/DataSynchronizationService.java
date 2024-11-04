@@ -21,6 +21,7 @@ import group.intelliboys.smms.models.data.TravelHistory;
 import group.intelliboys.smms.models.data.User;
 import group.intelliboys.smms.models.forms.UserCredential;
 import group.intelliboys.smms.services.Utils;
+import group.intelliboys.smms.services.local.LocalDbStatusUpdateService;
 import group.intelliboys.smms.services.local.LocalDbTravelHistoryService;
 import group.intelliboys.smms.services.local.LocalDbUserService;
 import okhttp3.OkHttpClient;
@@ -59,6 +60,8 @@ public class DataSynchronizationService {
 
         List<TravelHistory> travelHistories = travelHistoryService.getTravelHistoriesByUser(user.getEmail());
         user.setTravelHistories(travelHistories);
+
+        LocalDbStatusUpdateService statusUpdateService = new LocalDbStatusUpdateService(fragment.requireActivity());
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());

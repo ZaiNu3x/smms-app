@@ -85,7 +85,7 @@ public class LocalDbUserService {
         ContentValues contentValues = new ContentValues();
 
         contentValues.put("email", user.getEmail());
-        //contentValues.put("phone_number", user.getPhoneNumber());
+        contentValues.put("phone_number", user.getPhoneNumber());
         contentValues.put("last_name", user.getLastName());
         contentValues.put("first_name", user.getFirstName());
         contentValues.put("middle_name", user.getMiddleName());
@@ -93,8 +93,8 @@ public class LocalDbUserService {
         contentValues.put("birth_date", String.valueOf(user.getBirthDate()));
         contentValues.put("age", user.getAge());
         contentValues.put("address", user.getAddress());
-        //contentValues.put("profile_pic", user.getProfilePic());
-        //contentValues.put("auth_token", user.getAuthToken());
+        contentValues.put("profile_pic", user.getProfilePic());
+        contentValues.put("auth_token", user.getAuthToken());
 
         int result = sqLiteDatabase.update("User", contentValues, "email = ?",
                 new String[]{user.getEmail()});

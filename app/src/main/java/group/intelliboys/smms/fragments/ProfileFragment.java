@@ -171,6 +171,7 @@ public class ProfileFragment extends Fragment {
         }
 
         User userInfo = Utils.getInstance().getLoggedInUser().getUserModel().getValue();
+        assert userInfo != null;
         userInfo.setLastName(lastName.getText().toString());
         userInfo.setFirstName(firstName.getText().toString());
         userInfo.setMiddleName(middleName.getText().toString());

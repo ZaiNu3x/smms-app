@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Objects;
 
 import group.intelliboys.smms.configs.local_db.DatabaseHelper;
+import group.intelliboys.smms.models.data.StatusUpdate;
 import group.intelliboys.smms.models.data.TravelHistory;
 import group.intelliboys.smms.services.Utils;
 
@@ -70,14 +71,14 @@ public class LocalDbTravelHistoryService {
         if (result != -1) {
             // CODE FOR SUCCESSFUL INSERTION
             activityRef.runOnUiThread(() -> {
-                Toast.makeText(activityRef, "INSERTION SUCCESS!", Toast.LENGTH_LONG).show();
+                //Toast.makeText(activityRef, "INSERTION SUCCESS!", Toast.LENGTH_LONG).show();
             });
 
             userService.incrementUserVersion();
         } else {
             // CODE FOR FAILED INSERTION
             activityRef.runOnUiThread(() -> {
-                Toast.makeText(activityRef, "INSERTION FAILED!", Toast.LENGTH_LONG).show();
+                //Toast.makeText(activityRef, "INSERTION FAILED!", Toast.LENGTH_LONG).show();
             });
         }
     }
@@ -89,6 +90,8 @@ public class LocalDbTravelHistoryService {
         @SuppressLint("Recycle")
         Cursor cursor = sqLiteDatabase.rawQuery(query, new String[]{email});
         ArrayList<TravelHistory> travelHistories = new ArrayList<>();
+        LocalDbStatusUpdateService statusUpdateService = new LocalDbStatusUpdateService(activityRef);
+        List<StatusUpdate> statusUpdates = statusUpdateService.getStatusUpdates();
 
         if (cursor.moveToFirst()) {
             do {
@@ -121,6 +124,7 @@ public class LocalDbTravelHistoryService {
             }
             while (cursor.moveToNext());
         }
+
         return travelHistories;
     }
 
@@ -152,13 +156,13 @@ public class LocalDbTravelHistoryService {
 
         if (result > 0) {
             activityRef.runOnUiThread(() -> {
-                Toast.makeText(context, "Update Success!", Toast.LENGTH_LONG).show();
+                //Toast.makeText(context, "Update Success!", Toast.LENGTH_LONG).show();
             });
 
             userService.incrementUserVersion();
         } else {
             activityRef.runOnUiThread(() -> {
-                Toast.makeText(context, "Update Fail!", Toast.LENGTH_LONG).show();
+                //Toast.makeText(context, "Update Fail!", Toast.LENGTH_LONG).show();
             });
         }
     }

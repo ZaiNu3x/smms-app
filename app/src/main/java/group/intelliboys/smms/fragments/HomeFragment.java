@@ -268,15 +268,6 @@ public class HomeFragment extends Fragment {
                     public void onAnimationEnd(@NonNull Animator animator) {
                         navContainer.setVisibility(View.INVISIBLE);
                         viewModel.setNavigateContainerVisible(false);
-
-                        DataSynchronizationService service = new DataSynchronizationService(HomeFragment.this);
-
-                        try {
-                            service.synchronizeUserData();
-                        }
-                        catch (Exception e) {
-                            Log.i("", Objects.requireNonNull(e.getMessage()));
-                        }
                     }
 
                     @Override

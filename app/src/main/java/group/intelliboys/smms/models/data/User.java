@@ -1,5 +1,7 @@
 package group.intelliboys.smms.models.data;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.List;
@@ -14,6 +16,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class User implements Serializable {
     private long version;
     private String email;

@@ -14,14 +14,17 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 
 import group.intelliboys.smms.activities.HomeActivity;
 import group.intelliboys.smms.configs.CustomOkHttpClient;
 import group.intelliboys.smms.configs.NetworkConfig;
+import group.intelliboys.smms.models.data.TravelHistory;
 import group.intelliboys.smms.models.data.User;
 import group.intelliboys.smms.models.forms.UserCredential;
 import group.intelliboys.smms.services.Utils;
+import group.intelliboys.smms.services.local.LocalDbTravelHistoryService;
 import group.intelliboys.smms.services.local.LocalDbUserService;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -126,7 +129,18 @@ public class RemoteUserService {
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 if (response.body() != null) {
                     String body = response.body().string();
-                    ObjectMapper mapper = new ObjectMapper();
+
+                    if (!body.isEmpty()) {
+                        ObjectMapper mapper = new ObjectMapper();
+                        mapper.registerModule(new JavaTimeModule());
+                        User fetchedUser = mapper.readValue(body, User.class);
+                        List<TravelHistory> travelHistories = fetchedUser.getTravelHistories();
+                        LocalDbTravelHistoryService travelHistoryService = new LocalDbTravelHistoryService(activityRef);
+                        travelHistories.forEach(travelHistory -> {
+                            travelHistory.setUserId(fetchedUser.getEmail());
+                            travelHistoryService.addTravelHistory(travelHistory);
+                        });
+                    }
                 }
             }
         });
