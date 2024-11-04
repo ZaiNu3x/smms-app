@@ -1,9 +1,5 @@
 package group.intelliboys.smms.models.data;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import org.osmdroid.util.GeoPoint;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -11,7 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 @Data
 @AllArgsConstructor

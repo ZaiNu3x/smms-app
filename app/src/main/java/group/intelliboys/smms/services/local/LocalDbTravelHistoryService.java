@@ -12,18 +12,16 @@ import android.widget.Toast;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import group.intelliboys.smms.configs.local_db.DatabaseHelper;
-import group.intelliboys.smms.models.data.StatusUpdate;
 import group.intelliboys.smms.models.data.TravelHistory;
 import group.intelliboys.smms.services.Utils;
 
 public class LocalDbTravelHistoryService {
     private final DatabaseHelper databaseHelper;
     private final Context context;
-    private Activity activityRef;
-    private LocalDbUserService userService;
+    private final Activity activityRef;
+    private final LocalDbUserService userService;
 
     public LocalDbTravelHistoryService(Activity activity) {
         this.databaseHelper = DatabaseHelper.getInstance();
@@ -32,138 +30,120 @@ public class LocalDbTravelHistoryService {
         this.userService = new LocalDbUserService(activity);
     }
 
-    /*
-        THIS BLOCK OF CODE WILL SET THE LOCATION NAME
-        IN THE TRAVEL HISTORY TABLE.
-     */
-    public void setLocationNames() {
-
-    }
-
     public void addTravelHistory(TravelHistory travelHistory) {
-        SQLiteDatabase sqLiteDatabase = databaseHelper.getReadableDatabase();
+        SQLiteDatabase sqLiteDatabase = databaseHelper.getWritableDatabase();
         ContentValues cv = new ContentValues();
-
-        StringBuilder startCoordinatesBuilder = new StringBuilder();
-        startCoordinatesBuilder.append(travelHistory.getStartLatitude())
-                .append(",").append(travelHistory.getStartLongitude()).append(",")
-                .append(travelHistory.getStartAltitude());
-
-        String startCoordinates = new String(startCoordinatesBuilder);
-
-        StringBuilder endCoordinatesBuilder = new StringBuilder();
-        endCoordinatesBuilder.append(travelHistory.getEndLatitude())
-                .append(",").append(travelHistory.getEndLongitude()).append(",")
-                .append(travelHistory.getEndAltitude());
-
-        String endCoordinates = new String(endCoordinatesBuilder);
 
         cv.put("id", travelHistory.getId());
         cv.put("user_id", travelHistory.getUserId());
-        cv.put("start_time", String.valueOf(travelHistory.getStartTime()));
-        cv.put("end_time", String.valueOf(travelHistory.getEndTime()));
-        cv.put("start_coordinates", startCoordinates);
-        cv.put("end_coordinates", endCoordinates);
-        cv.put("created_at", String.valueOf(travelHistory.getCreatedAt()));
+        cv.put("start_time", travelHistory.getStartTime().toString());
+        cv.put("end_time", travelHistory.getEndTime() != null ? travelHistory.getEndTime().toString() : null);
+        cv.put("start_coordinates", formatCoordinates(travelHistory.getStartLatitude(), travelHistory.getStartLongitude(), travelHistory.getStartAltitude()));
+        cv.put("end_coordinates", formatCoordinates(travelHistory.getEndLatitude(), travelHistory.getEndLongitude(), travelHistory.getEndAltitude()));
+        cv.put("created_at", travelHistory.getCreatedAt().toString());
 
         long result = sqLiteDatabase.insert("travel_history", null, cv);
-
-        if (result != -1) {
-            // CODE FOR SUCCESSFUL INSERTION
-            activityRef.runOnUiThread(() -> {
-                //Toast.makeText(activityRef, "INSERTION SUCCESS!", Toast.LENGTH_LONG).show();
-            });
-
-            userService.incrementUserVersion();
-        } else {
-            // CODE FOR FAILED INSERTION
-            activityRef.runOnUiThread(() -> {
-                //Toast.makeText(activityRef, "INSERTION FAILED!", Toast.LENGTH_LONG).show();
-            });
-        }
+        handleInsertResult(result);
+        sqLiteDatabase.close();
     }
 
     public List<TravelHistory> getTravelHistoriesByUser(String email) {
         SQLiteDatabase sqLiteDatabase = databaseHelper.getReadableDatabase();
         String query = "SELECT * FROM travel_history WHERE user_id = ?";
+        List<TravelHistory> travelHistories = new ArrayList<>();
 
-        @SuppressLint("Recycle")
-        Cursor cursor = sqLiteDatabase.rawQuery(query, new String[]{email});
-        ArrayList<TravelHistory> travelHistories = new ArrayList<>();
-        LocalDbStatusUpdateService statusUpdateService = new LocalDbStatusUpdateService(activityRef);
-        List<StatusUpdate> statusUpdates = statusUpdateService.getStatusUpdates();
-
-        if (cursor.moveToFirst()) {
-            do {
+        try (Cursor cursor = sqLiteDatabase.rawQuery(query, new String[]{email})) {
+            while (cursor.moveToNext()) {
                 try {
-                    @SuppressLint("Range")
-                    String[] startCoordinates = cursor.getString(cursor.getColumnIndex("start_coordinates")).split(",");
-                    @SuppressLint("Range")
-                    String[] endCoordinates = cursor.getString(cursor.getColumnIndex("end_coordinates")).split(",");
-
                     @SuppressLint("Range") TravelHistory travel = TravelHistory.builder()
                             .id(cursor.getString(cursor.getColumnIndex("id")))
                             .userId(cursor.getString(cursor.getColumnIndex("user_id")))
                             .startTime(LocalDateTime.parse(cursor.getString(cursor.getColumnIndex("start_time"))))
-                            .startLatitude(Float.parseFloat(startCoordinates[0]))
-                            .startLongitude(Float.parseFloat(startCoordinates[1]))
-                            .startAltitude(Float.parseFloat(startCoordinates[2]))
-                            .endLatitude(Float.parseFloat(endCoordinates[0]))
-                            .endLongitude(Float.parseFloat(endCoordinates[1]))
-                            .endAltitude(Float.parseFloat(endCoordinates[2]))
+                            .startLatitude(parseCoordinate(cursor.getString(cursor.getColumnIndex("start_coordinates")), 0))
+                            .startLongitude(parseCoordinate(cursor.getString(cursor.getColumnIndex("start_coordinates")), 1))
+                            .startAltitude(parseCoordinate(cursor.getString(cursor.getColumnIndex("start_coordinates")), 2))
+                            .endLatitude(parseCoordinate(cursor.getString(cursor.getColumnIndex("end_coordinates")), 0))
+                            .endLongitude(parseCoordinate(cursor.getString(cursor.getColumnIndex("end_coordinates")), 1))
+                            .endAltitude(parseCoordinate(cursor.getString(cursor.getColumnIndex("end_coordinates")), 2))
                             .startLocationName(cursor.getString(cursor.getColumnIndex("start_location_name")))
-                            .endTime(LocalDateTime.parse(cursor.getString(cursor.getColumnIndex("end_time"))))
+                            .endTime(cursor.isNull(cursor.getColumnIndex("end_time")) ? null : LocalDateTime.parse(cursor.getString(cursor.getColumnIndex("end_time"))))
                             .endLocationName(cursor.getString(cursor.getColumnIndex("end_location_name")))
                             .createdAt(LocalDateTime.parse(cursor.getString(cursor.getColumnIndex("created_at"))))
                             .build();
 
                     travelHistories.add(travel);
                 } catch (Exception e) {
-                    Log.i("", Objects.requireNonNull(e.getMessage()));
+                    Log.e("LocalDbTravelHistoryService", "Error parsing TravelHistory", e);
                 }
             }
-            while (cursor.moveToNext());
         }
-
+        sqLiteDatabase.close();
         return travelHistories;
     }
 
     public void updateTravelHistoryById(TravelHistory travelHistory) {
-        SQLiteDatabase sqLiteDatabase = databaseHelper.getReadableDatabase();
+        SQLiteDatabase sqLiteDatabase = databaseHelper.getWritableDatabase();
         ContentValues cv = new ContentValues();
 
-        StringBuilder startCoordinatesBuilder = new StringBuilder();
-        startCoordinatesBuilder.append(travelHistory.getStartLatitude())
-                .append(",").append(travelHistory.getStartLongitude()).append(",")
-                .append(travelHistory.getStartAltitude());
+        cv.put("start_time", travelHistory.getStartTime().toString());
+        cv.put("end_time", travelHistory.getEndTime() != null ? travelHistory.getEndTime().toString() : null);
+        cv.put("start_coordinates", formatCoordinates(travelHistory.getStartLatitude(), travelHistory.getStartLongitude(), travelHistory.getStartAltitude()));
+        cv.put("end_coordinates", formatCoordinates(travelHistory.getEndLatitude(), travelHistory.getEndLongitude(), travelHistory.getEndAltitude()));
 
-        String startCoordinates = new String(startCoordinatesBuilder);
+        int result = sqLiteDatabase.update("travel_history", cv, "id = ?", new String[]{travelHistory.getId()});
+        handleUpdateResult(result);
+        sqLiteDatabase.close();
+    }
 
-        StringBuilder endCoordinatesBuilder = new StringBuilder();
-        endCoordinatesBuilder.append(travelHistory.getEndLatitude())
-                .append(",").append(travelHistory.getEndLongitude()).append(",")
-                .append(travelHistory.getEndAltitude());
+    public void deleteTravelHistoryById(String travelHistoryId) {
+        SQLiteDatabase sqLiteDatabase = databaseHelper.getWritableDatabase();
+        int result = sqLiteDatabase.delete("travel_history", "id = ?", new String[]{travelHistoryId});
+        handleDeleteResult(result);
+        sqLiteDatabase.close();
+    }
 
-        String endCoordinates = new String(endCoordinatesBuilder);
+    private void handleInsertResult(long result) {
+        activityRef.runOnUiThread(() -> {
+            if (result != -1) {
+                Toast.makeText(activityRef, "Insertion Success!", Toast.LENGTH_LONG).show();
+                userService.incrementUserVersion();
+            } else {
+                Toast.makeText(activityRef, "Insertion Failed!", Toast.LENGTH_LONG).show();
+            }
+        });
+    }
 
-        cv.put("start_time", String.valueOf(travelHistory.getStartTime()));
-        cv.put("end_time", String.valueOf(travelHistory.getEndTime()));
-        cv.put("start_coordinates", startCoordinates);
-        cv.put("end_coordinates", endCoordinates);
+    private void handleUpdateResult(int result) {
+        activityRef.runOnUiThread(() -> {
+            if (result > 0) {
+                Toast.makeText(activityRef, "Update Success!", Toast.LENGTH_LONG).show();
+                userService.incrementUserVersion();
+            } else {
+                Toast.makeText(activityRef, "Update Failed!", Toast.LENGTH_LONG).show();
+            }
+        });
+    }
 
-        int result = sqLiteDatabase.update("travel_history", cv, "id = ?",
-                new String[]{travelHistory.getId()});
+    private void handleDeleteResult(int result) {
+        activityRef.runOnUiThread(() -> {
+            if (result > 0) {
+                Toast.makeText(activityRef, "Delete Success!", Toast.LENGTH_LONG).show();
+                userService.incrementUserVersion();
+            } else {
+                Toast.makeText(activityRef, "Delete Failed!", Toast.LENGTH_LONG).show();
+            }
+        });
+    }
 
-        if (result > 0) {
-            activityRef.runOnUiThread(() -> {
-                //Toast.makeText(context, "Update Success!", Toast.LENGTH_LONG).show();
-            });
+    private String formatCoordinates(float latitude, float longitude, float altitude) {
+        return latitude + "," + longitude + "," + altitude;
+    }
 
-            userService.incrementUserVersion();
-        } else {
-            activityRef.runOnUiThread(() -> {
-                //Toast.makeText(context, "Update Fail!", Toast.LENGTH_LONG).show();
-            });
+    private float parseCoordinate(String coordinates, int index) {
+        String[] parts = coordinates.split(",");
+        if (parts.length > index) {
+            return Float.parseFloat(parts[index]);
         }
+        return 0; // Default value if parsing fails
     }
 }

@@ -1,7 +1,6 @@
 package group.intelliboys.smms.services.remote;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 import android.widget.Toast;
@@ -15,7 +14,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Objects;
 
 import group.intelliboys.smms.activities.HomeActivity;
 import group.intelliboys.smms.configs.CustomOkHttpClient;
@@ -35,14 +33,18 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class RemoteUserService {
-    private Activity activityRef;
+    private final Activity activityRef;
     private final OkHttpClient okHttpClient;
-    private final Context context;
+    private final ObjectMapper objectMapper;
+    private final LocalDbUserService localDbUserService;
+    private final LocalDbTravelHistoryService travelHistoryService;
 
     public RemoteUserService(Activity activity) {
         this.activityRef = activity;
-        this.context = activity.getApplicationContext();
-        okHttpClient = CustomOkHttpClient.getOkHttpClient(context);
+        this.okHttpClient = CustomOkHttpClient.getOkHttpClient(activity.getApplicationContext());
+        this.objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+        this.localDbUserService = new LocalDbUserService(activityRef);
+        this.travelHistoryService = new LocalDbTravelHistoryService(activityRef);
     }
 
     public void fetchUserData(UserCredential credential) {
@@ -60,47 +62,49 @@ public class RemoteUserService {
         okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                Log.i("", Objects.requireNonNull(e.getMessage()));
+                Log.e("RemoteUserService", "Fetch user data failed: " + e.getMessage());
+                showToast("Network error. Please try again.");
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (response.code() == 200) {
-                    assert response.body() != null;
-                    String responseBody = response.body().string();
-                    ObjectMapper mapper = new ObjectMapper();
-                    mapper.registerModule(new JavaTimeModule());
-
-                    User user = mapper.readValue(responseBody, User.class);
-                    if (user != null) {
-                        user.setAuthToken(credential.getToken());
-                        LocalDbUserService userService = new LocalDbUserService(activityRef);
-
+                if (response.isSuccessful() && response.body() != null) {
+                    String body = response.body().string();
+                    if (!body.isEmpty()) {
                         try {
-                            userService.deleteUser(user.getEmail());
-                            userService.addUser(user);
-
-                            activityRef.runOnUiThread(() -> {
-                                Toast.makeText(activityRef, "AUTHENTICATION SUCCESS!", Toast.LENGTH_LONG).show();
-                                Utils.getInstance().setLoggedInUser(user);
-                                Intent intent = new Intent(activityRef, HomeActivity.class);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                activityRef.startActivity(intent);
-                            });
-
+                            User fetchedUser = objectMapper.readValue(body, User.class);
+                            handleUserFetchSuccess(fetchedUser, credential);
                         } catch (Exception e) {
-                            activityRef.runOnUiThread(() -> {
-                                Toast.makeText(activityRef, "SOMETHING WENT WRONG!", Toast.LENGTH_LONG).show();
-                            });
+                            Log.e("RemoteUserService", "Error parsing user data: " + e.getMessage());
+                            showToast("SOMETHING WENT WRONG!");
                         }
-
-                    } else {
-                        activityRef.runOnUiThread(() -> {
-                            Toast.makeText(activityRef, "SOMETHING WENT WRONG!", Toast.LENGTH_LONG).show();
-                        });
                     }
+                } else {
+                    showToast("SOMETHING WENT WRONG!");
                 }
             }
+        });
+    }
+
+    private void handleUserFetchSuccess(User fetchedUser, UserCredential credential) {
+        fetchedUser.setAuthToken(credential.getToken());
+        localDbUserService.deleteUser(fetchedUser.getEmail());
+        localDbUserService.addUser(fetchedUser);
+        updateTravelHistories(fetchedUser.getTravelHistories(), fetchedUser.getEmail());
+
+        activityRef.runOnUiThread(() -> {
+            showToast("AUTHENTICATION SUCCESS!");
+            Utils.getInstance().setLoggedInUser(fetchedUser);
+            Intent intent = new Intent(activityRef, HomeActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            activityRef.startActivity(intent);
+        });
+    }
+
+    private void updateTravelHistories(List<TravelHistory> travelHistories, String userId) {
+        travelHistories.forEach(travelHistory -> {
+            travelHistory.setUserId(userId);
+            travelHistoryService.addTravelHistory(travelHistory);
         });
     }
 
@@ -122,27 +126,27 @@ public class RemoteUserService {
         okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                Log.i("", Objects.requireNonNull(e.getMessage()));
+                Log.e("RemoteUserService", "Data synchronization failed: " + e.getMessage());
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (response.body() != null) {
+                if (response.isSuccessful() && response.body() != null) {
                     String body = response.body().string();
-
                     if (!body.isEmpty()) {
-                        ObjectMapper mapper = new ObjectMapper();
-                        mapper.registerModule(new JavaTimeModule());
-                        User fetchedUser = mapper.readValue(body, User.class);
-                        List<TravelHistory> travelHistories = fetchedUser.getTravelHistories();
-                        LocalDbTravelHistoryService travelHistoryService = new LocalDbTravelHistoryService(activityRef);
-                        travelHistories.forEach(travelHistory -> {
-                            travelHistory.setUserId(fetchedUser.getEmail());
-                            travelHistoryService.addTravelHistory(travelHistory);
-                        });
+                        try {
+                            User fetchedUser = objectMapper.readValue(body, User.class);
+                            updateTravelHistories(fetchedUser.getTravelHistories(), fetchedUser.getEmail());
+                        } catch (Exception e) {
+                            Log.e("RemoteUserService", "Error parsing sync data: " + e.getMessage());
+                        }
                     }
                 }
             }
         });
+    }
+
+    private void showToast(String message) {
+        activityRef.runOnUiThread(() -> Toast.makeText(activityRef, message, Toast.LENGTH_LONG).show());
     }
 }

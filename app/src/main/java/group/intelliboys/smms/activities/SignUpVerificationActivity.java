@@ -23,7 +23,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.Objects;
 
 import group.intelliboys.smms.R;
 import group.intelliboys.smms.configs.CustomOkHttpClient;
@@ -38,13 +37,8 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class SignUpVerificationActivity extends AppCompatActivity {
-    private Activity activityRef;
-    private EditText emailOtpEditTxt;
-    private EditText smsOtpEditTxt;
-    private TextView resendEmailOtpLbl;
-    private TextView resendSmsOtpLbl;
-    private TextView emailOtpTimer;
-    private TextView smsOtpTimer;
+    private EditText emailOtpEditTxt, smsOtpEditTxt;
+    private TextView resendEmailOtpLbl, resendSmsOtpLbl, emailOtpTimer, smsOtpTimer;
     private OkHttpClient okHttpClient;
     private String ipAddress;
 
@@ -52,227 +46,183 @@ public class SignUpVerificationActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_otp_verification);
-        activityRef = this;
 
-        ipAddress = NetworkConfig.getInstance().getServerIpAddress();
+        initializeViews();
+        setupOkHttpClient();
+        setupButtonListeners();
+
+        startResendTimers();
+    }
+
+    private void initializeViews() {
         emailOtpEditTxt = findViewById(R.id.fgpNewPassEditTxt);
         smsOtpEditTxt = findViewById(R.id.fgpConfirmPassEditTxt);
         resendEmailOtpLbl = findViewById(R.id.fgpResendEmailOtpLbl);
         resendSmsOtpLbl = findViewById(R.id.fgpResendSmsOtpLbl);
         emailOtpTimer = findViewById(R.id.fgpEmailOtpTimer);
         smsOtpTimer = findViewById(R.id.fgpSmsOtpTimer);
+    }
+
+    private void setupOkHttpClient() {
+        ipAddress = NetworkConfig.getInstance().getServerIpAddress();
         okHttpClient = CustomOkHttpClient.getOkHttpClient(getApplicationContext());
+    }
+
+    private void setupButtonListeners() {
         Button submitBtn = findViewById(R.id.fgpSubmitBtn);
-
-        resendEmailOtpTimer();
-        resendSmsOtpTimer();
-
-        resendEmailOtpLbl.setOnClickListener(lbl -> {
-            resendEmailOtpTimer();
-            resendEmailOtp();
-        });
-
-        resendSmsOtpLbl.setOnClickListener(lbl -> {
-            resendSmsOtpTimer();
-            resendSmsOtp();
-        });
-
-        submitBtn.setOnClickListener(btn -> {
-            String formId = getIntent().getStringExtra("formId");
-            String emailOtp = emailOtpEditTxt.getText().toString();
-            String smsOtp = smsOtpEditTxt.getText().toString();
-
-            JSONObject regForm = new JSONObject();
-
+        submitBtn.setOnClickListener(view -> {
             try {
-                regForm.put("formId", formId);
-                regForm.put("emailOtp", emailOtp);
-                regForm.put("smsOtp", smsOtp);
+                String formId = getIntent().getStringExtra("formId");
+                JSONObject regForm = createRegForm(formId);
+                doVerify(regForm);
             } catch (JSONException e) {
-                Log.i("", Objects.requireNonNull(e.getMessage()));
+                Log.e("SignUpVerificationActivity", "Error creating registration form", e);
             }
+        });
 
-            doVerify(regForm);
+        resendEmailOtpLbl.setOnClickListener(view -> {
+            resendEmailOtp();
+            startEmailOtpTimer();
+        });
+
+        resendSmsOtpLbl.setOnClickListener(view -> {
+            resendSmsOtp();
+            startSmsOtpTimer();
         });
     }
 
-    private void resendEmailOtpTimer() {
-        resendEmailOtpLbl.setVisibility(View.INVISIBLE);
-        emailOtpTimer.setVisibility(View.VISIBLE);
-
-        new CountDownTimer(30000, 1000) {
-
-            @SuppressLint("SetTextI18n")
-            @Override
-            public void onTick(long ms) {
-                emailOtpTimer.setText(Long.toString(ms / 1000));
-            }
-
-            @Override
-            public void onFinish() {
-                emailOtpTimer.setVisibility(View.INVISIBLE);
-                resendEmailOtpLbl.setVisibility(View.VISIBLE);
-            }
-        }.start();
+    private JSONObject createRegForm(String formId) throws JSONException {
+        JSONObject regForm = new JSONObject();
+        regForm.put("formId", formId);
+        regForm.put("emailOtp", emailOtpEditTxt.getText().toString());
+        regForm.put("smsOtp", smsOtpEditTxt.getText().toString());
+        return regForm;
     }
 
-    private void resendSmsOtpTimer() {
-        resendSmsOtpLbl.setVisibility(View.INVISIBLE);
-        smsOtpTimer.setVisibility(View.VISIBLE);
+    private void startResendTimers() {
+        startEmailOtpTimer();
+        startSmsOtpTimer();
+    }
+
+    private void startEmailOtpTimer() {
+        startTimer(emailOtpTimer, resendEmailOtpLbl);
+    }
+
+    private void startSmsOtpTimer() {
+        startTimer(smsOtpTimer, resendSmsOtpLbl);
+    }
+
+    private void startTimer(TextView timerView, TextView label) {
+        label.setVisibility(View.INVISIBLE);
+        timerView.setVisibility(View.VISIBLE);
 
         new CountDownTimer(30000, 1000) {
-
             @SuppressLint("SetTextI18n")
             @Override
             public void onTick(long ms) {
-                smsOtpTimer.setText(Long.toString(ms / 1000));
+                timerView.setText(String.valueOf(ms / 1000));
             }
 
             @Override
             public void onFinish() {
-                smsOtpTimer.setVisibility(View.INVISIBLE);
-                resendSmsOtpLbl.setVisibility(View.VISIBLE);
+                timerView.setVisibility(View.INVISIBLE);
+                label.setVisibility(View.VISIBLE);
             }
         }.start();
     }
 
     private void resendEmailOtp() {
-        String formId = getIntent().getStringExtra("formId");
-        final String RESEND_EMAIL_OTP_URL = ipAddress + "/register/resend/email-otp/" + formId;
-
-        Request request = new Request.Builder()
-                .get()
-                .url(RESEND_EMAIL_OTP_URL)
-                .build();
-
-        okHttpClient.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                runOnUiThread(() -> {
-                    Toast toast = new Toast(getApplicationContext());
-                    toast.setText("FAILED TO RESEND EMAIL OTP!");
-                    toast.setDuration(Toast.LENGTH_LONG);
-                    toast.show();
-                });
-            }
-
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                runOnUiThread(() -> {
-                    Toast toast = new Toast(getApplicationContext());
-                    toast.setText("NEW EMAIL OTP HAS RESENT!");
-                    toast.setDuration(Toast.LENGTH_LONG);
-                    toast.show();
-                });
-            }
-        });
+        sendOtpRequest("/register/resend/email-otp/", "FAILED TO RESEND EMAIL OTP!", "NEW EMAIL OTP HAS RESENT!");
     }
 
     private void resendSmsOtp() {
+        sendOtpRequest("/register/resend/sms-otp/", "FAILED TO RESEND SMS OTP!", "NEW SMS OTP HAS RESENT!");
+    }
+
+    private void sendOtpRequest(String endpoint, String failureMessage, String successMessage) {
         String formId = getIntent().getStringExtra("formId");
-        final String RESEND_SMS_OTP_URL = ipAddress + "/register/resend/sms-otp/" + formId;
+        String url = ipAddress + endpoint + formId;
 
-        Request request = new Request.Builder()
-                .get()
-                .url(RESEND_SMS_OTP_URL)
-                .build();
-
+        Request request = new Request.Builder().get().url(url).build();
         okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                runOnUiThread(() -> {
-                    Toast toast = new Toast(getApplicationContext());
-                    toast.setText("FAILED TO RESEND SMS OTP!");
-                    toast.setDuration(Toast.LENGTH_LONG);
-                    toast.show();
-                });
+                showToast(failureMessage);
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                runOnUiThread(() -> {
-                    Toast toast = new Toast(getApplicationContext());
-                    toast.setText("NEW SMS OTP HAS RESENT!");
-                    toast.setDuration(Toast.LENGTH_LONG);
-                    toast.show();
-                });
+                if (response.isSuccessful()) {
+                    showToast(successMessage);
+                }
             }
         });
     }
 
-    private void doVerify(JSONObject regForm) {
-        final String VERIFICATION_URL = ipAddress + "/register/verify";
-        final MediaType JSON = MediaType.get("application/json");
+    private void showToast(String message) {
+        runOnUiThread(() -> Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show());
+    }
 
+    private void doVerify(JSONObject regForm) {
+        String verificationUrl = ipAddress + "/register/verify";
+        MediaType JSON = MediaType.get("application/json");
         RequestBody requestBody = RequestBody.create(regForm.toString(), JSON);
 
-        Request request = new Request.Builder()
-                .url(VERIFICATION_URL)
-                .post(requestBody)
-                .build();
-
+        Request request = new Request.Builder().url(verificationUrl).post(requestBody).build();
         okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                Log.i("", Objects.requireNonNull(e.getMessage()));
+                Log.e("SignUpVerificationActivity", "Verification request failed", e);
             }
 
-            @SuppressLint("UseCompatLoadingForDrawables")
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                assert response.body() != null;
-                String responseBody = response.body().string();
-
-                ObjectMapper mapper = new ObjectMapper();
-                TwoFAVerificationResult verificationResult = mapper.readValue(responseBody, TwoFAVerificationResult.class);
-                Log.i("", "Result: " + verificationResult.toString());
-
-                if (verificationResult.isEmailOtpMatches()) {
-                    Drawable drawable = getDrawable(R.drawable.check);
-                    assert drawable != null;
-                    drawable.setBounds(0, 0, 45, 45);
-
-                    runOnUiThread(() -> {
-                        emailOtpEditTxt.setCompoundDrawables(null, null, drawable, null);
-                    });
-                } else {
-                    Drawable drawable = getDrawable(R.drawable.error);
-                    assert drawable != null;
-                    drawable.setBounds(0, 0, 45, 45);
-
-                    runOnUiThread(() -> {
-                        emailOtpEditTxt.setError("WRONG OTP!", drawable);
-                    });
-                }
-
-                if (verificationResult.isSmsOtpMatches()) {
-                    Drawable drawable = getDrawable(R.drawable.check);
-                    assert drawable != null;
-                    drawable.setBounds(0, 0, 45, 45);
-
-                    runOnUiThread(() -> {
-                        smsOtpEditTxt.setCompoundDrawables(null, null, drawable, null);
-                    });
-                } else {
-                    Drawable drawable = getDrawable(R.drawable.error);
-                    assert drawable != null;
-                    drawable.setBounds(0, 0, 45, 45);
-
-                    runOnUiThread(() -> {
-                        smsOtpEditTxt.setError("WRONG OTP!", drawable);
-                    });
-                }
-
-                if (verificationResult.getStatus().equals("VERIFICATION_SUCCESS")) {
-                    runOnUiThread(() -> {
-                        Toast.makeText(getApplicationContext(), "REGISTRATION SUCCESS!", Toast.LENGTH_SHORT).show();
-                    });
-
-                    Intent intent = new Intent(getApplicationContext(), SignInActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                }
+                handleVerificationResponse(response);
             }
         });
+    }
+
+    private void handleVerificationResponse(Response response) throws IOException {
+        if (!response.isSuccessful() || response.body() == null) {
+            Log.e("SignUpVerificationActivity", "Response was not successful or body is null");
+            return;
+        }
+
+        String responseBody = response.body().string();
+        ObjectMapper mapper = new ObjectMapper();
+        TwoFAVerificationResult verificationResult = mapper.readValue(responseBody, TwoFAVerificationResult.class);
+        Log.i("SignUpVerificationActivity", "Result: " + verificationResult);
+
+        updateOtpFields(verificationResult);
+        if ("VERIFICATION_SUCCESS".equals(verificationResult.getStatus())) {
+            showToast("REGISTRATION SUCCESS!");
+            navigateToSignIn();
+        }
+    }
+
+    private void updateOtpFields(TwoFAVerificationResult verificationResult) {
+        updateField(emailOtpEditTxt, verificationResult.isEmailOtpMatches(), "WRONG OTP!");
+        updateField(smsOtpEditTxt, verificationResult.isSmsOtpMatches(), "WRONG OTP!");
+    }
+
+    private void updateField(EditText otpField, boolean isMatch, String errorMessage) {
+        @SuppressLint("UseCompatLoadingForDrawables")
+        Drawable drawable = getDrawable(isMatch ? R.drawable.check : R.drawable.error);
+        if (drawable != null) {
+            drawable.setBounds(0, 0, 45, 45);
+            runOnUiThread(() -> {
+                if (isMatch) {
+                    otpField.setCompoundDrawables(null, null, drawable, null);
+                } else {
+                    otpField.setError(errorMessage, drawable);
+                }
+            });
+        }
+    }
+
+    private void navigateToSignIn() {
+        Intent intent = new Intent(getApplicationContext(), SignInActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
     }
 }

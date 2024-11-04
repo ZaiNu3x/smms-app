@@ -18,7 +18,7 @@ import group.intelliboys.smms.services.Utils;
 public class LocalDbUserService {
     private final DatabaseHelper databaseHelper;
     private final Context context;
-    private Activity activityRef;
+    private final Activity activityRef;
 
     public LocalDbUserService(Activity activity) {
         this.databaseHelper = DatabaseHelper.getInstance();
@@ -28,94 +28,92 @@ public class LocalDbUserService {
 
     @SuppressLint({"Recycle", "Range"})
     public User retrieveUser(String email) {
-        SQLiteDatabase sqLiteDatabase = databaseHelper.getReadableDatabase();
-        String query = "SELECT * FROM user WHERE email = ?";
-        Cursor cursor = sqLiteDatabase.rawQuery(query, new String[]{email});
-
-        if (cursor.moveToFirst()) {
-            do {
-                return User.builder()
-                        .email(cursor.getString(cursor.getColumnIndex("email")))
-                        .phoneNumber(cursor.getString(cursor.getColumnIndex("phone_number")))
-                        .lastName(cursor.getString(cursor.getColumnIndex("last_name")))
-                        .firstName(cursor.getString(cursor.getColumnIndex("first_name")))
-                        .middleName(cursor.getString(cursor.getColumnIndex("middle_name")))
-                        .sex(cursor.getString(cursor.getColumnIndex("sex")))
-                        .birthDate(LocalDate.parse(cursor.getString(cursor.getColumnIndex("last_name"))))
-                        .age((byte) cursor.getInt(cursor.getColumnIndex("age")))
-                        .address(cursor.getString(cursor.getColumnIndex("address")))
-                        .profilePic(cursor.getBlob(cursor.getColumnIndex("profile_pic")))
-                        .authToken(cursor.getString(cursor.getColumnIndex("auth_token")))
-                        .build();
-            }
-            while (cursor.moveToNext());
-        } else return null;
+        return queryUser("SELECT * FROM user WHERE email = ?", new String[]{email});
     }
 
     @SuppressLint("Range")
     public User retrieveLoggedInUser() {
-        SQLiteDatabase sqLiteDatabase = databaseHelper.getReadableDatabase();
-        String query = "SELECT * FROM user LIMIT 1";
-        @SuppressLint("Recycle")
-        Cursor cursor = sqLiteDatabase.rawQuery(query, null);
+        return queryUser("SELECT * FROM user LIMIT 1", null);
+    }
 
-        if (cursor.moveToFirst()) {
-            do {
-                return User.builder()
-                        .email(cursor.getString(cursor.getColumnIndex("email")))
-                        .phoneNumber(cursor.getString(cursor.getColumnIndex("phone_number")))
-                        .lastName(cursor.getString(cursor.getColumnIndex("last_name")))
-                        .firstName(cursor.getString(cursor.getColumnIndex("first_name")))
-                        .middleName(cursor.getString(cursor.getColumnIndex("middle_name")))
-                        .sex(cursor.getString(cursor.getColumnIndex("sex")))
-                        .birthDate(LocalDate.parse(cursor.getString(cursor.getColumnIndex("birth_date"))))
-                        .age((byte) cursor.getInt(cursor.getColumnIndex("age")))
-                        .address(cursor.getString(cursor.getColumnIndex("address")))
-                        .profilePic(cursor.getBlob(cursor.getColumnIndex("profile_pic")))
-                        .authToken(cursor.getString(cursor.getColumnIndex("auth_token")))
-                        .build();
+    @SuppressLint("Range")
+    private User queryUser(String query, String[] selectionArgs) {
+        SQLiteDatabase sqLiteDatabase = databaseHelper.getReadableDatabase();
+        try (Cursor cursor = sqLiteDatabase.rawQuery(query, selectionArgs)) {
+            if (cursor.moveToFirst()) {
+                return mapCursorToUser(cursor);
             }
-            while (cursor.moveToNext());
-        } else return null;
+        }
+        return null;
     }
 
     public void updateLoggedInUserInfo(User user) {
-        SQLiteDatabase sqLiteDatabase = databaseHelper.getReadableDatabase();
+        SQLiteDatabase sqLiteDatabase = databaseHelper.getWritableDatabase();
+        ContentValues contentValues = mapUserToContentValues(user);
 
-        ContentValues contentValues = new ContentValues();
-
-        contentValues.put("email", user.getEmail());
-        contentValues.put("phone_number", user.getPhoneNumber());
-        contentValues.put("last_name", user.getLastName());
-        contentValues.put("first_name", user.getFirstName());
-        contentValues.put("middle_name", user.getMiddleName());
-        contentValues.put("sex", user.getSex());
-        contentValues.put("birth_date", String.valueOf(user.getBirthDate()));
-        contentValues.put("age", user.getAge());
-        contentValues.put("address", user.getAddress());
-        contentValues.put("profile_pic", user.getProfilePic());
-        contentValues.put("auth_token", user.getAuthToken());
-
-        int result = sqLiteDatabase.update("User", contentValues, "email = ?",
-                new String[]{user.getEmail()});
+        int result = sqLiteDatabase.update("user", contentValues, "email = ?", new String[]{user.getEmail()});
+        showToast(result > 0 ? "User Update Success!" : "User Update Fail!");
 
         if (result > 0) {
-            activityRef.runOnUiThread(() -> {
-                Toast.makeText(context, "User Update Success!", Toast.LENGTH_LONG).show();
-            });
-
             incrementUserVersion();
-        } else {
-            activityRef.runOnUiThread(() -> {
-                Toast.makeText(context, "User Update Fail!", Toast.LENGTH_LONG).show();
-            });
         }
     }
 
     public void addUser(User user) {
-        SQLiteDatabase sqLiteDatabase = databaseHelper.getReadableDatabase();
-        ContentValues contentValues = new ContentValues();
+        SQLiteDatabase sqLiteDatabase = databaseHelper.getWritableDatabase();
+        ContentValues contentValues = mapUserToContentValues(user);
 
+        long result = sqLiteDatabase.insert("user", null, contentValues);
+        showToast(result != -1 ? "User Insertion Success!" : "User Insertion Failed!");
+    }
+
+    public void incrementUserVersion() {
+        String email = Objects.requireNonNull(Utils.getInstance().getLoggedInUser().getUserModel().getValue()).getEmail();
+        SQLiteDatabase sqLiteDatabase = databaseHelper.getWritableDatabase();
+        sqLiteDatabase.execSQL("UPDATE user SET version = version + 1 WHERE email = ?", new Object[]{email});
+    }
+
+    @SuppressLint("Range")
+    public long getUserAccountVersion(String email) {
+        SQLiteDatabase sqLiteDatabase = databaseHelper.getReadableDatabase();
+        try (Cursor cursor = sqLiteDatabase.rawQuery("SELECT version FROM user WHERE email = ?", new String[]{email})) {
+            if (cursor.moveToFirst()) {
+                return cursor.getLong(cursor.getColumnIndex("version"));
+            }
+        }
+        return 0;
+    }
+
+    @SuppressLint("Recycle")
+    public void deleteUser(String email) {
+        SQLiteDatabase sqLiteDatabase = databaseHelper.getWritableDatabase();
+        int rowsDeleted = sqLiteDatabase.delete("user", "email = ?", new String[]{email});
+        if (rowsDeleted > 0) {
+            showToast("User Deleted Successfully!");
+        } else {
+            showToast("User not found or delete failed.");
+        }
+    }
+
+    @SuppressLint("Range")
+    private User mapCursorToUser(Cursor cursor) {
+        return User.builder()
+                .email(cursor.getString(cursor.getColumnIndex("email")))
+                .phoneNumber(cursor.getString(cursor.getColumnIndex("phone_number")))
+                .lastName(cursor.getString(cursor.getColumnIndex("last_name")))
+                .firstName(cursor.getString(cursor.getColumnIndex("first_name")))
+                .middleName(cursor.getString(cursor.getColumnIndex("middle_name")))
+                .sex(cursor.getString(cursor.getColumnIndex("sex")))
+                .birthDate(LocalDate.parse(cursor.getString(cursor.getColumnIndex("birth_date"))))
+                .age((byte) cursor.getInt(cursor.getColumnIndex("age")))
+                .address(cursor.getString(cursor.getColumnIndex("address")))
+                .profilePic(cursor.getBlob(cursor.getColumnIndex("profile_pic")))
+                .authToken(cursor.getString(cursor.getColumnIndex("auth_token")))
+                .build();
+    }
+
+    private ContentValues mapUserToContentValues(User user) {
+        ContentValues contentValues = new ContentValues();
         contentValues.put("version", user.getVersion());
         contentValues.put("email", user.getEmail());
         contentValues.put("phone_number", user.getPhoneNumber());
@@ -128,44 +126,10 @@ public class LocalDbUserService {
         contentValues.put("address", user.getAddress());
         contentValues.put("profile_pic", user.getProfilePic());
         contentValues.put("auth_token", user.getAuthToken());
-
-        long result = sqLiteDatabase.insert("User", null, contentValues);
-
-        if (result != -1) {
-            activityRef.runOnUiThread(() -> {
-                //Toast.makeText(context, "User Insertion Success!", Toast.LENGTH_LONG).show();
-            });
-        } else {
-            activityRef.runOnUiThread(() -> {
-                //Toast.makeText(context, "User Insertion Failed!", Toast.LENGTH_LONG).show();
-            });
-        }
+        return contentValues;
     }
 
-    public void incrementUserVersion() {
-        String email = Objects.requireNonNull(Utils.getInstance().getLoggedInUser().getUserModel()
-                .getValue()).getEmail();
-
-        SQLiteDatabase sqLiteDatabase = databaseHelper.getReadableDatabase();
-        final String query = "UPDATE user SET version = version + 1 WHERE email = '" + email + "';";
-        sqLiteDatabase.execSQL(query);
-    }
-
-    @SuppressLint("Range")
-    public long getUserAccountVersion(String email) {
-        SQLiteDatabase sqLiteDatabase = databaseHelper.getReadableDatabase();
-        final String query = "SELECT version FROM user WHERE email = ?";
-        @SuppressLint("Recycle")
-        Cursor cursor = sqLiteDatabase.rawQuery(query, new String[]{email});
-
-        if (cursor.moveToNext()) {
-            return cursor.getLong(cursor.getColumnIndex("version"));
-        } else return 0;
-    }
-
-    @SuppressLint("Recycle")
-    public void deleteUser(String email) {
-        SQLiteDatabase sqLiteDatabase = databaseHelper.getReadableDatabase();
-        sqLiteDatabase.delete("User", "email = ?", new String[]{email});
+    private void showToast(String message) {
+        activityRef.runOnUiThread(() -> Toast.makeText(context, message, Toast.LENGTH_LONG).show());
     }
 }

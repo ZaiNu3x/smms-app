@@ -220,7 +220,6 @@ public class SignInActivity extends AppCompatActivity {
                 runOnUiThread(() -> {
                     Toast.makeText(getApplicationContext(), "SERVER ERROR!", Toast.LENGTH_LONG).show();
                     signinProgress.setVisibility(View.INVISIBLE);
-
                     loginButton.setEnabled(true);
                     signupButton.setEnabled(true);
                 });
@@ -230,6 +229,7 @@ public class SignInActivity extends AppCompatActivity {
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 ObjectMapper mapper = new ObjectMapper();
 
+                assert response.body() != null;
                 String body = response.body().string();
                 SignInResult signInResult = mapper.readValue(body, SignInResult.class);
 
