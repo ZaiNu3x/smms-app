@@ -6,12 +6,14 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import group.intelliboys.smms.configs.local_db.DatabaseHelper;
 import group.intelliboys.smms.models.data.SearchedPlace;
+import group.intelliboys.smms.models.data.User;
 import group.intelliboys.smms.services.Utils;
 
 public class LocalDbSearchedPlaceService {
@@ -26,24 +28,28 @@ public class LocalDbSearchedPlaceService {
     }
 
     public void insertSearchedPlace(SearchedPlace searchedPlace) {
+        User user = Utils.getInstance().getLoggedInUser().getUserModel().getValue();
+
         SQLiteDatabase sqLiteDatabase = databaseHelper.getReadableDatabase();
         ContentValues contentValues = new ContentValues();
-
         contentValues.put("name", searchedPlace.getName());
         contentValues.put("display_name", searchedPlace.getDisplayName());
         contentValues.put("latitude", searchedPlace.getLatitude());
         contentValues.put("longitude", searchedPlace.getLongitude());
         contentValues.put("bounding_box", searchedPlace.getBoundingBox());
 
+        assert user != null;
+        contentValues.put("user_id", user.getEmail());
+
         long result = sqLiteDatabase.insert("searched_place", null, contentValues);
 
         if (result != -1) {
             activityRef.runOnUiThread(() -> {
-                //Toast.makeText(context, "Inserted Successful!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "Inserted Successful!", Toast.LENGTH_SHORT).show();
             });
         } else {
             activityRef.runOnUiThread(() -> {
-                //Toast.makeText(context, "Insertion Failed!", Toast.LENGTH_LONG).show();
+                Toast.makeText(context, "Insertion Failed!", Toast.LENGTH_LONG).show();
             });
         }
     }

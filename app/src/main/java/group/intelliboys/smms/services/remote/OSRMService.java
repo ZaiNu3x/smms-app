@@ -10,11 +10,11 @@ import androidx.fragment.app.Fragment;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.json.JSONObject;
 import org.osmdroid.util.GeoPoint;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -59,10 +59,9 @@ public class OSRMService {
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 assert response.body() != null;
                 String body = response.body().string();
-                ObjectMapper mapper = new ObjectMapper();
 
                 try {
-                    Map<?, ?> jsonResponse = mapper.readValue(body, Map.class);
+                    JSONObject jsonResponse = new JSONObject(body);
                     Log.i("", jsonResponse.toString());
                 } catch (Exception e) {
                     Log.i("", Objects.requireNonNull(e.getMessage()));
@@ -134,6 +133,10 @@ public class OSRMService {
                             viewModel.setPointAValue(value);
                             homeFragment.setMarkerA(geoPoint);
                             homeFragment.showStartDrivingButton();
+
+                            if (homeFragment.getMarkerB() != null) {
+                                getRoute(geoPoint, homeFragment.getMarkerB().getPosition());
+                            }
                         });
                     } else {
                         activity.runOnUiThread(() -> {
@@ -208,6 +211,10 @@ public class OSRMService {
                             viewModel.setPointBValue(value);
                             homeFragment.setMarkerB(geoPoint);
                             homeFragment.showStartDrivingButton();
+
+                            if (homeFragment.getMarkerA() != null) {
+                                getRoute(geoPoint, homeFragment.getMarkerB().getPosition());
+                            }
                         });
                     } else {
                         activity.runOnUiThread(() -> {

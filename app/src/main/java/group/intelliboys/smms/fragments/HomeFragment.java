@@ -45,7 +45,6 @@ import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
 
 import java.util.List;
-import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import group.intelliboys.smms.BuildConfig;
@@ -53,7 +52,6 @@ import group.intelliboys.smms.R;
 import group.intelliboys.smms.models.data.SearchedPlace;
 import group.intelliboys.smms.models.view_models.HomeFragmentViewModel;
 import group.intelliboys.smms.services.local.LocalDbSearchedPlaceService;
-import group.intelliboys.smms.services.remote.DataSynchronizationService;
 import group.intelliboys.smms.services.remote.OSRMService;
 import lombok.Getter;
 
@@ -350,6 +348,8 @@ public class HomeFragment extends Fragment {
                         List<SearchedPlace> searchedPlaces = searchedPlaceService
                                 .getSearchedPlaces(value.toString());
 
+                        Log.i("", searchedPlaces.toString());
+
                         ArrayAdapter<SearchedPlace> adapter = new ArrayAdapter<>(requireActivity(),
                                 android.R.layout.simple_dropdown_item_1line, searchedPlaces);
                         pointA.setAdapter(adapter);
@@ -425,6 +425,8 @@ public class HomeFragment extends Fragment {
                     } else {
                         List<SearchedPlace> searchedPlaces = searchedPlaceService
                                 .getSearchedPlaces(value.toString());
+
+                        Log.i("", searchedPlaces.toString());
 
                         ArrayAdapter<SearchedPlace> adapter = new ArrayAdapter<>(requireActivity(),
                                 android.R.layout.simple_dropdown_item_1line, searchedPlaces);
