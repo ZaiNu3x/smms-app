@@ -2,6 +2,7 @@ package group.intelliboys.smms.services.remote;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.graphics.Color;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -9,12 +10,19 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.maps.android.PolyUtil;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
+import org.osmdroid.util.BoundingBox;
 import org.osmdroid.util.GeoPoint;
+import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.Polyline;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -23,6 +31,7 @@ import group.intelliboys.smms.fragments.HomeFragment;
 import group.intelliboys.smms.models.data.SearchedPlace;
 import group.intelliboys.smms.models.view_models.HomeFragmentViewModel;
 import group.intelliboys.smms.services.local.LocalDbSearchedPlaceService;
+import lombok.Data;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -32,6 +41,7 @@ import okhttp3.Response;
 public class OSRMService {
     private final OkHttpClient httpClient;
     private final Fragment fragment;
+    public static Polyline routePolyline = new Polyline();
 
     public OSRMService(Fragment fragment) {
         httpClient = new OkHttpClient();
@@ -40,9 +50,11 @@ public class OSRMService {
 
     // GET ROUTE FROM POINT A TO POINT B
     public void getRoute(GeoPoint sp, GeoPoint ep) {
-        String URL = "https://routing.openstreetmap.de/routed-car/route/v1/driving" +
-                "/" + sp.getLongitude() + "," + sp.getLatitude() + ";" + ep.getLongitude() + ","
-                + ep.getLatitude() + "?" + "overview=false&alternatives=true&steps=true";
+        String URL = "https://routing.openstreetmap.de/routed-car/route/v1/driving/" + sp.getLongitude() +
+                "," + sp.getLatitude() + ";" + ep.getLongitude() + "," + ep.getLatitude() +
+                "?overview=false&alternatives=true&steps=true";
+
+        Log.i("", URL);
 
         Request request = new Request.Builder()
                 .get()
@@ -61,13 +73,74 @@ public class OSRMService {
                 String body = response.body().string();
 
                 try {
-                    JSONObject jsonResponse = new JSONObject(body);
-                    Log.i("", jsonResponse.toString());
+                    JSONObject routeData = new JSONObject(body);
+                    JSONArray routes = routeData.getJSONArray("routes");
+                    JSONObject route = routes.getJSONObject(0);
+                    JSONArray legs = route.getJSONArray("legs");
+                    List<GeoPoint> geoPoints = new ArrayList<>();
+
+                    // Loop through each leg
+                    for (int i = 0; i < legs.length(); i++) {
+                        JSONObject leg = legs.getJSONObject(i);
+                        JSONArray steps = leg.getJSONArray("steps");
+
+                        // Loop through each step in the leg
+                        for (int j = 0; j < steps.length(); j++) {
+                            JSONObject step = steps.getJSONObject(j);
+                            String encodedGeometry = step.getString("geometry");
+
+                            // Decode the polyline geometry
+                            List<GeoPoint> points = decodePolyline(encodedGeometry);
+                            geoPoints.addAll(points);
+                        }
+                    }
+
+                    HomeFragment homeFragment = (HomeFragment) fragment;
+                    homeFragment.getMapView().getOverlays().remove(routePolyline);
+                    routePolyline.setPoints(geoPoints);
+                    routePolyline.setWidth(10);
+                    routePolyline.setColor(Color.rgb(12, 147, 237));
+                    homeFragment.getMapView().getOverlays().add(routePolyline);
+                    homeFragment.getMapView().invalidate();
+
+                    focusOnRoute(homeFragment.getMapView(), geoPoints);
                 } catch (Exception e) {
                     Log.i("", Objects.requireNonNull(e.getMessage()));
                 }
             }
         });
+    }
+
+    private void focusOnRoute(MapView mapView, List<GeoPoint> geoPoints) {
+        if (geoPoints.isEmpty()) return;
+
+        // Get the bounds of the route (min and max latitudes/longitudes)
+        double minLat = Double.MAX_VALUE, maxLat = -Double.MAX_VALUE;
+        double minLon = Double.MAX_VALUE, maxLon = -Double.MAX_VALUE;
+
+        for (GeoPoint point : geoPoints) {
+            minLat = Math.min(minLat, point.getLatitude());
+            maxLat = Math.max(maxLat, point.getLatitude());
+            minLon = Math.min(minLon, point.getLongitude());
+            maxLon = Math.max(maxLon, point.getLongitude());
+        }
+
+        // Create a bounding box from the min/max latitudes/longitudes
+        BoundingBox boundingBox = new BoundingBox(maxLat, maxLon, minLat, minLon);
+
+        // Adjust the map to zoom and center on the bounding box
+        mapView.zoomToBoundingBox(boundingBox, true);
+    }
+
+    private List<GeoPoint> decodePolyline(String encoded) {
+        List<GeoPoint> polyline = new ArrayList<>();
+        List<com.google.android.gms.maps.model.LatLng> decoded = PolyUtil.decode(encoded);
+
+        for (com.google.android.gms.maps.model.LatLng latLng : decoded) {
+            polyline.add(new GeoPoint(latLng.latitude, latLng.longitude));
+        }
+
+        return polyline;
     }
 
     // GET FULL ADDRESS NAME FROM ADDRESS KEYWORDS
@@ -135,7 +208,9 @@ public class OSRMService {
                             homeFragment.showStartDrivingButton();
 
                             if (homeFragment.getMarkerB() != null) {
-                                getRoute(geoPoint, homeFragment.getMarkerB().getPosition());
+                                GeoPoint pointA = homeFragment.getMarkerA().getPosition();
+                                GeoPoint pointB = homeFragment.getMarkerB().getPosition();
+                                getRoute(pointA, pointB);
                             }
                         });
                     } else {
@@ -213,7 +288,9 @@ public class OSRMService {
                             homeFragment.showStartDrivingButton();
 
                             if (homeFragment.getMarkerA() != null) {
-                                getRoute(geoPoint, homeFragment.getMarkerB().getPosition());
+                                GeoPoint pointA = homeFragment.getMarkerA().getPosition();
+                                GeoPoint pointB = homeFragment.getMarkerB().getPosition();
+                                getRoute(pointA, pointB);
                             }
                         });
                     } else {

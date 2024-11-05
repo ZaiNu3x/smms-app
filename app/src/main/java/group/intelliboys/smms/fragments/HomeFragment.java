@@ -342,6 +342,7 @@ public class HomeFragment extends Fragment {
 
                 runnable = () -> {
                     if (value.length() == 0) {
+                        mapView.getOverlays().remove(OSRMService.routePolyline);
                         deleteMarkerA();
                         showStartDrivingButton();
                     } else {
@@ -420,6 +421,7 @@ public class HomeFragment extends Fragment {
 
                 runnable = () -> {
                     if (value.length() == 0) {
+                        mapView.getOverlays().remove(OSRMService.routePolyline);
                         deleteMarkerB();
                         showStartDrivingButton();
                     } else {
