@@ -60,5 +60,6 @@
     <string name="speed_text">Speed: %1$.2f km/h</string>
     <string name="status_over_speeding">Status: Over Speeding!</string>
     <string name="status_normal">Status: Normal</string>
+    <string name="login">LOGIN</string>
 
 </resources>

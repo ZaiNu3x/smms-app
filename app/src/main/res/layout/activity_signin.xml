@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -9,16 +8,16 @@
         android:id="@+id/logo"
         android:layout_width="172dp"
         android:layout_height="169dp"
+        android:src="@drawable/user"
         app:layout_constraintBottom_toTopOf="@+id/imageView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.681"
-        android:src="@drawable/user" />
+        app:layout_constraintVertical_bias="0.681" />
 
     <EditText
-        android:id="@+id/emailEditTxt"
+        android:id="@+id/signInEmailField"
         android:layout_width="350dp"
         android:layout_height="70dp"
         android:layout_marginBottom="20dp"
@@ -31,13 +30,13 @@
         android:maxLength="32"
         android:paddingStart="18dp"
         android:paddingEnd="18dp"
-        app:layout_constraintBottom_toTopOf="@+id/passwordEditTxt"
+        app:layout_constraintBottom_toTopOf="@+id/signInPasswordField"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.504"
         app:layout_constraintStart_toStartOf="parent" />
 
     <EditText
-        android:id="@+id/passwordEditTxt"
+        android:id="@+id/signInPasswordField"
         android:layout_width="350dp"
         android:layout_height="70dp"
         android:layout_marginBottom="8dp"
@@ -50,13 +49,13 @@
         android:maxLength="16"
         android:paddingStart="18dp"
         android:paddingEnd="18dp"
-        app:layout_constraintBottom_toTopOf="@+id/forgotPasswordLbl"
+        app:layout_constraintBottom_toTopOf="@+id/signInForgotPasswordLbl"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.491"
         app:layout_constraintStart_toStartOf="parent" />
 
     <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/signupButton"
+        android:id="@+id/signUpButton"
         android:layout_width="350dp"
         android:layout_height="65dp"
         android:layout_marginBottom="12dp"
@@ -67,25 +66,25 @@
         android:text="SIGNUP"
         android:textColor="#FFFFFF"
         android:textSize="18sp"
-        app:layout_constraintBottom_toTopOf="@+id/signinProgress"
+        app:layout_constraintBottom_toTopOf="@+id/signInProgress"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.508"
         app:layout_constraintStart_toStartOf="parent" />
 
     <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/loginButton"
+        android:id="@+id/sigInButton"
         android:layout_width="350dp"
         android:layout_height="65dp"
         android:layout_marginBottom="12dp"
         android:background="@drawable/custom_button"
-        android:drawableRight="@drawable/ic_login"
+        android:drawableEnd="@drawable/ic_login"
         android:enabled="false"
         android:paddingStart="125dp"
         android:paddingEnd="125dp"
-        android:text="LOGIN"
+        android:text="@string/login"
         android:textColor="#FFFFFF"
         android:textSize="18sp"
-        app:layout_constraintBottom_toTopOf="@+id/signupButton"
+        app:layout_constraintBottom_toTopOf="@+id/signUpButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.508"
         app:layout_constraintStart_toStartOf="parent" />
@@ -95,31 +94,31 @@
         android:layout_width="152dp"
         android:layout_height="76dp"
         android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/emailEditTxt"
+        app:layout_constraintBottom_toTopOf="@+id/signInEmailField"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:srcCompat="@drawable/login" />
 
     <ProgressBar
-        android:id="@+id/signinProgress"
+        android:id="@+id/signInProgress"
         style="?android:attr/progressBarStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="40dp"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/signupButton"
-        app:layout_constraintStart_toStartOf="@+id/signupButton" />
+        app:layout_constraintEnd_toEndOf="@+id/signUpButton"
+        app:layout_constraintStart_toStartOf="@+id/signUpButton" />
 
     <TextView
-        android:id="@+id/forgotPasswordLbl"
+        android:id="@+id/signInForgotPasswordLbl"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="24dp"
         android:text="FORGOT PASSWORD"
         android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@+id/loginButton"
+        app:layout_constraintBottom_toTopOf="@+id/sigInButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.153"
         app:layout_constraintStart_toStartOf="parent" />

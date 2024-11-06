@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp"
-    tools:context=".fragments.AccidentHistoryFragment">
+    tools:context=".fragments.dashboard_menu.AccidentHistoryFragment">
 
     <!-- RecyclerView to display multiple accident cards -->
     <androidx.recyclerview.widget.RecyclerView

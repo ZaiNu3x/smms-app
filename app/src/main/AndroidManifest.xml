@@ -42,13 +42,13 @@
                 android:name="osmdroid.tileCache"
                 android:value="osmdroid" />
         </activity>
-        <activity android:name=".activities.SignInActivity" />
-        <activity android:name=".activities.SignUpActivity" />
-        <activity android:name=".activities.HomeActivity" />
-        <activity android:name=".activities.SignInVerificationActivity" />
-        <activity android:name=".activities.SignUpProfileActivity" />
-        <activity android:name=".activities.SignUpVerificationActivity" />
-        <activity android:name=".activities.ForgotPasswordActivity" />
+        <activity android:name=".activities.signin.SignInActivity" />
+        <activity android:name=".activities.signup.SignUpActivity" />
+        <activity android:name=".activities.dashboard.HomeActivity" />
+        <activity android:name=".activities.signin.SignInVerificationActivity" />
+        <activity android:name=".activities.signup.SignUpProfileActivity" />
+        <activity android:name=".activities.signup.SignUpVerificationActivity" />
+        <activity android:name=".activities.forgot_password.ForgotPasswordActivity" />
         <activity android:name=".fragments.Clubinfo"/>
         <activity android:name=".fragments.CreateClub"/>
     </application>

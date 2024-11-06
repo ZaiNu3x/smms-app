@@ -8,8 +8,6 @@ import android.net.NetworkCapabilities;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 
-import group.intelliboys.smms.services.Utils;
-
 public class NetworkConfig {
     private static NetworkConfig networkConfigInstance;
     private String deviceIpAddress;
@@ -31,39 +29,12 @@ public class NetworkConfig {
             WifiManager wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
             WifiInfo wifiInfo = wifiManager.getConnectionInfo();
             int ipAddress = wifiInfo.getIpAddress();
+
             return String.format("%d.%d.%d.%d",
                     (ipAddress & 0xff),
                     (ipAddress >> 8 & 0xff),
                     (ipAddress >> 16 & 0xff),
                     (ipAddress >> 24 & 0xff));
-        }
-        return null;
-    }
-
-    public String getDeviceIpAddress() {
-        if (deviceIpAddress == null) {
-            Context context = Utils.getInstance().getApplicationContext();
-            deviceIpAddress = fetchDeviceIpAddress(context);
-        }
-        return deviceIpAddress;
-    }
-
-    public boolean isNetworkActive() {
-        ConnectivityManager connectivityManager = (ConnectivityManager) Utils.getInstance().getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
-        Network network = connectivityManager.getActiveNetwork();
-        return network != null;
-    }
-
-    public String getServerIpAddress() {
-        if (deviceIpAddress == null) {
-            Context context = Utils.getInstance().getApplicationContext();
-            deviceIpAddress = fetchDeviceIpAddress(context);
-            if (deviceIpAddress == null) {
-                return null;
-            }
-        }
-
-        String[] ipSubParts = deviceIpAddress.split("\\.");
-        return "https://192.168." + ipSubParts[2] + ".254:443";
+        } else return null;
     }
 }

@@ -1,0 +1,16 @@
+package group.intelliboys.smms.activities.signup;
+
+import android.os.Bundle;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+
+import group.intelliboys.smms.R;
+
+public class SignUpProfileActivity extends AppCompatActivity {
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_signup_user_profile);
+    }
+}
