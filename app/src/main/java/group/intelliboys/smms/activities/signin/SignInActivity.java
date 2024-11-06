@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -21,6 +22,9 @@ import java.util.regex.Pattern;
 import group.intelliboys.smms.R;
 import group.intelliboys.smms.activities.forgot_password.ForgotPasswordActivity;
 import group.intelliboys.smms.activities.signup.SignUpActivity;
+import group.intelliboys.smms.configs.CustomOkHttpClient;
+import group.intelliboys.smms.configs.NetworkConfig;
+import okhttp3.OkHttpClient;
 
 public class SignInActivity extends AppCompatActivity {
     private EditText signInEmailField;
@@ -31,6 +35,10 @@ public class SignInActivity extends AppCompatActivity {
     private ProgressBar signInProgress;
 
     private boolean isEmailValid, isPasswordValid;
+
+    private final NetworkConfig networkConfig = NetworkConfig.getInstance();
+    private String serverIpAddress;
+    private OkHttpClient httpClient;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -124,7 +132,14 @@ public class SignInActivity extends AppCompatActivity {
 
         signInButton.setOnClickListener(v -> {
             // CODES FOR SIGNING IN INTO SYSTEM
+            serverIpAddress = networkConfig.getServerIpAddress(getApplicationContext());
 
+            if (httpClient == null) {
+                httpClient = CustomOkHttpClient.getOkHttpClient(getApplicationContext());
+            }
+
+            final String LOGIN_URL = serverIpAddress + "/login";
+            Log.i("", LOGIN_URL);
         });
 
         signUpButton.setOnClickListener(V -> {
