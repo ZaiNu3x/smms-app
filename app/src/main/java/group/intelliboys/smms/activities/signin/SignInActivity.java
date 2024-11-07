@@ -7,7 +7,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -20,7 +19,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,7 +29,6 @@ import group.intelliboys.smms.configs.DeviceSpecs;
 import group.intelliboys.smms.configs.NetworkConfig;
 import group.intelliboys.smms.utils.ServerAPIs;
 import lombok.Getter;
-import okhttp3.OkHttpClient;
 
 public class SignInActivity extends AppCompatActivity {
     @Getter
@@ -40,8 +37,13 @@ public class SignInActivity extends AppCompatActivity {
     @Getter
     private EditText signInPasswordField;
 
+    @Getter
     private TextView signInForgotPasswordLbl;
+
+    @Getter
     private Button signInButton;
+
+    @Getter
     private Button signUpButton;
 
     @Getter
@@ -50,8 +52,6 @@ public class SignInActivity extends AppCompatActivity {
     private boolean isEmailValid, isPasswordValid;
 
     private final NetworkConfig networkConfig = NetworkConfig.getInstance();
-    private String serverIpAddress;
-    private OkHttpClient httpClient;
     private ServerAPIs serverAPIs;
 
     @SuppressLint("MissingInflatedId")
@@ -144,6 +144,8 @@ public class SignInActivity extends AppCompatActivity {
         signInButton.setOnClickListener(v -> {
             // CODES FOR SIGNING IN INTO SYSTEM
             signInProgress.setVisibility(View.VISIBLE);
+            disableButtons();
+
             if (serverAPIs == null) {
                 serverAPIs = new ServerAPIs(this);
             }
@@ -157,10 +159,10 @@ public class SignInActivity extends AppCompatActivity {
                 loginCredential.put("password", password);
                 loginCredential.put("deviceId", DeviceSpecs.DEVICE_ID);
                 loginCredential.put("deviceName", DeviceSpecs.DEVICE_NAME);
-
                 serverAPIs.signIn(loginCredential);
             } catch (JSONException e) {
-                Log.i("", Objects.requireNonNull(e.getMessage()));
+                enableButtons();
+                signInProgress.setVisibility(View.INVISIBLE);
             }
         });
 
@@ -168,6 +170,18 @@ public class SignInActivity extends AppCompatActivity {
             Intent intent = new Intent(getApplicationContext(), SignUpActivity.class);
             startActivity(intent);
         });
+    }
+
+    public void disableButtons() {
+        signInButton.setEnabled(false);
+        signInForgotPasswordLbl.setEnabled(false);
+        signUpButton.setEnabled(false);
+    }
+
+    public void enableButtons() {
+        signInButton.setEnabled(true);
+        signInForgotPasswordLbl.setEnabled(true);
+        signUpButton.setEnabled(true);
     }
 
     private void isEmailAndPasswordAreValid() {

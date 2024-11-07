@@ -59,7 +59,8 @@ public class ServerAPIs {
                     @Override
                     public void onFailure(@NonNull Call call, @NonNull IOException e) {
                         activity.runOnUiThread(() -> {
-                            signInActivity.getSignInProgress().setVisibility(View.INVISIBLE);
+                            postSignIn(signInActivity);
+                            Commons.toastMessage(signInActivity, "Profile fetching failed!");
                         });
                     }
 
@@ -73,10 +74,11 @@ public class ServerAPIs {
                                     try {
                                         Map<?, ?> profileData = ObjectMapper.convertJsonToMapObject(body);
                                         User user = ObjectMapper.convertMapObjectToUser(profileData);
+                                        Log.i("", user.toString());
 
                                         // THIS CODE WILL BE EXECUTED AFTER USER PROFILE DATA SAVED INTO LOCAL DATABASE.
+                                        postSignIn(signInActivity);
                                         Commons.toastMessage(activity, "Authentication Success!");
-                                        signInActivity.getSignInProgress().setVisibility(View.INVISIBLE);
                                     } catch (JsonProcessingException e) {
                                         throw new RuntimeException(e);
                                     }
@@ -86,13 +88,15 @@ public class ServerAPIs {
                     }
                 });
             } else activity.runOnUiThread(() -> {
+                postSignIn(signInActivity);
                 Commons.toastMessage(activity, "No Internet Connection!");
-                signInActivity.getSignInProgress().setVisibility(View.INVISIBLE);
             });
         } else {
             activity.runOnUiThread(() -> {
                 Commons.toastMessage(activity, "Invalid signIn activity instance!");
             });
+
+            throw new RuntimeException();
         }
     }
 
@@ -117,8 +121,8 @@ public class ServerAPIs {
                         @Override
                         public void onFailure(@NonNull Call call, @NonNull IOException e) {
                             activity.runOnUiThread(() -> {
+                                postSignIn(signInActivity);
                                 Commons.toastMessage(activity, "Server Error!");
-                                signInActivity.getSignInProgress().setVisibility(View.INVISIBLE);
                             });
                         }
 
@@ -129,7 +133,6 @@ public class ServerAPIs {
 
                                 if (!responseBody.isEmpty()) {
                                     Map<?, ?> jsonResponse = ObjectMapper.convertJsonToMapObject(responseBody);
-
                                     String message = (String) jsonResponse.get("message");
 
                                     if (message != null) {
@@ -137,9 +140,9 @@ public class ServerAPIs {
                                             case "Email not found!":
                                                 // CODE FOR EMAIL NOT FOUND!
                                                 activity.runOnUiThread(() -> {
-                                                    Commons.toastMessage(activity, "Email not found!");
+                                                    postSignIn(signInActivity);
                                                     signInActivity.getSignInEmailField().setError("Email not found!");
-                                                    signInActivity.getSignInProgress().setVisibility(View.INVISIBLE);
+                                                    Commons.toastMessage(activity, "Email not found!");
                                                 });
                                                 break;
                                             case "Authentication Success!":
@@ -151,10 +154,13 @@ public class ServerAPIs {
                                             case "Wrong Password!":
                                                 // CODE FOR WRONG PASSWORD!
                                                 activity.runOnUiThread(() -> {
-                                                    Commons.toastMessage(activity, "Wrong Password!");
+                                                    postSignIn(signInActivity);
                                                     signInActivity.getSignInPasswordField().setError("Wrong Password!");
-                                                    signInActivity.getSignInProgress().setVisibility(View.INVISIBLE);
+                                                    Commons.toastMessage(activity, "Wrong Password!");
                                                 });
+                                                break;
+                                            case "Please Verify!":
+                                                // CODE FOR 2 FACTOR AUTHENTICATION
                                                 break;
                                         }
                                     }
@@ -164,19 +170,30 @@ public class ServerAPIs {
                     });
                 } catch (Exception e) {
                     activity.runOnUiThread(() -> {
+                        postSignIn(signInActivity);
                         Commons.toastMessage(activity, "Something went wrong!");
-                        ((SignInActivity) activity).getSignInPasswordField().setVisibility(View.INVISIBLE);
                     });
                 }
             } else activity.runOnUiThread(() -> {
+                postSignIn(signInActivity);
                 Commons.toastMessage(activity, "No Internet Connection!");
-                signInActivity.getSignInProgress().setVisibility(View.INVISIBLE);
             });
         } else {
             activity.runOnUiThread(() -> {
                 Commons.toastMessage(activity, "Invalid signIn activity instance!");
+                throw new RuntimeException();
             });
         }
+    }
+
+    public void preSignIn(SignInActivity signInActivity) {
+        signInActivity.disableButtons();
+        signInActivity.getSignInProgress().setVisibility(View.VISIBLE);
+    }
+
+    public void postSignIn(SignInActivity signInActivity) {
+        signInActivity.enableButtons();
+        signInActivity.getSignInProgress().setVisibility(View.INVISIBLE);
     }
     // ==================================== END OF USER SIGN IN ====================================
 }
