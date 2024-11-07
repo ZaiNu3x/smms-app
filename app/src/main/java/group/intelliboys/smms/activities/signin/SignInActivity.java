@@ -8,6 +8,7 @@ import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -16,22 +17,34 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import group.intelliboys.smms.R;
 import group.intelliboys.smms.activities.forgot_password.ForgotPasswordActivity;
 import group.intelliboys.smms.activities.signup.SignUpActivity;
-import group.intelliboys.smms.configs.CustomOkHttpClient;
+import group.intelliboys.smms.configs.DeviceSpecs;
 import group.intelliboys.smms.configs.NetworkConfig;
+import group.intelliboys.smms.utils.ServerAPIs;
+import lombok.Getter;
 import okhttp3.OkHttpClient;
 
 public class SignInActivity extends AppCompatActivity {
+    @Getter
     private EditText signInEmailField;
+
+    @Getter
     private EditText signInPasswordField;
+
     private TextView signInForgotPasswordLbl;
     private Button signInButton;
     private Button signUpButton;
+
+    @Getter
     private ProgressBar signInProgress;
 
     private boolean isEmailValid, isPasswordValid;
@@ -39,6 +52,7 @@ public class SignInActivity extends AppCompatActivity {
     private final NetworkConfig networkConfig = NetworkConfig.getInstance();
     private String serverIpAddress;
     private OkHttpClient httpClient;
+    private ServerAPIs serverAPIs;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -114,10 +128,7 @@ public class SignInActivity extends AppCompatActivity {
                 runnable = () -> {
                     String password = s.toString();
 
-                    if (password.length() > 8) {
-                        isPasswordValid = true;
-                    } else isPasswordValid = false;
-
+                    isPasswordValid = password.length() > 8;
                     isEmailAndPasswordAreValid();
                 };
 
@@ -132,14 +143,25 @@ public class SignInActivity extends AppCompatActivity {
 
         signInButton.setOnClickListener(v -> {
             // CODES FOR SIGNING IN INTO SYSTEM
-            serverIpAddress = networkConfig.getServerIpAddress(getApplicationContext());
-
-            if (httpClient == null) {
-                httpClient = CustomOkHttpClient.getOkHttpClient(getApplicationContext());
+            signInProgress.setVisibility(View.VISIBLE);
+            if (serverAPIs == null) {
+                serverAPIs = new ServerAPIs(this);
             }
 
-            final String LOGIN_URL = serverIpAddress + "/login";
-            Log.i("", LOGIN_URL);
+            String email = signInEmailField.getText().toString();
+            String password = signInPasswordField.getText().toString();
+
+            try {
+                JSONObject loginCredential = new JSONObject();
+                loginCredential.put("email", email);
+                loginCredential.put("password", password);
+                loginCredential.put("deviceId", DeviceSpecs.DEVICE_ID);
+                loginCredential.put("deviceName", DeviceSpecs.DEVICE_NAME);
+
+                serverAPIs.signIn(loginCredential);
+            } catch (JSONException e) {
+                Log.i("", Objects.requireNonNull(e.getMessage()));
+            }
         });
 
         signUpButton.setOnClickListener(V -> {
