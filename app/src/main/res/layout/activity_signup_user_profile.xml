@@ -11,7 +11,7 @@
         android:layout_height="wrap_content">
 
         <EditText
-            android:id="@+id/lastNameEditTxt"
+            android:id="@+id/signupLastNameField"
             android:layout_width="350dp"
             android:layout_height="70dp"
             android:layout_marginTop="48dp"
@@ -28,7 +28,7 @@
             app:layout_constraintTop_toBottomOf="@+id/textView" />
 
         <EditText
-            android:id="@+id/middleNameEditTxt"
+            android:id="@+id/signupMiddleNameField"
             android:layout_width="350dp"
             android:layout_height="70dp"
             android:layout_marginTop="52dp"
@@ -39,10 +39,10 @@
             android:maxLength="30"
             android:paddingStart="18dp"
             android:paddingEnd="18dp"
-            app:layout_constraintEnd_toEndOf="@+id/firstNameEditTxt"
+            app:layout_constraintEnd_toEndOf="@+id/signupFirstNameField"
             app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@+id/firstNameEditTxt"
-            app:layout_constraintTop_toBottomOf="@+id/firstNameEditTxt" />
+            app:layout_constraintStart_toStartOf="@+id/signupFirstNameField"
+            app:layout_constraintTop_toBottomOf="@+id/signupFirstNameField" />
 
         <RadioGroup
             android:id="@+id/radioGroup"
@@ -51,13 +51,13 @@
             android:layout_marginTop="56dp"
             android:background="@drawable/custom_input"
             android:paddingStart="18dp"
-            app:layout_constraintEnd_toEndOf="@+id/middleNameEditTxt"
-            app:layout_constraintStart_toStartOf="@+id/middleNameEditTxt"
-            app:layout_constraintTop_toBottomOf="@+id/middleNameEditTxt"
+            app:layout_constraintEnd_toEndOf="@+id/signupMiddleNameField"
+            app:layout_constraintStart_toStartOf="@+id/signupMiddleNameField"
+            app:layout_constraintTop_toBottomOf="@+id/signupMiddleNameField"
             tools:ignore="MissingConstraints">
 
             <RadioButton
-                android:id="@+id/maleRadioBtn"
+                android:id="@+id/signupMaleRadioBtn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="MALE"
@@ -65,7 +65,7 @@
                 tools:layout_editor_absoluteY="491dp" />
 
             <RadioButton
-                android:id="@+id/femaleRadioBtn"
+                android:id="@+id/signupFemaleRadioBtn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="FEMALE"
@@ -75,7 +75,7 @@
         </RadioGroup>
 
         <EditText
-            android:id="@+id/birthDatePicker"
+            android:id="@+id/signupBirthDateField"
             android:layout_width="350dp"
             android:layout_height="70dp"
             android:layout_marginTop="52dp"
@@ -93,7 +93,7 @@
             app:layout_constraintTop_toBottomOf="@+id/radioGroup" />
 
         <EditText
-            android:id="@+id/addressEditTxt"
+            android:id="@+id/signupAddressField"
             android:layout_width="350dp"
             android:layout_height="70dp"
             android:layout_marginTop="50dp"
@@ -105,36 +105,36 @@
             android:maxLength="64"
             android:paddingStart="18dp"
             android:paddingEnd="18dp"
-            app:layout_constraintEnd_toEndOf="@+id/birthDatePicker"
-            app:layout_constraintStart_toStartOf="@+id/birthDatePicker"
-            app:layout_constraintTop_toBottomOf="@+id/birthDatePicker" />
+            app:layout_constraintEnd_toEndOf="@+id/signupBirthDateField"
+            app:layout_constraintStart_toStartOf="@+id/signupBirthDateField"
+            app:layout_constraintTop_toBottomOf="@+id/signupBirthDateField" />
 
         <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/profileView"
+            android:id="@+id/signupProfilePic"
             android:layout_width="215dp"
             android:layout_height="179dp"
             android:layout_marginTop="85dp"
             android:src="@drawable/user"
             app:civ_border_color="@color/black"
             app:civ_border_width="1dp"
-            app:layout_constraintEnd_toEndOf="@+id/addressEditTxt"
+            app:layout_constraintEnd_toEndOf="@+id/signupAddressField"
             app:layout_constraintHorizontal_bias="0.503"
-            app:layout_constraintStart_toStartOf="@+id/addressEditTxt"
-            app:layout_constraintTop_toBottomOf="@+id/addressEditTxt" />
+            app:layout_constraintStart_toStartOf="@+id/signupAddressField"
+            app:layout_constraintTop_toBottomOf="@+id/signupAddressField" />
 
         <Button
-            android:id="@+id/selectProfileBtn"
+            android:id="@+id/signupSelectProfilePicBtn"
             android:layout_width="162dp"
             android:layout_height="55dp"
             android:layout_marginTop="30dp"
             android:text="SELECT PROFILE"
-            app:layout_constraintEnd_toEndOf="@+id/profileView"
+            app:layout_constraintEnd_toEndOf="@+id/signupProfilePic"
             app:layout_constraintHorizontal_bias="0.49"
-            app:layout_constraintStart_toStartOf="@+id/profileView"
-            app:layout_constraintTop_toBottomOf="@+id/profileView" />
+            app:layout_constraintStart_toStartOf="@+id/signupProfilePic"
+            app:layout_constraintTop_toBottomOf="@+id/signupProfilePic" />
 
         <EditText
-            android:id="@+id/firstNameEditTxt"
+            android:id="@+id/signupFirstNameField"
             android:layout_width="350dp"
             android:layout_height="70dp"
             android:layout_marginTop="52dp"
@@ -145,10 +145,10 @@
             android:maxLength="30"
             android:paddingStart="18dp"
             android:paddingEnd="18dp"
-            app:layout_constraintEnd_toEndOf="@+id/lastNameEditTxt"
+            app:layout_constraintEnd_toEndOf="@+id/signupLastNameField"
             app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@+id/lastNameEditTxt"
-            app:layout_constraintTop_toBottomOf="@+id/lastNameEditTxt" />
+            app:layout_constraintStart_toStartOf="@+id/signupLastNameField"
+            app:layout_constraintTop_toBottomOf="@+id/signupLastNameField" />
 
         <TextView
             android:id="@+id/textView"
@@ -164,15 +164,16 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <Button
-            android:id="@+id/submitBtn"
+            android:id="@+id/signupSubmitBtn"
             android:layout_width="wrap_content"
+            android:enabled="false"
             android:layout_height="wrap_content"
             android:layout_marginTop="44dp"
             android:text="SUBMIT"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.896"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/selectProfileBtn" />
+            app:layout_constraintTop_toBottomOf="@+id/signupSelectProfilePicBtn" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
