@@ -1,6 +1,7 @@
 package group.intelliboys.smms.utils;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.util.Log;
 import android.view.View;
 
@@ -13,6 +14,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.Map;
 
+import group.intelliboys.smms.activities.dashboard.HomeActivity;
 import group.intelliboys.smms.activities.signin.SignInActivity;
 import group.intelliboys.smms.configs.CustomOkHttpClient;
 import group.intelliboys.smms.configs.DeviceSpecs;
@@ -77,6 +79,10 @@ public class ServerAPIs {
                                         Log.i("", user.toString());
 
                                         // THIS CODE WILL BE EXECUTED AFTER USER PROFILE DATA SAVED INTO LOCAL DATABASE.
+                                        Intent intent = new Intent(activity, HomeActivity.class);
+                                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                        activity.startActivity(intent);
+
                                         postSignIn(signInActivity);
                                         Commons.toastMessage(activity, "Authentication Success!");
                                     } catch (JsonProcessingException e) {
@@ -161,6 +167,10 @@ public class ServerAPIs {
                                                 break;
                                             case "Please Verify!":
                                                 // CODE FOR 2 FACTOR AUTHENTICATION
+                                                activity.runOnUiThread(() -> {
+                                                    postSignIn(signInActivity);
+                                                    Commons.toastMessage(activity, "Please Verify!");
+                                                });
                                                 break;
                                         }
                                     }
