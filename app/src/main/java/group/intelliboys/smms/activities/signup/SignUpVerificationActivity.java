@@ -40,13 +40,13 @@ public class SignUpVerificationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_otp_verification);
 
-        signupVerEmailOtpField = findViewById(R.id.signupVerEmailOtpField);
-        signupVerResendEmailOtpLbl = findViewById(R.id.signupVerResendEmailOtpLbl);
-        signupVerEmailTimerLbl = findViewById(R.id.signupVerEmailTimerLbl);
-        signupVerSmsOtpField = findViewById(R.id.signupVerSmsOtpField);
-        signupVerResendSmsOtpLbl = findViewById(R.id.signupVerResendSmsOtpLbl);
-        signupVerSmsTimerLbl = findViewById(R.id.signupVerSmsTimerLbl);
-        signupVerSubmitBtn = findViewById(R.id.signupVerSubmitBtn);
+        signupVerEmailOtpField = findViewById(R.id.verEmailOtpField);
+        signupVerResendEmailOtpLbl = findViewById(R.id.verResendEmailOtpLbl);
+        signupVerEmailTimerLbl = findViewById(R.id.verEmailTimerLbl);
+        signupVerSmsOtpField = findViewById(R.id.verSmsOtpField);
+        signupVerResendSmsOtpLbl = findViewById(R.id.verResendSmsOtpLbl);
+        signupVerSmsTimerLbl = findViewById(R.id.verSmsTimerLbl);
+        signupVerSubmitBtn = findViewById(R.id.verSubmitBtn);
 
         serverAPIs = new ServerAPIs(this);
 
@@ -55,12 +55,12 @@ public class SignUpVerificationActivity extends AppCompatActivity {
 
         signupVerResendEmailOtpLbl.setOnClickListener(v -> {
             startCountdownOnEmailOtp();
-            serverAPIs.resendEmailOtp();
+            serverAPIs.resendRegistrationEmailOtp();
         });
 
         signupVerResendSmsOtpLbl.setOnClickListener(v -> {
             startCountdownOnSmsOtp();
-            serverAPIs.resendSmsOtp();
+            serverAPIs.resendRegistrationSmsOtp();
         });
 
         signupVerSubmitBtn.setOnClickListener(v -> {

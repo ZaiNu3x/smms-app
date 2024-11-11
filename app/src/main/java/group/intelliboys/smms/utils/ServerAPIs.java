@@ -18,6 +18,7 @@ import java.util.Objects;
 
 import group.intelliboys.smms.activities.dashboard.HomeActivity;
 import group.intelliboys.smms.activities.signin.SignInActivity;
+import group.intelliboys.smms.activities.signin.SignInVerificationActivity;
 import group.intelliboys.smms.activities.signup.SignUpActivity;
 import group.intelliboys.smms.activities.signup.SignUpProfileActivity;
 import group.intelliboys.smms.activities.signup.SignUpVerificationActivity;
@@ -173,6 +174,11 @@ public class ServerAPIs {
                                             case "Please Verify!":
                                                 // CODE FOR 2 FACTOR AUTHENTICATION
                                                 activity.runOnUiThread(() -> {
+                                                    String formId = (String) jsonResponse.get("formId");
+
+                                                    Intent intent = new Intent(activity, SignInVerificationActivity.class);
+                                                    intent.putExtra("formId", formId);
+                                                    activity.startActivity(intent);
                                                     postSignIn(signInActivity);
                                                     Commons.toastMessage(activity, "Please Verify!");
                                                 });
@@ -198,6 +204,192 @@ public class ServerAPIs {
                 Commons.toastMessage(activity, "Invalid signIn activity instance!");
             });
             throw new RuntimeException();
+        }
+    }
+
+    public void verifySignIn(JSONObject form) {
+        Log.i("", "Executed!");
+        if (activity instanceof SignInVerificationActivity) {
+            SignInVerificationActivity signInVerificationActivity = (SignInVerificationActivity) activity;
+            serverIpAddress = networkConfig.getServerIpAddress(activity);
+
+            if (serverIpAddress != null && !serverIpAddress.isEmpty()) {
+                final String LOGIN_2FA_URL = serverIpAddress + "/login/2fa/verify";
+
+                try {
+                    RequestBody body = RequestBody.create(form.toString(), JSON);
+                    Request request = new Request.Builder()
+                            .url(LOGIN_2FA_URL)
+                            .post(body)
+                            .build();
+
+                    okHttpClient.newCall(request).enqueue(new Callback() {
+                        @Override
+                        public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                            signInVerificationActivity.getSigninVerSubmitBtn().setEnabled(true);
+                            Log.i("", Objects.requireNonNull(e.getMessage()));
+                        }
+
+                        @Override
+                        public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                            if (response.body() != null) {
+                                String body = response.body().string();
+                                Map<?, ?> data = ObjectMapper.convertJsonToMapObject(body);
+                                Log.i("", data.toString());
+
+                                String formId = (String) data.get("formId");
+                                String token = (String) data.get("token");
+                                boolean isEmailOtpMatches = (boolean) data.get("emailOtpMatches");
+                                boolean isSmsOtpMatches = (boolean) data.get("smsOtpMatches");
+
+                                if (!isEmailOtpMatches) {
+                                    activity.runOnUiThread(() -> {
+                                        signInVerificationActivity.getSigninVerEmailOtpField().setError("Invalid OTP!");
+                                    });
+                                }
+
+                                if (!isSmsOtpMatches) {
+                                    activity.runOnUiThread(() -> {
+                                        signInVerificationActivity.getSigninVerSmsOtpField().setError("Invalid OTP!");
+                                    });
+                                }
+
+                                if (isEmailOtpMatches && isSmsOtpMatches) {
+                                    activity.runOnUiThread(() -> {
+                                        Intent intent = new Intent(activity, HomeActivity.class);
+                                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                        activity.startActivity(intent);
+                                        Commons.toastMessage(activity, "Authentication Success!");
+                                    });
+                                }
+                            }
+
+                            activity.runOnUiThread(() -> {
+                                signInVerificationActivity.getSigninVerSubmitBtn().setEnabled(true);
+                            });
+                        }
+                    });
+                } catch (Exception e) {
+                    Log.i("", Objects.requireNonNull(e.getMessage()));
+                    activity.runOnUiThread(this::toastErrorMessage);
+                }
+            }
+        } else {
+            activity.runOnUiThread(() -> {
+                Commons.toastMessage(activity, "Invalid SignIn verification activity");
+            });
+            throw new RuntimeException();
+        }
+    }
+
+    public void resendLoginEmailOtp() {
+        if (activity instanceof SignInVerificationActivity) {
+            serverIpAddress = networkConfig.getServerIpAddress(activity);
+            SignInVerificationActivity signUpVerificationActivity = (SignInVerificationActivity) activity;
+
+            if (serverIpAddress != null && !serverIpAddress.isEmpty()) {
+                String formId = signUpVerificationActivity.getIntent().getStringExtra("formId");
+                assert formId != null;
+                Log.i("", formId);
+                final String RESEND_EMAIL_OTP = serverIpAddress + "/login/2fa/resend/email-otp/" + formId;
+
+                try {
+                    Request request = new Request.Builder()
+                            .url(RESEND_EMAIL_OTP)
+                            .build();
+
+                    okHttpClient.newCall(request).enqueue(new Callback() {
+                        @Override
+                        public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                            toastErrorMessage();
+                        }
+
+                        @Override
+                        public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                            if (response.body() != null) {
+                                String body = response.body().string();
+                                Map<?, ?> data = ObjectMapper.convertJsonToMapObject(body);
+                                String status = (String) data.get("status");
+
+                                if (status != null && !status.isEmpty()) {
+                                    switch (status) {
+                                        case "NEW_EMAIL_OTP_RESENT_SUCCESSFULLY":
+                                            activity.runOnUiThread(() -> {
+                                                Commons.toastMessage(activity, "New Email OTP sent!");
+                                            });
+                                            break;
+                                        case "2FA_VERIFICATION_FORM_ALREADY_VERIFIED":
+                                            activity.runOnUiThread(() -> {
+                                                Commons.toastMessage(activity, "This form already verified!");
+                                                Intent intent = new Intent(activity, SignInActivity.class);
+                                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                                activity.startActivity(intent);
+                                            });
+                                            break;
+                                    }
+                                }
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    toastErrorMessage();
+                }
+            }
+        }
+    }
+
+    public void resendLoginSmsOtp() {
+        if (activity instanceof SignInVerificationActivity) {
+            serverIpAddress = networkConfig.getServerIpAddress(activity);
+            SignInVerificationActivity signUpVerificationActivity = (SignInVerificationActivity) activity;
+
+            if (serverIpAddress != null && !serverIpAddress.isEmpty()) {
+                String formId = signUpVerificationActivity.getIntent().getStringExtra("formId");
+                final String RESEND_EMAIL_OTP = serverIpAddress + "/login/2fa/resend/sms-otp/" + formId;
+
+                try {
+                    Request request = new Request.Builder()
+                            .url(RESEND_EMAIL_OTP)
+                            .build();
+
+                    okHttpClient.newCall(request).enqueue(new Callback() {
+                        @Override
+                        public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                            toastErrorMessage();
+                        }
+
+                        @Override
+                        public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                            if (response.body() != null) {
+                                String body = response.body().string();
+                                Map<?, ?> data = ObjectMapper.convertJsonToMapObject(body);
+
+                                String status = (String) data.get("status");
+
+                                if (status != null && !status.isEmpty()) {
+                                    switch (status) {
+                                        case "NEW_SMS_OTP_RESENT_SUCCESSFULLY":
+                                            activity.runOnUiThread(() -> {
+                                                Commons.toastMessage(activity, "New Sms OTP sent!");
+                                            });
+                                            break;
+                                        case "2FA_VERIFICATION_FORM_ALREADY_VERIFIED":
+                                            activity.runOnUiThread(() -> {
+                                                Commons.toastMessage(activity, "This form already verified!");
+                                                Intent intent = new Intent(activity, SignInActivity.class);
+                                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                                activity.startActivity(intent);
+                                            });
+                                            break;
+                                    }
+                                }
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    toastErrorMessage();
+                }
+            }
         }
     }
 
@@ -469,7 +661,7 @@ public class ServerAPIs {
         });
     }
 
-    public void resendEmailOtp() {
+    public void resendRegistrationEmailOtp() {
         if (activity instanceof SignUpVerificationActivity) {
             serverIpAddress = networkConfig.getServerIpAddress(activity);
             SignUpVerificationActivity signUpVerificationActivity = (SignUpVerificationActivity) activity;
@@ -525,7 +717,7 @@ public class ServerAPIs {
         }
     }
 
-    public void resendSmsOtp() {
+    public void resendRegistrationSmsOtp() {
         if (activity instanceof SignUpVerificationActivity) {
             serverIpAddress = networkConfig.getServerIpAddress(activity);
             SignUpVerificationActivity signUpVerificationActivity = (SignUpVerificationActivity) activity;
