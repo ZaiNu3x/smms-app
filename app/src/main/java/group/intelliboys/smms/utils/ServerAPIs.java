@@ -2,6 +2,7 @@ package group.intelliboys.smms.utils;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
@@ -16,7 +17,9 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 
+import group.intelliboys.smms.R;
 import group.intelliboys.smms.activities.dashboard.HomeActivity;
+import group.intelliboys.smms.activities.forgot_password.ForgotPasswordActivity;
 import group.intelliboys.smms.activities.signin.SignInActivity;
 import group.intelliboys.smms.activities.signin.SignInVerificationActivity;
 import group.intelliboys.smms.activities.signup.SignUpActivity;
@@ -25,6 +28,9 @@ import group.intelliboys.smms.activities.signup.SignUpVerificationActivity;
 import group.intelliboys.smms.configs.CustomOkHttpClient;
 import group.intelliboys.smms.configs.DeviceSpecs;
 import group.intelliboys.smms.configs.NetworkConfig;
+import group.intelliboys.smms.fragments.forgot_password.ForgotPasswordFragment;
+import group.intelliboys.smms.fragments.forgot_password.ForgotPasswordVerificationFragment;
+import group.intelliboys.smms.fragments.forgot_password.SearchAccountFragment;
 import group.intelliboys.smms.models.data.user.User;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -772,5 +778,214 @@ public class ServerAPIs {
         }
     }
 
-// ==================================== END OF USER REGISTRATION ====================================
+    // ==================================== END OF USER REGISTRATION ====================================
+
+    // ==================================== FORGOT PASSWORD ====================================
+
+    public void forgotPasswordSearchAccount(String email) {
+        if (activity instanceof ForgotPasswordActivity) {
+            serverIpAddress = networkConfig.getServerIpAddress(activity);
+            ForgotPasswordActivity forgotPasswordActivity = (ForgotPasswordActivity) activity;
+
+            if (serverIpAddress != null && !serverIpAddress.isEmpty()) {
+                final String SEARCH_ACCOUNT_URL = serverIpAddress + "/forgot-password/search-account/" + email;
+
+                Request request = new Request.Builder()
+                        .url(SEARCH_ACCOUNT_URL)
+                        .get()
+                        .build();
+
+                okHttpClient.newCall(request).enqueue(new Callback() {
+                    @Override
+                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                        toastErrorMessage();
+                        Log.i("", Objects.requireNonNull(e.getMessage()));
+                    }
+
+                    @Override
+                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                        if (response.body() != null) {
+                            String body = response.body().string();
+
+                            if (!body.isEmpty()) {
+                                Map<?, ?> responseData = ObjectMapper.convertJsonToMapObject(body);
+                                String id = (String) responseData.get("id");
+                                boolean isExists = (boolean) responseData.get("isExists");
+
+                                if (isExists) {
+                                    Bundle bundle = new Bundle();
+                                    bundle.putString("id", id);
+
+                                    forgotPasswordActivity.getSupportFragmentManager().beginTransaction()
+                                            .replace(R.id.forgotPasswordContainer, ForgotPasswordVerificationFragment.class, bundle)
+                                            .commit();
+                                } else {
+                                    SearchAccountFragment searchAccountFragment = (SearchAccountFragment) forgotPasswordActivity
+                                            .getSupportFragmentManager().findFragmentById(R.id.forgotPasswordContainer);
+
+                                    if (searchAccountFragment != null) {
+                                        activity.runOnUiThread(() -> {
+                                            searchAccountFragment.getSearchAccountField().setError("Email not found!");
+                                        });
+                                    } else {
+                                        Log.i("", "Search Account Fragment is null!");
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        } else {
+            activity.runOnUiThread(() -> {
+                Commons.toastMessage(activity, "Invalid Forgot Password Activity!");
+                throw new RuntimeException();
+            });
+        }
+    }
+
+    public void forgotPasswordSubmitOtp(JSONObject form) {
+        if (activity instanceof ForgotPasswordActivity) {
+            serverIpAddress = networkConfig.getServerIpAddress(activity);
+            ForgotPasswordActivity forgotPasswordActivity = (ForgotPasswordActivity) activity;
+            ForgotPasswordVerificationFragment forgotPasswordVerificationFragment = (ForgotPasswordVerificationFragment) forgotPasswordActivity
+                    .getSupportFragmentManager().findFragmentById(R.id.forgotPasswordContainer);
+
+
+            if (serverIpAddress != null && !serverIpAddress.isEmpty()) {
+                final String FORGOT_PASS_OTP_URL = serverIpAddress + "/forgot-password/verify-otp";
+                RequestBody requestBody = RequestBody.create(form.toString(), JSON);
+
+                Request request = new Request.Builder()
+                        .url(FORGOT_PASS_OTP_URL)
+                        .post(requestBody)
+                        .build();
+
+                okHttpClient.newCall(request).enqueue(new Callback() {
+                    @Override
+                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                        activity.runOnUiThread(() -> {
+                            assert forgotPasswordVerificationFragment != null;
+                            forgotPasswordVerificationFragment.getForgotPassVerSubmitBtn().setEnabled(true);
+                        });
+
+                        Log.i("", Objects.requireNonNull(e.getMessage()));
+                    }
+
+                    @Override
+                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                        if (response.body() != null) {
+                            String body = response.body().string();
+
+                            if (!body.isEmpty()) {
+                                Map<?, ?> data = ObjectMapper.convertJsonToMapObject(body);
+
+                                String id = (String) data.get("id");
+                                String message = (String) data.get("message");
+                                boolean isEmailOtpSame = (boolean) data.get("emailOtpSame");
+                                boolean isSmsOtpSame = (boolean) data.get("smsOtpSame");
+
+                                if (message.equals("TOKEN_EXISTS")) {
+
+                                    if (!isEmailOtpSame) {
+                                        activity.runOnUiThread(() -> {
+                                            assert forgotPasswordVerificationFragment != null;
+                                            forgotPasswordVerificationFragment.getForgotPassVerSmsOtpField().setError("Incorrect OTP!");
+                                        });
+                                    }
+
+                                    if (!isSmsOtpSame) {
+                                        activity.runOnUiThread(() -> {
+                                            assert forgotPasswordVerificationFragment != null;
+                                            forgotPasswordVerificationFragment.getForgotPassVerEmailOtpField().setError("Incorrect OTP!");
+                                        });
+                                    }
+
+                                    if (isEmailOtpSame && isSmsOtpSame) {
+                                        Bundle bundle = new Bundle();
+                                        bundle.putString("id", id);
+                                        forgotPasswordActivity.getSupportFragmentManager().beginTransaction()
+                                                .replace(R.id.forgotPasswordContainer, ForgotPasswordFragment.class, bundle)
+                                                .commit();
+                                    }
+
+                                } else {
+                                    activity.runOnUiThread(() -> {
+                                        Intent intent = new Intent(activity, SignInActivity.class);
+                                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                        activity.startActivity(intent);
+                                        Commons.toastMessage(activity, "This form is expired!");
+                                    });
+                                }
+                            }
+                        }
+
+                        activity.runOnUiThread(() -> {
+                            assert forgotPasswordVerificationFragment != null;
+                            forgotPasswordVerificationFragment.getForgotPassVerSubmitBtn().setEnabled(true);
+                        });
+                    }
+                });
+            }
+        } else {
+            activity.runOnUiThread(() -> {
+                Commons.toastMessage(activity, "Invalid Forgot Password Activity!");
+                throw new RuntimeException();
+            });
+        }
+    }
+
+    public void forgotPasswordSubmit(JSONObject form) {
+        if (activity instanceof ForgotPasswordActivity) {
+            serverIpAddress = networkConfig.getServerIpAddress(activity);
+            ForgotPasswordActivity forgotPasswordActivity = (ForgotPasswordActivity) activity;
+
+            if (serverIpAddress != null && !serverIpAddress.isEmpty()) {
+                final String FORGOT_PASSWORD_SUBMIT = serverIpAddress + "/forgot-password/submit";
+                RequestBody requestBody = RequestBody.create(form.toString(), JSON);
+
+                Request request = new Request.Builder()
+                        .url(FORGOT_PASSWORD_SUBMIT)
+                        .post(requestBody)
+                        .build();
+
+                okHttpClient.newCall(request).enqueue(new Callback() {
+                    @Override
+                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                        Log.i("", Objects.requireNonNull(e.getMessage()));
+                        toastErrorMessage();
+                    }
+
+                    @Override
+                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                        if (response.body() != null) {
+                            String body = response.body().string();
+
+                            if (body.contains("CHANGE_PASSWORD_SUCCESS")) {
+                                activity.runOnUiThread(() -> {
+                                    Commons.toastMessage(activity, "Changed password successfully!");
+                                });
+
+                                Intent intent = new Intent(activity, SignInActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                activity.startActivity(intent);
+                            } else {
+                                activity.runOnUiThread(() -> {
+                                    Commons.toastMessage(activity, "Change password failed!");
+                                });
+                            }
+                        }
+                    }
+                });
+            }
+
+        } else {
+            activity.runOnUiThread(() -> {
+                Commons.toastMessage(activity, "Invalid Forgot Password Activity!");
+                throw new RuntimeException();
+            });
+        }
+    }
+
+    // ==================================== END OF FORGOT PASSWORD ====================================
 }
