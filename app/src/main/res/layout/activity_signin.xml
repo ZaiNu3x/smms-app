@@ -1,20 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/bg">
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/logo"
         android:layout_width="172dp"
         android:layout_height="169dp"
+        android:src="@drawable/bghome"
         app:layout_constraintBottom_toTopOf="@+id/imageView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.681"
-        android:src="@drawable/user" />
+        app:layout_constraintVertical_bias="0.681" />
 
     <EditText
         android:id="@+id/emailEditTxt"
@@ -33,7 +35,10 @@
         app:layout_constraintBottom_toTopOf="@+id/passwordEditTxt"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.504"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        android:textColor="@color/black"
+        android:textColorHint="@android:color/darker_gray"
+        tools:ignore="HardcodedText" />
 
     <EditText
         android:id="@+id/passwordEditTxt"
@@ -52,7 +57,10 @@
         app:layout_constraintBottom_toTopOf="@+id/loginButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.508"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        android:textColor="@color/black"
+        android:textColorHint="@android:color/darker_gray"
+        tools:ignore="HardcodedText" />
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/loginButton"
@@ -60,7 +68,7 @@
         android:layout_height="65dp"
         android:layout_marginBottom="12dp"
         android:background="@drawable/custom_button"
-        android:drawableRight="@drawable/ic_login"
+        android:drawableEnd="@drawable/ic_login"
         android:enabled="false"
         android:paddingStart="125dp"
         android:paddingEnd="125dp"
@@ -70,7 +78,8 @@
         app:layout_constraintBottom_toTopOf="@+id/signupButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.491"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        tools:ignore="HardcodedText" />
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/signupButton"
@@ -78,7 +87,7 @@
         android:layout_height="65dp"
         android:layout_marginBottom="28dp"
         android:background="@drawable/custom_button"
-        android:drawableRight="@drawable/ic_register"
+        android:drawableEnd="@drawable/ic_register"
         android:paddingStart="125dp"
         android:paddingEnd="120dp"
         android:text="SIGNUP"
@@ -87,7 +96,8 @@
         app:layout_constraintBottom_toTopOf="@+id/signinProgress"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.491"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        tools:ignore="HardcodedText" />
 
     <ImageView
         android:id="@+id/imageView"

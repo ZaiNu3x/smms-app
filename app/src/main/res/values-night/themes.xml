@@ -12,5 +12,27 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
+
+        <!-- Other theme settings -->
+        <item name="colorBackground">@color/dark_background</item>
+        <item name="colorOnBackground">@color/dark_on_background</item>
+        <item name="colorSurface">@color/dark_surface</item>
     </style>
+
+        <color name="black">#FFFFFF</color>
+        <color name="white">#000000</color>
+        <color name="dark_gray">#555555</color>
+
+    <!-- settings -->
+        <color name="text_color">#FFFFFF</color>
+        <color name="warning_color">#FF5252</color>
+        <color name="background_color">#121212</color>
+        <color name="button_color">#03A9F4</color>
+
+    <!-- Monitoring dark -->
+        <color name="dark_background">#121212</color>
+        <color name="dark_on_background">#FFFFFF</color>
+        <color name="dark_surface">#424242</color>
+
 </resources>
+

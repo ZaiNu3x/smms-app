@@ -21,21 +21,21 @@ public class AccidentHistoryAdapter extends RecyclerView.Adapter<AccidentHistory
     @NonNull
     @Override
     public AccidentViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // Inflate the item layout (item_accident.xml)
+        //  (item_accident.xml)
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_accident, parent, false);
         return new AccidentViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull AccidentViewHolder holder, int position) {
-        // Get the current accident data
+
         Accident accident = accidentList.get(position);
 
-        // Set the data to the views
+
         holder.locationTextView.setText(accident.getLocation());
         holder.timeTextView.setText(accident.getTime());
         holder.dateTextView.setText(accident.getDate());
-        holder.mapImageView.setImageResource(R.drawable.ic_map); // Use your map icon
+        holder.mapImageView.setImageResource(R.drawable.ic_map);
     }
 
     @Override

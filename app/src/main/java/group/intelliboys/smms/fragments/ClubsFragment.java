@@ -1,87 +1,69 @@
 package group.intelliboys.smms.fragments;
 
-import android.content.Intent;
-
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
-import android.view.animation.DecelerateInterpolator;
-import android.graphics.Color;
-
+import androidx.fragment.app.FragmentTransaction;
+import android.util.Log;
 import group.intelliboys.smms.R;
 
 public class ClubsFragment extends Fragment {
 
+    private LinearLayout groupListLayout;
+    private ImageButton btnAddGroup;
+
+    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_clubs, container, false);
 
+        groupListLayout = view.findViewById(R.id.groupListLayout);
+        btnAddGroup = view.findViewById(R.id.btnAddGroup);
 
-        ImageView clubsLogoImageView = view.findViewById(R.id.clubsLogoImageView);
-        TextView memberNameTextView = view.findViewById(R.id.member_name_0);
-        LinearLayout memberListLinearLayout = view.findViewById(R.id.member_list);
-        Button createButton = view.findViewById(R.id.create_button);
-
-
-        clubsLogoImageView.setOnClickListener(view1 -> {
-            Intent intent = new Intent(getActivity(), Clubinfo.class);
-            startActivity(intent);
-        });
-
-
-        memberNameTextView.setOnClickListener(view1 -> {
-            Animation alertAnimation = new AlphaAnimation(1.0f, 0.2f);
-            alertAnimation.setDuration(150);
-            alertAnimation.setInterpolator(new DecelerateInterpolator());
-            alertAnimation.setRepeatCount(1);
-            alertAnimation.setRepeatMode(Animation.REVERSE);
-            memberNameTextView.startAnimation(alertAnimation);
-
-
-            memberNameTextView.setTextColor(Color.BLACK);
-
-            alertAnimation.setAnimationListener(new Animation.AnimationListener() {
-                @Override
-                public void onAnimationStart(Animation animation) {
-
-                }
-
-                @Override
-                public void onAnimationEnd(Animation animation) {
-
-                    Intent intent = new Intent(getActivity(), Clubinfo.class);
-                    startActivity(intent);
-                }
-
-                @Override
-                public void onAnimationRepeat(Animation animation) {
-
-                }
-            });
-        });
-
-
-        memberListLinearLayout.setOnClickListener(view1 -> {
-            Intent intent = new Intent(getActivity(), Clubinfo.class);
-            startActivity(intent);
-        });
-
-
-        createButton.setOnClickListener(view1 -> {
-            Intent intent = new Intent(getActivity(), CreateClub.class);
-            startActivity(intent);
-        });
+        btnAddGroup.setOnClickListener(v -> openCreateClubFragment());
 
         return view;
+    }
 
+    private void openCreateClubFragment() {
+        CreateClubFragment createClubFragment = new CreateClubFragment();
+
+        FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragment_container, createClubFragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
+    }
+
+    public void addNewGroupToList(String groupName, Uri logoUri) {
+
+        View newGroupView = getLayoutInflater().inflate(R.layout.group_item, null);
+
+
+        TextView groupNameTextView = newGroupView.findViewById(R.id.tvGroupName);
+        groupNameTextView.setText(groupName);
+
+
+        ImageView groupLogoImageView = newGroupView.findViewById(R.id.ivGroupLogo);
+        if (logoUri != null) {
+            groupLogoImageView.setImageURI(logoUri);
+        }
+
+
+        groupListLayout.addView(newGroupView);
+        groupListLayout.requestLayout();
+
+
+        Log.d("ClubsFragment", "Group added: " + groupName);
+        Toast.makeText(getActivity(), "New group '" + groupName + "' added", Toast.LENGTH_SHORT).show();
     }
 }

@@ -1,173 +1,57 @@
-<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bgcolor"
     android:orientation="vertical"
     android:padding="16dp"
-    tools:context=".MainActivity">
+    android:background="?android:attr/colorBackground"
+    tools:context=".fragments.ClubsFragment">
 
+<RelativeLayout
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:paddingBottom="8dp">
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
+<TextView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Groups"
+    android:textSize="24sp"
+    android:textStyle="bold"
+    android:textColor="?android:attr/textColorPrimary"
+android:layout_marginBottom="25dp"
+android:layout_marginTop="10dp"/>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+<ImageButton
+    android:id="@+id/btnAddGroup"
+    android:layout_width="50dp"
+    android:layout_height="50dp"
+    android:layout_alignParentEnd="true"
+    android:src="@android:drawable/ic_input_add"
+    android:background="?android:attr/selectableItemBackground"
+    android:contentDescription="Add Group" />
+</RelativeLayout>
 
-            <TextView
-                android:id="@+id/club_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="@string/my_clubs"
-                android:textColor="@color/common_google_signin_btn_text_dark_pressed"
-                android:textSize="30sp"
-                android:textStyle="bold" />
+<EditText
+    android:id="@+id/etSearch"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:hint="Search"
+    android:padding="10dp"
+    android:drawableStart="@android:drawable/ic_menu_search"
+    android:background="?android:attr/colorControlHighlight"
+    android:textColor="?android:attr/textColorPrimary"
+    android:layout_marginBottom="20dp"/>
 
-            <!-- intelliboys club -->
+<ScrollView
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+<LinearLayout
+    android:id="@+id/groupListLayout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
 
-            <LinearLayout
-                android:id="@+id/member_list"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="40dp"
-                android:layout_marginBottom="8dp"
-                android:background="#FFFFFF"
-                android:elevation="4dp"
-                android:orientation="horizontal"
-                android:padding="16dp"
-                android:visibility="visible">
-
-                <ImageView
-                    android:id="@+id/clubsLogoImageView"
-                    android:layout_width="55dp"
-                    android:layout_height="55dp"
-                    android:layout_marginEnd="16dp"
-                    android:contentDescription="@string/member_logo"
-                    app:srcCompat="@drawable/clubs_motor_logo__2_" />
-
-                <TextView
-                    android:id="@+id/member_name_0"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:text="@string/intelliboys_club"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/black"/>
-            </LinearLayout>
-
-            <!--maddog club-->
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:layout_marginBottom="8dp"
-                android:background="#FFFFFF"
-                android:elevation="4dp"
-                android:orientation="horizontal"
-                android:padding="16dp"
-                android:visibility="visible">
-
-                <ImageView
-                    android:id="@+id/member_logo_1"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:layout_marginEnd="16dp"
-                    android:contentDescription="@string/member_logo1"
-                    app:srcCompat="@drawable/maddog" />
-
-                <TextView
-                    android:id="@+id/member_name_1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:text="@string/maddog_club"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/black"/>
-            </LinearLayout>
-
-            <!--indios club-->
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:layout_marginBottom="8dp"
-                android:background="#FFFFFF"
-                android:elevation="4dp"
-                android:orientation="horizontal"
-                android:padding="16dp">
-
-                <ImageView
-                    android:id="@+id/member_logo_2"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:layout_marginEnd="16dp"
-                    android:contentDescription="@string/member_logo2"
-                    app:srcCompat="@drawable/indios_club" />
-
-                <TextView
-                    android:id="@+id/member_name_2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:text="@string/indios_club"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/black" />
-            </LinearLayout>
-
-            <!--royale club-->
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:background="#FFFFFF"
-                android:elevation="4dp"
-                android:orientation="horizontal"
-                android:padding="16dp">
-
-                <ImageView
-                    android:id="@+id/member_logo_3"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:layout_marginEnd="16dp"
-                    android:contentDescription="@string/member_logo3"
-                    app:srcCompat="@drawable/royale" />
-
-                <TextView
-                    android:id="@+id/member_name_3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:text="@string/royale_club"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/black" />
-            </LinearLayout>
-
-        </LinearLayout>
-
-    </ScrollView>
-
-
-    <Button
-        android:id="@+id/create_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
-        android:text="@string/create" />
-
+</LinearLayout>
+</ScrollView>
 </LinearLayout>

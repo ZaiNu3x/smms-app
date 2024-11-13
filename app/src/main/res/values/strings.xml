@@ -60,5 +60,8 @@
     <string name="speed_text">Speed: %1$.2f km/h</string>
     <string name="status_over_speeding">Status: Over Speeding!</string>
     <string name="status_normal">Status: Normal</string>
+    <string name="helmet_detected">helmet detected</string>
+    <string name="no_helmet_detected">no helmet detected</string>
+    <string name="camera_permission_denied">camera permission</string>
 
 </resources>

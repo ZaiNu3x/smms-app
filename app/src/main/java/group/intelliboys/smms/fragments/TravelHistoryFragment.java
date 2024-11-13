@@ -8,6 +8,7 @@ import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,16 +32,11 @@ import group.intelliboys.smms.R;
 
 public class TravelHistoryFragment extends Fragment {
 
-    //fragment_travel_history.xml
-
-
     private FusedLocationProviderClient fusedLocationClient;
-    private TextView locationTextView;
-    private TextView dateTimeTextView;
+    private LinearLayout recordsContainer;
     private List<String> locationRecords = new ArrayList<>();
     private final Handler handler = new Handler(Looper.getMainLooper());
     private static final long REFRESH_INTERVAL = 3000;
-
 
     private final ActivityResultLauncher<String[]> requestPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
@@ -65,8 +61,7 @@ public class TravelHistoryFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_travel_history, container, false);
-        locationTextView = view.findViewById(R.id.locationTextView);
-        dateTimeTextView = view.findViewById(R.id.dateTimeTextView);
+        recordsContainer = view.findViewById(R.id.recordsContainer);
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
 
         // Check location permissions
@@ -90,9 +85,11 @@ public class TravelHistoryFragment extends Fragment {
                         if (location != null && isAdded()) {
                             double latitude = location.getLatitude();
                             double longitude = location.getLongitude();
-                            String locationRecord = getString(R.string.location_format, latitude, longitude) + " - " + getCurrentDateTime();
-                            locationRecords.add(locationRecord);
-                            updateLocationRecords();
+                            String locationRecord = getString(R.string.location_format, latitude, longitude);
+                            String dateTime = getCurrentDateTime();
+
+
+                            addLocationRecord(locationRecord, dateTime);
                         } else {
                             Toast.makeText(requireActivity(), "Unable to get location", Toast.LENGTH_SHORT).show();
                         }
@@ -105,7 +102,6 @@ public class TravelHistoryFragment extends Fragment {
             @Override
             public void run() {
                 if (isAdded()) {
-                    updateDateTime();
                     getLocation();
                     handler.postDelayed(this, REFRESH_INTERVAL);
                 }
@@ -113,22 +109,18 @@ public class TravelHistoryFragment extends Fragment {
         }, REFRESH_INTERVAL);
     }
 
-    private void updateDateTime() {
-        if (isAdded()) {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-            String currentDateAndTime = sdf.format(new Date());
-            dateTimeTextView.setText(currentDateAndTime);
-        }
-    }
+    private void addLocationRecord(String location, String dateTime) {
+        View card = LayoutInflater.from(requireContext()).inflate(R.layout.card_layout, recordsContainer, false);
 
-    private void updateLocationRecords() {
-        if (isAdded()) {
-            StringBuilder records = new StringBuilder();
-            for (String record : locationRecords) {
-                records.append(record).append("\n");
-            }
-            locationTextView.setText(records.toString());
-        }
+        TextView dateTextView = card.findViewById(R.id.dateTextView);
+        TextView locationTextView = card.findViewById(R.id.locationTextView);
+        TextView timeTextView = card.findViewById(R.id.timeTextView);
+
+        dateTextView.setText("Date: " + dateTime.split(" ")[0]);
+        timeTextView.setText("Time: " + dateTime.split(" ")[1]);
+        locationTextView.setText("Location: " + location);
+
+        recordsContainer.addView(card);
     }
 
     private String getCurrentDateTime() {
@@ -139,7 +131,6 @@ public class TravelHistoryFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-
         handler.removeCallbacksAndMessages(null);
     }
 }

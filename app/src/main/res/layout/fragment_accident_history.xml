@@ -8,7 +8,7 @@
     android:padding="16dp"
     tools:context=".AccidentHistoryFragment">
 
-    <!-- RecyclerView to display multiple accident cards -->
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_accident_history"
         android:layout_width="match_parent"
