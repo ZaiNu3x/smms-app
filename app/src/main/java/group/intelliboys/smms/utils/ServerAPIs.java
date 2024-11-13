@@ -844,6 +844,104 @@ public class ServerAPIs {
         }
     }
 
+    public void forgotPasswordResendEmailOtp() {
+        if (activity instanceof ForgotPasswordActivity) {
+            serverIpAddress = networkConfig.getServerIpAddress(activity);
+            ForgotPasswordActivity forgotPasswordActivity = (ForgotPasswordActivity) activity;
+            ForgotPasswordVerificationFragment forgotPasswordVerificationFragment = (ForgotPasswordVerificationFragment) forgotPasswordActivity
+                    .getSupportFragmentManager().findFragmentById(R.id.forgotPasswordContainer);
+
+            assert forgotPasswordVerificationFragment != null;
+            assert forgotPasswordVerificationFragment.getArguments() != null;
+            String formId = forgotPasswordVerificationFragment.getArguments().getString("id");
+
+            if (serverIpAddress != null && !serverIpAddress.isEmpty()) {
+                final String RESEND_EMAIL_URL = serverIpAddress + "/forgot-password/resend/email-otp/" + formId;
+
+                Request request = new Request.Builder()
+                        .url(RESEND_EMAIL_URL)
+                        .get()
+                        .build();
+
+                okHttpClient.newCall(request).enqueue(new Callback() {
+                    @Override
+                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                        Log.i("", Objects.requireNonNull(e.getMessage()));
+                    }
+
+                    @Override
+                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                        if (response.body() != null) {
+                            String body = response.body().string();
+                            if (body.contains("NEW_EMAIL_OTP_RESENT")) {
+                                activity.runOnUiThread(() -> {
+                                    Commons.toastMessage(activity, "New OTP Resent!");
+                                });
+                            } else {
+                                activity.runOnUiThread(() -> {
+                                    Commons.toastMessage(activity, "New OTP failed to send!");
+                                });
+                            }
+                        }
+                    }
+                });
+            }
+        } else {
+            activity.runOnUiThread(() -> {
+                Commons.toastMessage(activity, "Invalid Forgot Password Activity!");
+            });
+        }
+    }
+
+    public void forgotPasswordResendSmsOtp() {
+        if (activity instanceof ForgotPasswordActivity) {
+            serverIpAddress = networkConfig.getServerIpAddress(activity);
+            ForgotPasswordActivity forgotPasswordActivity = (ForgotPasswordActivity) activity;
+            ForgotPasswordVerificationFragment forgotPasswordVerificationFragment = (ForgotPasswordVerificationFragment) forgotPasswordActivity
+                    .getSupportFragmentManager().findFragmentById(R.id.forgotPasswordContainer);
+
+            assert forgotPasswordVerificationFragment != null;
+            assert forgotPasswordVerificationFragment.getArguments() != null;
+            String formId = forgotPasswordVerificationFragment.getArguments().getString("id");
+
+            if (serverIpAddress != null && !serverIpAddress.isEmpty()) {
+                final String RESEND_EMAIL_URL = serverIpAddress + "/forgot-password/resend/sms-otp/" + formId;
+
+                Request request = new Request.Builder()
+                        .url(RESEND_EMAIL_URL)
+                        .get()
+                        .build();
+
+                okHttpClient.newCall(request).enqueue(new Callback() {
+                    @Override
+                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                        Log.i("", Objects.requireNonNull(e.getMessage()));
+                    }
+
+                    @Override
+                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                        if (response.body() != null) {
+                            String body = response.body().string();
+                            if (body.contains("NEW_EMAIL_OTP_RESENT")) {
+                                activity.runOnUiThread(() -> {
+                                    Commons.toastMessage(activity, "New OTP Resent!");
+                                });
+                            } else {
+                                activity.runOnUiThread(() -> {
+                                    Commons.toastMessage(activity, "New OTP failed to send!");
+                                });
+                            }
+                        }
+                    }
+                });
+            }
+        } else {
+            activity.runOnUiThread(() -> {
+                Commons.toastMessage(activity, "Invalid Forgot Password Activity!");
+            });
+        }
+    }
+
     public void forgotPasswordSubmitOtp(JSONObject form) {
         if (activity instanceof ForgotPasswordActivity) {
             serverIpAddress = networkConfig.getServerIpAddress(activity);
@@ -879,6 +977,7 @@ public class ServerAPIs {
 
                             if (!body.isEmpty()) {
                                 Map<?, ?> data = ObjectMapper.convertJsonToMapObject(body);
+                                Log.i("", data.toString());
 
                                 String id = (String) data.get("id");
                                 String message = (String) data.get("message");
@@ -890,14 +989,24 @@ public class ServerAPIs {
                                     if (!isEmailOtpSame) {
                                         activity.runOnUiThread(() -> {
                                             assert forgotPasswordVerificationFragment != null;
-                                            forgotPasswordVerificationFragment.getForgotPassVerSmsOtpField().setError("Incorrect OTP!");
+                                            forgotPasswordVerificationFragment.getForgotPassVerEmailOtpField().setError("Incorrect OTP!");
+                                        });
+                                    } else {
+                                        activity.runOnUiThread(() -> {
+                                            assert forgotPasswordVerificationFragment != null;
+                                            forgotPasswordVerificationFragment.getForgotPassVerEmailOtpField().setError(null);
                                         });
                                     }
 
                                     if (!isSmsOtpSame) {
                                         activity.runOnUiThread(() -> {
                                             assert forgotPasswordVerificationFragment != null;
-                                            forgotPasswordVerificationFragment.getForgotPassVerEmailOtpField().setError("Incorrect OTP!");
+                                            forgotPasswordVerificationFragment.getForgotPassVerSmsOtpField().setError("Incorrect OTP!");
+                                        });
+                                    } else {
+                                        activity.runOnUiThread(() -> {
+                                            assert forgotPasswordVerificationFragment != null;
+                                            forgotPasswordVerificationFragment.getForgotPassVerSmsOtpField().setError(null);
                                         });
                                     }
 

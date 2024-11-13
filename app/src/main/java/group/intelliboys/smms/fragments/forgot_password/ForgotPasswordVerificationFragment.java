@@ -58,12 +58,12 @@ public class ForgotPasswordVerificationFragment extends Fragment {
 
         forgotPassVerResendEmailOtpLbl.setOnClickListener(v -> {
             startCountdownOnEmailOtp();
-            serverAPIs.resendLoginEmailOtp();
+            serverAPIs.forgotPasswordResendEmailOtp();
         });
 
         forgotPassVerResendSmsOtpLbl.setOnClickListener(v -> {
             startCountdownOnSmsOtp();
-            serverAPIs.resendLoginSmsOtp();
+            serverAPIs.forgotPasswordResendSmsOtp();
         });
 
         forgotPassVerSubmitBtn.setOnClickListener(v -> {
