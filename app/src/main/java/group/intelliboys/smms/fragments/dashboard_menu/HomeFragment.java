@@ -46,6 +46,8 @@ import de.hdodenhof.circleimageview.CircleImageView;
 import group.intelliboys.smms.BuildConfig;
 import group.intelliboys.smms.R;
 import group.intelliboys.smms.fragments.driving_mode.DrivingModeFragment;
+import group.intelliboys.smms.models.data.view_models.HomeFragmentViewModel;
+import group.intelliboys.smms.services.OsrmService;
 import lombok.Getter;
 
 @Getter
@@ -64,6 +66,8 @@ public class HomeFragment extends Fragment {
     private FusedLocationProviderClient fusedLocationClient;
     private LocationCallback locationCallback;
     private static final int LOCATION_REQUEST_CODE = 1;
+    private HomeFragmentViewModel viewModel;
+    private OsrmService osrmService;
 
     @SuppressLint({"ClickableViewAccessibility", "MissingInflatedId"})
     @Override
@@ -88,6 +92,42 @@ public class HomeFragment extends Fragment {
         mapView.setMultiTouchControls(true);
         mapView.setMinZoomLevel(5d);
 
+        // ============================= MAP CONFIG INITIALIZATION =============================
+        viewModel = HomeFragmentViewModel.getInstance();
+
+        if (viewModel.getZoomLevel() == 0) {
+            mapView.getController().setZoom(6.5f);
+        } else mapView.getController().setZoom(viewModel.getZoomLevel());
+
+        if (viewModel.getMapCenter() == null) {
+            mapView.getController().setCenter(new GeoPoint(12.8797f, 121.7740f));
+        } else mapView.getController().setCenter(viewModel.getMapCenter());
+
+        if (viewModel.getPointAValue() != null && !viewModel.getPointAValue().isEmpty()) {
+            pointA.setText(viewModel.getPointAValue());
+        }
+
+        if (viewModel.getPointBValue() != null && !viewModel.getPointBValue().isEmpty()) {
+            pointB.setText(viewModel.getPointBValue());
+        }
+
+        if (viewModel.getMarkerA() != null) {
+            setMarkerA(viewModel.getMarkerA());
+        }
+
+        if (viewModel.getMarkerB() != null) {
+            setMarkerB(viewModel.getMarkerB());
+        }
+
+        if (viewModel.isNavContainerVisible()) {
+            navContainer.setVisibility(View.VISIBLE);
+            navContainer.setAlpha(1f);
+        }
+
+        // ============================= END OF MAP CONFIG INITIALIZATION =============================
+
+        osrmService = new OsrmService(requireActivity());
+
         mapView.addMapListener(new MapListener() {
             @Override
             public boolean onScroll(ScrollEvent event) {
@@ -96,6 +136,8 @@ public class HomeFragment extends Fragment {
 
             @Override
             public boolean onZoom(ZoomEvent event) {
+                viewModel.setMapCenter(mapView.getMapCenter());
+                viewModel.setZoomLevel((float) mapView.getZoomLevelDouble());
                 return false;
             }
         });
@@ -109,12 +151,16 @@ public class HomeFragment extends Fragment {
                 // =========================== POINT A ============================
                 if (pointA.hasFocus()) {
                     setMarkerA(geoPoint);
+                    osrmService.getFullAddressOnCoordinates(geoPoint, mapView, pointA);
+                    viewModel.setMarkerA(geoPoint);
                 }
                 // =================================================================
 
                 // =========================== POINT B ===========================
                 if (pointB.hasFocus()) {
                     setMarkerB(geoPoint);
+                    osrmService.getFullAddressOnCoordinates(geoPoint, mapView, pointB);
+                    viewModel.setMarkerB(geoPoint);
                 }
                 // =================================================================
             }
@@ -183,6 +229,7 @@ public class HomeFragment extends Fragment {
                     @Override
                     public void onAnimationEnd(@NonNull Animator animator) {
                         navContainer.setVisibility(View.INVISIBLE);
+                        viewModel.setNavContainerVisible(false);
                     }
 
                     @Override
@@ -200,6 +247,7 @@ public class HomeFragment extends Fragment {
                     @Override
                     public void onAnimationStart(@NonNull Animator animator) {
                         navContainer.setVisibility(View.VISIBLE);
+                        viewModel.setNavContainerVisible(true);
                     }
 
                     @Override
@@ -257,10 +305,11 @@ public class HomeFragment extends Fragment {
                 handler.removeCallbacks(runnable);
 
                 runnable = () -> {
+
                     if (value.length() == 0) {
-
+                        viewModel.setPointAValue(null);
                     } else {
-
+                        viewModel.setPointAValue(value.toString());
                     }
                 };
 
@@ -320,9 +369,9 @@ public class HomeFragment extends Fragment {
 
                 runnable = () -> {
                     if (value.length() == 0) {
-
+                        viewModel.setPointBValue(null);
                     } else {
-
+                        viewModel.setPointBValue(value.toString());
                     }
                 };
 
