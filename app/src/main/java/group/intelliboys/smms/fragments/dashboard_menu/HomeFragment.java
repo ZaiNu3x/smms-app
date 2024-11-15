@@ -275,10 +275,8 @@ public class HomeFragment extends Fragment {
 
         pointA.setOnKeyListener((v, i, event) -> {
             if (event.getAction() == KeyEvent.ACTION_DOWN && i == KeyEvent.KEYCODE_ENTER) {
-                if (pointA.getText().length() > 0) {
-
-                }
-
+                String keywords = pointA.getText().toString();
+                osrmService.getFullAddressOnKeywords(keywords, mapView, pointA);
                 return true;
             }
 
@@ -334,10 +332,8 @@ public class HomeFragment extends Fragment {
 
         pointB.setOnKeyListener((v, i, event) -> {
             if (event.getAction() == KeyEvent.ACTION_DOWN && i == KeyEvent.KEYCODE_ENTER) {
-                if (pointB.getText().length() > 5) {
-
-                }
-
+                String keywords = pointB.getText().toString();
+                osrmService.getFullAddressOnKeywords(keywords, mapView, pointA);
                 return true;
             }
 

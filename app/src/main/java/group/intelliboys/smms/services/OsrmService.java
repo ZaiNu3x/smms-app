@@ -11,6 +11,7 @@ import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -61,8 +62,9 @@ public class OsrmService {
         });
     }
 
-    public void getFullAddressOnKeywords(String keywords, MapView mapView, EditText field) {
-        final String API = "https://nominatim.openstreetmap.org/search?q=Arca%20south&limit=5&format=json&addressdetails=1";
+    public void getFullAddressOnKeywords(String value, MapView mapView, EditText field) {
+        String keywords = value.replaceAll("\\s", "%20");
+        final String API = "https://nominatim.openstreetmap.org/search?q=" + keywords + "&limit=5&format=json&addressdetails=1";
 
         Request request = new Request.Builder()
                 .url(API)
@@ -81,9 +83,13 @@ public class OsrmService {
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 if (response.body() != null) {
                     String body = response.body().string();
-                    Map<?, ?> data = ObjectMapper.convertJsonToMapObject(body);
-                    String displayName = (String) data.get("display_name");
+                    List<Map<String, Object>> data = ObjectMapper.convertJsonToListOfMap(body);
+                    String displayName = (String) data.get(0).get("display_name");
+                    float lat = (float) data.get(0).get("lat");
+                    float lon = (float) data.get(0).get("lon");
                     field.setText(displayName);
+
+                    GeoPoint geoPoint = new GeoPoint(lat, lon);
                 }
             }
         });
