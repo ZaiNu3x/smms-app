@@ -61,5 +61,6 @@
     <string name="status_over_speeding">Status: Over Speeding!</string>
     <string name="status_normal">Status: Normal</string>
     <string name="login">LOGIN</string>
+    <string name="forgot_password">Forgot Password</string>
 
 </resources>

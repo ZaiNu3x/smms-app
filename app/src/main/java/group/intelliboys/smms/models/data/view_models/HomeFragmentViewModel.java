@@ -2,6 +2,7 @@ package group.intelliboys.smms.models.data.view_models;
 
 import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.util.GeoPoint;
+import org.osmdroid.views.overlay.Marker;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -18,10 +19,10 @@ public class HomeFragmentViewModel {
     private String pointBValue;
     @Getter
     @Setter
-    private GeoPoint markerA;
+    private GeoPoint markerACoordinates;
     @Getter
     @Setter
-    private GeoPoint markerB;
+    private GeoPoint markerBCoordinates;
     @Getter
     @Setter
     private IGeoPoint mapCenter;

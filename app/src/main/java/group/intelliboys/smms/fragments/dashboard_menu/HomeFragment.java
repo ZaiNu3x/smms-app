@@ -111,12 +111,12 @@ public class HomeFragment extends Fragment {
             pointB.setText(viewModel.getPointBValue());
         }
 
-        if (viewModel.getMarkerA() != null) {
-            setMarkerA(viewModel.getMarkerA());
+        if (viewModel.getMarkerACoordinates() != null) {
+            setMarkerA(viewModel.getMarkerACoordinates());
         }
 
-        if (viewModel.getMarkerB() != null) {
-            setMarkerB(viewModel.getMarkerB());
+        if (viewModel.getMarkerBCoordinates() != null) {
+            setMarkerB(viewModel.getMarkerBCoordinates());
         }
 
         if (viewModel.isNavContainerVisible()) {
@@ -126,7 +126,7 @@ public class HomeFragment extends Fragment {
 
         // ============================= END OF MAP CONFIG INITIALIZATION =============================
 
-        osrmService = new OsrmService(requireActivity());
+        osrmService = new OsrmService(this);
 
         mapView.addMapListener(new MapListener() {
             @Override
@@ -151,16 +151,16 @@ public class HomeFragment extends Fragment {
                 // =========================== POINT A ============================
                 if (pointA.hasFocus()) {
                     setMarkerA(geoPoint);
-                    osrmService.getFullAddressOnCoordinates(geoPoint, mapView, pointA);
-                    viewModel.setMarkerA(geoPoint);
+                    osrmService.getFullAddressOnCoordinates(geoPoint, pointA);
+                    viewModel.setMarkerACoordinates(geoPoint);
                 }
                 // =================================================================
 
                 // =========================== POINT B ===========================
                 if (pointB.hasFocus()) {
                     setMarkerB(geoPoint);
-                    osrmService.getFullAddressOnCoordinates(geoPoint, mapView, pointB);
-                    viewModel.setMarkerB(geoPoint);
+                    osrmService.getFullAddressOnCoordinates(geoPoint, pointB);
+                    viewModel.setMarkerBCoordinates(geoPoint);
                 }
                 // =================================================================
             }
@@ -276,7 +276,7 @@ public class HomeFragment extends Fragment {
         pointA.setOnKeyListener((v, i, event) -> {
             if (event.getAction() == KeyEvent.ACTION_DOWN && i == KeyEvent.KEYCODE_ENTER) {
                 String keywords = pointA.getText().toString();
-                osrmService.getFullAddressOnKeywords(keywords, mapView, pointA);
+                osrmService.getFullAddressOnKeywordsInPointA(keywords);
                 return true;
             }
 
@@ -306,6 +306,7 @@ public class HomeFragment extends Fragment {
 
                     if (value.length() == 0) {
                         viewModel.setPointAValue(null);
+                        deleteMarkerA();
                     } else {
                         viewModel.setPointAValue(value.toString());
                     }
@@ -333,7 +334,7 @@ public class HomeFragment extends Fragment {
         pointB.setOnKeyListener((v, i, event) -> {
             if (event.getAction() == KeyEvent.ACTION_DOWN && i == KeyEvent.KEYCODE_ENTER) {
                 String keywords = pointB.getText().toString();
-                osrmService.getFullAddressOnKeywords(keywords, mapView, pointA);
+                osrmService.getFullAddressOnKeywordsInPointB(keywords);
                 return true;
             }
 
@@ -366,6 +367,7 @@ public class HomeFragment extends Fragment {
                 runnable = () -> {
                     if (value.length() == 0) {
                         viewModel.setPointBValue(null);
+                        deleteMarkerB();
                     } else {
                         viewModel.setPointBValue(value.toString());
                     }
@@ -411,7 +413,6 @@ public class HomeFragment extends Fragment {
             markerA = new Marker(mapView);
         }
 
-
         mapView.getOverlays().remove(markerA);
         markerA.setPosition(geoPoint);
         markerA.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
@@ -426,6 +427,8 @@ public class HomeFragment extends Fragment {
         mapView.getOverlays().remove(markerA);
         markerA = null;
         mapView.invalidate();
+
+        viewModel.setMarkerACoordinates(null);
     }
 
     public void setMarkerB(GeoPoint geoPoint) {
@@ -447,6 +450,8 @@ public class HomeFragment extends Fragment {
         mapView.getOverlays().remove(markerB);
         markerB = null;
         mapView.invalidate();
+
+        viewModel.setMarkerBCoordinates(null);
     }
 
     public void showStartDrivingButton() {
