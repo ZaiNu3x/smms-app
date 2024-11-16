@@ -153,6 +153,13 @@ public class HomeFragment extends Fragment {
                     setMarkerA(geoPoint);
                     osrmService.getFullAddressOnCoordinates(geoPoint, pointA);
                     viewModel.setMarkerACoordinates(geoPoint);
+
+                    if (markerB != null) {
+                        GeoPoint pointA = markerA.getPosition();
+                        GeoPoint pointB = markerB.getPosition();
+
+                        osrmService.getRouteFromPointAToPointB(pointA, pointB);
+                    }
                 }
                 // =================================================================
 
@@ -161,6 +168,13 @@ public class HomeFragment extends Fragment {
                     setMarkerB(geoPoint);
                     osrmService.getFullAddressOnCoordinates(geoPoint, pointB);
                     viewModel.setMarkerBCoordinates(geoPoint);
+
+                    if (markerA != null) {
+                        GeoPoint pointA = markerA.getPosition();
+                        GeoPoint pointB = markerB.getPosition();
+
+                        osrmService.getRouteFromPointAToPointB(pointA, pointB);
+                    }
                 }
                 // =================================================================
             }

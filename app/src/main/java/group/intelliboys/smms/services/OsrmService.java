@@ -30,6 +30,26 @@ public class OsrmService {
     public OsrmService(Fragment fragment) {
         this.fragment = fragment;
         okHttpClient = new OkHttpClient();
+
+        final String URL = "https://nominatim.openstreetmap.org/search?q=Taguig%20City%20University&limit=5&format=json&addressdetails=1";
+
+        Request request = new Request.Builder()
+                .url(URL)
+                .addHeader("Referer", "https://map.project-osrm.org/")
+                .get()
+                .build();
+
+        okHttpClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                // CODE
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                // CODE
+            }
+        });
     }
 
     public void getFullAddressOnCoordinates(GeoPoint coordinates, EditText field) {
@@ -152,6 +172,39 @@ public class OsrmService {
                             homeFragment.setMarkerB(geoPoint);
                             homeFragment.getViewModel().setMarkerBCoordinates(geoPoint);
                         });
+                    }
+                }
+            });
+        }
+    }
+
+    public void getRouteFromPointAToPointB(GeoPoint pointA, GeoPoint pointB) {
+        if (fragment instanceof HomeFragment) {
+            HomeFragment homeFragment = (HomeFragment) fragment;
+            Activity activity = homeFragment.requireActivity();
+
+            final String API = "https://routing.openstreetmap.de/routed-car/route/v1/driving/" +
+                    "121.04677955852198,14.5064614;121.05535712896216,14.4912287?" +
+                    "overview=false&alternatives=true&steps=true";
+
+            Request request = new Request.Builder()
+                    .url(API)
+                    .addHeader("Referer", "https://map.project-osrm.org/")
+                    .get()
+                    .build();
+
+            okHttpClient.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                    Log.i("", Objects.requireNonNull(e.getMessage()));
+                }
+
+                @Override
+                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                    if (response.body() != null) {
+                        String body = response.body().string();
+                        Map<?, ?> data = ObjectMapper.convertJsonToMapObject(body);
+                        Log.i("", data.toString());
                     }
                 }
             });
