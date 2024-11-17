@@ -52,7 +52,6 @@ import de.hdodenhof.circleimageview.CircleImageView;
 import group.intelliboys.smms.BuildConfig;
 import group.intelliboys.smms.R;
 import group.intelliboys.smms.fragments.driving_mode.DrivingModeFragment;
-import group.intelliboys.smms.models.data.components.MapRoute;
 import group.intelliboys.smms.models.data.view_models.HomeFragmentViewModel;
 import group.intelliboys.smms.services.OsrmService;
 import lombok.Getter;
@@ -70,7 +69,7 @@ public class HomeFragment extends Fragment {
     private Marker markerA;
     private Marker markerB;
     private Marker myLocation;
-    private MapRoute mapRoute;
+    private Polyline routeLine;
     private FusedLocationProviderClient fusedLocationClient;
     private LocationCallback locationCallback;
     private static final int LOCATION_REQUEST_CODE = 1;
@@ -100,7 +99,7 @@ public class HomeFragment extends Fragment {
         mapView.setMultiTouchControls(true);
         mapView.setMinZoomLevel(5d);
 
-        mapRoute = new MapRoute(new Polyline());
+        routeLine = new Polyline(mapView);
 
         // ============================= MAP CONFIG INITIALIZATION =============================
         viewModel = HomeFragmentViewModel.getInstance();
@@ -132,6 +131,10 @@ public class HomeFragment extends Fragment {
         if (viewModel.isNavContainerVisible()) {
             navContainer.setVisibility(View.VISIBLE);
             navContainer.setAlpha(1f);
+        }
+
+        if (viewModel.getRoutePoints() != null) {
+            drawRouteOnMap(viewModel.getRoutePoints());
         }
 
         // ============================= END OF MAP CONFIG INITIALIZATION =============================
@@ -168,7 +171,7 @@ public class HomeFragment extends Fragment {
                         GeoPoint pointA = markerA.getPosition();
                         GeoPoint pointB = markerB.getPosition();
 
-                        osrmService.getRouteFromPointAToPointB(pointA, pointB, mapRoute.getRoutePolyline());
+                        osrmService.getRouteFromPointAToPointB(pointA, pointB);
                     }
                 }
                 // =================================================================
@@ -183,7 +186,7 @@ public class HomeFragment extends Fragment {
                         GeoPoint pointA = markerA.getPosition();
                         GeoPoint pointB = markerB.getPosition();
 
-                        osrmService.getRouteFromPointAToPointB(pointA, pointB, mapRoute.getRoutePolyline());
+                        osrmService.getRouteFromPointAToPointB(pointA, pointB);
                     }
                 }
                 // =================================================================
@@ -438,7 +441,7 @@ public class HomeFragment extends Fragment {
         }
 
         mapView.getOverlays().remove(markerA);
-        mapView.getOverlays().remove(mapRoute.getRoutePolyline());
+        mapView.getOverlays().remove(routeLine);
         markerA.setPosition(geoPoint);
         markerA.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
         @SuppressLint({"UseCompatLoadingForDrawables", "ResourceType"})
@@ -450,11 +453,12 @@ public class HomeFragment extends Fragment {
 
     public void deleteMarkerA() {
         mapView.getOverlays().remove(markerA);
-        mapView.getOverlays().remove(mapRoute.getRoutePolyline());
+        mapView.getOverlays().remove(routeLine);
         markerA = null;
         mapView.invalidate();
 
         viewModel.setMarkerACoordinates(null);
+        viewModel.setRoutePoints(null);
     }
 
     public void setMarkerB(GeoPoint geoPoint) {
@@ -463,7 +467,7 @@ public class HomeFragment extends Fragment {
         }
 
         mapView.getOverlays().remove(markerB);
-        mapView.getOverlays().remove(mapRoute.getRoutePolyline());
+        mapView.getOverlays().remove(routeLine);
         markerB.setPosition(geoPoint);
         markerB.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
         @SuppressLint({"UseCompatLoadingForDrawables", "ResourceType"})
@@ -475,20 +479,22 @@ public class HomeFragment extends Fragment {
 
     public void deleteMarkerB() {
         mapView.getOverlays().remove(markerB);
-        mapView.getOverlays().remove(mapRoute.getRoutePolyline());
+        mapView.getOverlays().remove(routeLine);
         markerB = null;
         mapView.invalidate();
 
         viewModel.setMarkerBCoordinates(null);
+        viewModel.setRoutePoints(null);
     }
 
     public void drawRouteOnMap(List<GeoPoint> geoPoints) {
-        mapView.getOverlays().remove(mapRoute.getRoutePolyline());
-        mapRoute.getRoutePolyline().setPoints(geoPoints);
-        mapRoute.getRoutePolyline().setColor(Color.rgb(62, 108, 237));
-        mapRoute.getRoutePolyline().setWidth(10);
-        mapView.getOverlays().add(mapRoute.getRoutePolyline());
+        mapView.getOverlays().remove(routeLine);
+        routeLine.setPoints(geoPoints);
+        routeLine.setColor(Color.rgb(62, 108, 237));
+        routeLine.setWidth(10);
+        mapView.getOverlays().add(routeLine);
         mapView.invalidate();
+        viewModel.setRoutePoints(List.copyOf(geoPoints));
     }
 
     public void showStartDrivingButton() {

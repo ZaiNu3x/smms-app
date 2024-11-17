@@ -11,7 +11,6 @@ import androidx.fragment.app.Fragment;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.osmdroid.util.GeoPoint;
-import org.osmdroid.views.overlay.Polyline;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -139,6 +138,12 @@ public class OsrmService {
                                     homeFragment.getPointA().setText(displayName);
                                     homeFragment.setMarkerA(geoPoint);
                                     homeFragment.getViewModel().setMarkerACoordinates(geoPoint);
+
+                                    if (homeFragment.getMarkerA() != null && homeFragment.getMarkerB() != null) {
+                                        GeoPoint pointA = homeFragment.getMarkerA().getPosition();
+                                        GeoPoint pointB = homeFragment.getMarkerB().getPosition();
+                                        getRouteFromPointAToPointB(pointA, pointB);
+                                    }
                                 });
                             }
                         } catch (Exception e) {
@@ -189,6 +194,12 @@ public class OsrmService {
                                     homeFragment.getPointB().setText(displayName);
                                     homeFragment.setMarkerB(geoPoint);
                                     homeFragment.getViewModel().setMarkerBCoordinates(geoPoint);
+
+                                    if (homeFragment.getMarkerA() != null && homeFragment.getMarkerB() != null) {
+                                        GeoPoint pointA = homeFragment.getMarkerA().getPosition();
+                                        GeoPoint pointB = homeFragment.getMarkerB().getPosition();
+                                        getRouteFromPointAToPointB(pointA, pointB);
+                                    }
                                 });
                             }
                         } catch (Exception e) {
@@ -202,7 +213,7 @@ public class OsrmService {
         }
     }
 
-    public void getRouteFromPointAToPointB(GeoPoint pointA, GeoPoint pointB, Polyline routePolyline) {
+    public void getRouteFromPointAToPointB(GeoPoint pointA, GeoPoint pointB) {
         try {
             if (fragment instanceof HomeFragment) {
                 HomeFragment homeFragment = (HomeFragment) fragment;
@@ -210,7 +221,7 @@ public class OsrmService {
 
                 final String API = "https://routing.openstreetmap.de/routed-car/route/v1/driving/" + pointA.getLongitude() +
                         "," + pointA.getLatitude() + ";" + pointB.getLongitude() + "," + pointB.getLatitude() +
-                        "?overview=false&alternatives=true&steps=true";
+                        "?overview=false&alternatives=true&steps=true&annotations=speed";
 
                 Request request = new Request.Builder()
                         .url(API)

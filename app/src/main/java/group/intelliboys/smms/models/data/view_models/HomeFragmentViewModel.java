@@ -2,9 +2,9 @@ package group.intelliboys.smms.models.data.view_models;
 
 import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.util.GeoPoint;
-import org.osmdroid.views.overlay.Polyline;
 
-import group.intelliboys.smms.models.data.components.MapRoute;
+import java.util.List;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -32,7 +32,7 @@ public class HomeFragmentViewModel {
     private boolean isNavContainerVisible;
     @Getter
     @Setter
-    private MapRoute mapRoute;
+    private List<GeoPoint> routePoints;
 
     private static HomeFragmentViewModel instance;
 
