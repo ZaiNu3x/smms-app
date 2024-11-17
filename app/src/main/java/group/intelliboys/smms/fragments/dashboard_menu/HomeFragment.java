@@ -32,6 +32,7 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
+import com.google.maps.android.PolyUtil;
 
 import org.osmdroid.config.Configuration;
 import org.osmdroid.events.MapListener;
@@ -41,6 +42,10 @@ import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
+import org.osmdroid.views.overlay.Polyline;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import group.intelliboys.smms.BuildConfig;
@@ -63,6 +68,7 @@ public class HomeFragment extends Fragment {
     private Marker markerA;
     private Marker markerB;
     private Marker myLocation;
+    private Polyline routeLine;
     private FusedLocationProviderClient fusedLocationClient;
     private LocationCallback locationCallback;
     private static final int LOCATION_REQUEST_CODE = 1;
@@ -91,6 +97,8 @@ public class HomeFragment extends Fragment {
         mapView.setBuiltInZoomControls(false);
         mapView.setMultiTouchControls(true);
         mapView.setMinZoomLevel(5d);
+
+        routeLine = new Polyline(mapView);
 
         // ============================= MAP CONFIG INITIALIZATION =============================
         viewModel = HomeFragmentViewModel.getInstance();
@@ -158,7 +166,7 @@ public class HomeFragment extends Fragment {
                         GeoPoint pointA = markerA.getPosition();
                         GeoPoint pointB = markerB.getPosition();
 
-                        osrmService.getRouteFromPointAToPointB(pointA, pointB);
+                        osrmService.getRouteFromPointAToPointB(pointA, pointB, routeLine);
                     }
                 }
                 // =================================================================
@@ -173,7 +181,7 @@ public class HomeFragment extends Fragment {
                         GeoPoint pointA = markerA.getPosition();
                         GeoPoint pointB = markerB.getPosition();
 
-                        osrmService.getRouteFromPointAToPointB(pointA, pointB);
+                        osrmService.getRouteFromPointAToPointB(pointA, pointB, routeLine);
                     }
                 }
                 // =================================================================
@@ -439,6 +447,7 @@ public class HomeFragment extends Fragment {
 
     public void deleteMarkerA() {
         mapView.getOverlays().remove(markerA);
+        mapView.getOverlays().remove(routeLine);
         markerA = null;
         mapView.invalidate();
 
@@ -462,6 +471,7 @@ public class HomeFragment extends Fragment {
 
     public void deleteMarkerB() {
         mapView.getOverlays().remove(markerB);
+        mapView.getOverlays().remove(routeLine);
         markerB = null;
         mapView.invalidate();
 
@@ -474,6 +484,17 @@ public class HomeFragment extends Fragment {
         } else {
             startDrivingBtn.setVisibility(View.INVISIBLE);
         }
+    }
+
+    public List<GeoPoint> decodePolyline(String encoded) {
+        List<GeoPoint> polyline = new ArrayList<>();
+        List<com.google.android.gms.maps.model.LatLng> decoded = PolyUtil.decode(encoded);
+
+        for (com.google.android.gms.maps.model.LatLng latLng : decoded) {
+            polyline.add(new GeoPoint(latLng.latitude, latLng.longitude));
+        }
+
+        return polyline;
     }
 
     @Override
