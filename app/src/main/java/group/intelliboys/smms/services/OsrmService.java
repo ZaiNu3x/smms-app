@@ -2,7 +2,6 @@ package group.intelliboys.smms.services;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.graphics.Color;
 import android.util.Log;
 import android.widget.EditText;
 
@@ -250,13 +249,7 @@ public class OsrmService {
                                     }
                                 }
 
-                                HomeFragment homeFragment = (HomeFragment) fragment;
-                                homeFragment.getMapView().getOverlays().remove(routePolyline);
-                                routePolyline.setPoints(geoPoints);
-                                routePolyline.setWidth(10);
-                                routePolyline.setColor(Color.rgb(62, 108, 237));
-                                homeFragment.getMapView().getOverlays().add(routePolyline);
-                                homeFragment.getMapView().invalidate();
+                                homeFragment.drawRouteOnMap(geoPoints);
                             } catch (Exception e) {
                                 Log.i("", Objects.requireNonNull(e.getMessage()));
                             }
