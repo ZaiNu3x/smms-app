@@ -20,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -75,8 +76,11 @@ public class HomeFragment extends Fragment {
     private static final int LOCATION_REQUEST_CODE = 1;
     private HomeFragmentViewModel viewModel;
     private OsrmService osrmService;
+    private ConstraintLayout routeInfoContainer;
+    private TextView distanceInKmLbl;
+    private TextView durationTxtLbl;
 
-    @SuppressLint({"ClickableViewAccessibility", "MissingInflatedId"})
+    @SuppressLint({"ClickableViewAccessibility", "MissingInflatedId", "SetTextI18n"})
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -94,6 +98,10 @@ public class HomeFragment extends Fragment {
         drivingBtn = view.findViewById(R.id.drivingBtn);
         navContainer.setVisibility(View.INVISIBLE);
         navContainer.setAlpha(0f);
+        routeInfoContainer = view.findViewById(R.id.routeInfoContainer);
+        distanceInKmLbl = view.findViewById(R.id.distanceInKmLbl);
+        durationTxtLbl = view.findViewById(R.id.durationLbl);
+
         mapView.setTileSource(TileSourceFactory.MAPNIK);
         mapView.setBuiltInZoomControls(false);
         mapView.setMultiTouchControls(true);
@@ -135,6 +143,11 @@ public class HomeFragment extends Fragment {
 
         if (viewModel.getRoutePoints() != null) {
             drawRouteOnMap(viewModel.getRoutePoints());
+        }
+
+        if (viewModel.isRouteInfoContainerVisible()) {
+            setDistanceAndDuration(viewModel.getDistance(), viewModel.getDuration());
+            routeInfoContainer.setVisibility(View.VISIBLE);
         }
 
         // ============================= END OF MAP CONFIG INITIALIZATION =============================
@@ -459,6 +472,7 @@ public class HomeFragment extends Fragment {
 
         viewModel.setMarkerACoordinates(null);
         viewModel.setRoutePoints(null);
+        showRouteInfoContainer();
     }
 
     public void setMarkerB(GeoPoint geoPoint) {
@@ -485,6 +499,7 @@ public class HomeFragment extends Fragment {
 
         viewModel.setMarkerBCoordinates(null);
         viewModel.setRoutePoints(null);
+        showRouteInfoContainer();
     }
 
     public void drawRouteOnMap(List<GeoPoint> geoPoints) {
@@ -493,16 +508,67 @@ public class HomeFragment extends Fragment {
         routeLine.setColor(Color.rgb(62, 108, 237));
         routeLine.setWidth(10);
         mapView.getOverlays().add(routeLine);
-        mapView.invalidate();
         viewModel.setRoutePoints(List.copyOf(geoPoints));
+        showRouteInfoContainer();
+        mapView.invalidate();
     }
 
-    public void showStartDrivingButton() {
-        if (markerA != null && markerB != null) {
-            startDrivingBtn.setVisibility(View.VISIBLE);
+    public void showRouteInfoContainer() {
+        if (routeInfoContainer.getVisibility() == View.VISIBLE && (markerA == null || markerB == null)) {
+            routeInfoContainer.animate().alpha(0f).setListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(@NonNull Animator animator) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(@NonNull Animator animator) {
+                    routeInfoContainer.setVisibility(View.INVISIBLE);
+                    viewModel.setDistance(0);
+                    viewModel.setDuration(0);
+                    viewModel.setRouteInfoContainerVisible(false);
+                }
+
+                @Override
+                public void onAnimationCancel(@NonNull Animator animator) {
+
+                }
+
+                @Override
+                public void onAnimationRepeat(@NonNull Animator animator) {
+
+                }
+            });
         } else {
-            startDrivingBtn.setVisibility(View.INVISIBLE);
+            routeInfoContainer.animate().alpha(1f).setListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(@NonNull Animator animator) {
+                    routeInfoContainer.setVisibility(View.VISIBLE);
+                    viewModel.setRouteInfoContainerVisible(true);
+                }
+
+                @Override
+                public void onAnimationEnd(@NonNull Animator animator) {
+
+                }
+
+                @Override
+                public void onAnimationCancel(@NonNull Animator animator) {
+
+                }
+
+                @Override
+                public void onAnimationRepeat(@NonNull Animator animator) {
+
+                }
+            });
         }
+    }
+
+    @SuppressLint("SetTextI18n")
+    public void setDistanceAndDuration(double distance, double duration) {
+        distanceInKmLbl.setText(distance + " Km");
+        durationTxtLbl.setText(duration + " Hr");
     }
 
     public List<GeoPoint> decodePolyline(String encoded) {

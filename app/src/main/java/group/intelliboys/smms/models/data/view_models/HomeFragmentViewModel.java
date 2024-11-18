@@ -33,6 +33,15 @@ public class HomeFragmentViewModel {
     @Getter
     @Setter
     private List<GeoPoint> routePoints;
+    @Getter
+    @Setter
+    private boolean isRouteInfoContainerVisible;
+    @Getter
+    @Setter
+    private double distance;
+    @Getter
+    @Setter
+    private double duration;
 
     private static HomeFragmentViewModel instance;
 
@@ -45,5 +54,9 @@ public class HomeFragmentViewModel {
         }
 
         return instance;
+    }
+
+    public void destroy() {
+        instance = null;
     }
 }

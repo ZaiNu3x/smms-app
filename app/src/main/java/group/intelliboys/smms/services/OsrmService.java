@@ -13,6 +13,7 @@ import org.json.JSONObject;
 import org.osmdroid.util.GeoPoint;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -235,6 +236,7 @@ public class OsrmService {
                         Log.i("", Objects.requireNonNull(e.getMessage()));
                     }
 
+                    @SuppressLint("SetTextI18n")
                     @Override
                     public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                         if (response.body() != null) {
@@ -244,6 +246,15 @@ public class OsrmService {
                                 JSONObject routeData = new JSONObject(data);
                                 JSONArray routes = routeData.getJSONArray("routes");
                                 JSONObject route = routes.getJSONObject(0);
+
+                                DecimalFormat decimalFormat = new DecimalFormat("#.##");
+                                double distanceInKm = Double.parseDouble(decimalFormat.format(route
+                                        .getDouble("distance") / 1000));
+                                double duration = Double.parseDouble(decimalFormat.format(route
+                                        .getDouble("duration") / 3600));
+
+                                homeFragment.setDistanceAndDuration(distanceInKm, duration);
+
                                 JSONArray legs = route.getJSONArray("legs");
                                 List<GeoPoint> geoPoints = new ArrayList<>();
 
@@ -260,7 +271,12 @@ public class OsrmService {
                                     }
                                 }
 
-                                homeFragment.drawRouteOnMap(geoPoints);
+                                activity.runOnUiThread(() -> {
+                                    homeFragment.drawRouteOnMap(geoPoints);
+                                });
+
+                                homeFragment.getViewModel().setDistance(distanceInKm);
+                                homeFragment.getViewModel().setDuration(duration);
                             } catch (Exception e) {
                                 Log.i("", Objects.requireNonNull(e.getMessage()));
                             }

@@ -58,6 +58,7 @@
     <string name="time">Time</string>
     <string name="details">DETAILS</string>
     <string name="speed">SPEED:</string>
-    <string name="monitor_rider">MONITOR RIDER</string>>
+    <string name="monitor_rider">MONITOR RIDER</string>
+    <string name="value">value</string>>
 
 </resources>

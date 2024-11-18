@@ -29,6 +29,7 @@ import group.intelliboys.smms.fragments.dashboard_menu.MonitoringFragment;
 import group.intelliboys.smms.fragments.dashboard_menu.SettingsFragment;
 import group.intelliboys.smms.fragments.dashboard_menu.TravelHistoryFragment;
 import group.intelliboys.smms.fragments.profile_update.ProfileFragment;
+import group.intelliboys.smms.models.data.view_models.HomeFragmentViewModel;
 
 public class HomeActivity extends AppCompatActivity implements NavigationView
         .OnNavigationItemSelectedListener {
@@ -114,6 +115,9 @@ public class HomeActivity extends AppCompatActivity implements NavigationView
                         .setTitle("Logout?")
                         .setMessage("Are you sure you want to logout?")
                         .setPositiveButton(android.R.string.yes, (dialogInterface, i) -> {
+                            HomeFragmentViewModel viewModel = HomeFragmentViewModel.getInstance();
+                            viewModel.destroy();
+
                             Intent intent = new Intent(getApplicationContext(), SignInActivity.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                             startActivity(intent);
