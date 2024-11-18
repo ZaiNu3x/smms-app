@@ -8,4 +8,5 @@
     <color name="black">#000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="common_google_signin_btn_text_dark_pressed">#FF0000</color>
+
 </resources>

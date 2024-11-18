@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:gravity="center_horizontal"
+    android:background="?android:attr/colorBackground"> <!-- Theme-based background color -->
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Create"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="32dp"
+        android:textColor="?android:attr/textColorPrimary"/> <!-- Theme-based text color -->
+
+    <EditText
+        android:id="@+id/etClubName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/enter_club_group_name_optional"
+        android:padding="12dp"
+        android:background="@drawable/rounded_border"
+        android:layout_marginBottom="32dp" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_marginBottom="24dp">
+
+        <ImageButton
+            android:id="@+id/btnAddLogo"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:background="@drawable/circle_background"
+            android:src="@drawable/ic_add_logo"
+            android:contentDescription="@string/add_logo" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Add logo"
+            android:textSize="14sp"
+            android:layout_marginTop="8dp"
+            android:textColor="?android:attr/textColorPrimary"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_marginBottom="32dp">
+
+        <ImageButton
+            android:id="@+id/btnAddPeople"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:background="@drawable/circle_background"
+            android:src="@drawable/ic_add_people"
+            android:contentDescription="@string/add_people" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Add people"
+            android:textSize="14sp"
+            android:layout_marginTop="8dp"
+            android:textColor="?android:attr/textColorPrimary"/> <!-- Theme-based text color -->
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btnCreateClub"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Create club"
+        android:background="@drawable/rounded_button_background"
+        android:padding="12dp" />
+
+</LinearLayout>

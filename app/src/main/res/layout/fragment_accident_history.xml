@@ -18,5 +18,5 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
-
+    <!-- the activity_accident_history_card.xml will show this -->
 </androidx.constraintlayout.widget.ConstraintLayout>
