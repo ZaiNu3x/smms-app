@@ -12,6 +12,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -52,6 +53,7 @@ import java.util.List;
 import de.hdodenhof.circleimageview.CircleImageView;
 import group.intelliboys.smms.BuildConfig;
 import group.intelliboys.smms.R;
+import group.intelliboys.smms.activities.dashboard.HomeActivity;
 import group.intelliboys.smms.fragments.driving_mode.DrivingModeFragment;
 import group.intelliboys.smms.models.data.view_models.HomeFragmentViewModel;
 import group.intelliboys.smms.services.OsrmService;
@@ -221,6 +223,7 @@ public class HomeFragment extends Fragment {
 
             if (locationCallback == null) {
                 locationCallback = new LocationCallback() {
+                    private final HomeActivity homeActivity = (HomeActivity) HomeFragment.this.requireActivity();
                     private boolean isAnimated = true;
 
                     @Override
@@ -230,21 +233,52 @@ public class HomeFragment extends Fragment {
                         assert location != null;
                         GeoPoint geoPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
 
-                        if (myLocation == null) {
-                            myLocation = new Marker(mapView);
+                        if (pointA.hasFocus()) {
+                            homeActivity.runOnUiThread(() -> {
+                                mapView.getOverlays().remove(myLocation);
+                                setMarkerA(geoPoint);
+                                osrmService.getFullAddressOnCoordinates(geoPoint, pointA);
+
+                                if (isAnimated) {
+                                    mapView.getController()
+                                            .animateTo(markerA.getPosition(), 17d, 3000L);
+                                }
+
+                                viewModel.setMarkerACoordinates(geoPoint);
+                            });
+                        } else if (pointB.hasFocus()) {
+                            homeActivity.runOnUiThread(() -> {
+                                mapView.getOverlays().remove(myLocation);
+                                setMarkerB(geoPoint);
+                                osrmService.getFullAddressOnCoordinates(geoPoint, pointB);
+
+                                if (isAnimated) {
+                                    mapView.getController()
+                                            .animateTo(markerB.getPosition(), 17d, 3000L);
+                                }
+
+                                viewModel.setMarkerBCoordinates(geoPoint);
+                            });
+                        } else {
+                            if (myLocation == null) {
+                                myLocation = new Marker(mapView);
+                            }
+
+                            myLocation.setPosition(geoPoint);
+                            myLocation.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+                            mapView.getOverlays().remove(myLocation);
+                            mapView.getOverlays().add(myLocation);
+
+                            if (isAnimated) {
+                                mapView.getController()
+                                        .animateTo(myLocation.getPosition(), 17d, 3000L);
+                            }
+                            isAnimated = false;
+                            mapView.invalidate();
                         }
 
-                        myLocation.setPosition(geoPoint);
-                        myLocation.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-                        mapView.getOverlays().remove(myLocation);
-                        mapView.getOverlays().add(myLocation);
-
-                        if (isAnimated) {
-                            mapView.getController()
-                                    .animateTo(myLocation.getPosition(), 17d, 3000L);
-                        }
-                        isAnimated = false;
-                        mapView.invalidate();
+                        Log.i("", geoPoint.toString());
+                        fusedLocationClient.removeLocationUpdates(locationCallback);
                     }
                 };
             }
@@ -568,7 +602,16 @@ public class HomeFragment extends Fragment {
     @SuppressLint("SetTextI18n")
     public void setDistanceAndDuration(double distance, double duration) {
         distanceInKmLbl.setText(distance + " Km");
-        durationTxtLbl.setText(duration + " Hr");
+
+        int hours = (int) duration;
+        int minutes = (int) ((duration - hours) * 60);
+
+        if (duration < 1) {
+            durationTxtLbl.setText(minutes + " mins");
+        } else if (duration > 2) {
+            durationTxtLbl.setText(hours + "hrs");
+        }
+
     }
 
     public List<GeoPoint> decodePolyline(String encoded) {
