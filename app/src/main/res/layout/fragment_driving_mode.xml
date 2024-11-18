@@ -4,7 +4,7 @@
     android:layout_height="match_parent">
 
     <org.osmdroid.views.MapView
-        android:id="@+id/map_view"
+        android:id="@+id/drivingModeMapView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
@@ -17,7 +17,7 @@
         android:padding="16dp">
 
         <ImageButton
-            android:id="@+id/circle"
+            android:id="@+id/leftWarningIcon"
             android:layout_width="63dp"
             android:layout_height="74dp"
             android:contentDescription="@string/circle" />
@@ -46,7 +46,7 @@
         </LinearLayout>
 
         <ImageButton
-            android:id="@+id/circle1"
+            android:id="@+id/rightWarningIcon"
             android:layout_width="63dp"
             android:layout_height="74dp"
             android:contentDescription="@string/circle"
