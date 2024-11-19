@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <org.osmdroid.views.MapView
+    <group.intelliboys.smms.components.ui.CustomMapView
         android:id="@+id/drivingModeMapView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

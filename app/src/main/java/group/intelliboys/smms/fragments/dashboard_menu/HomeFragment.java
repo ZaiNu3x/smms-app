@@ -54,6 +54,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 import group.intelliboys.smms.BuildConfig;
 import group.intelliboys.smms.R;
 import group.intelliboys.smms.activities.dashboard.HomeActivity;
+import group.intelliboys.smms.components.ui.CustomMapView;
 import group.intelliboys.smms.fragments.driving_mode.DrivingModeFragment;
 import group.intelliboys.smms.models.data.view_models.HomeFragmentViewModel;
 import group.intelliboys.smms.services.OsrmService;
@@ -61,7 +62,7 @@ import lombok.Getter;
 
 @Getter
 public class HomeFragment extends Fragment {
-    private MapView mapView;
+    private CustomMapView mapView;
     private AutoCompleteTextView pointA;
     private AutoCompleteTextView pointB;
     private CircleImageView showMyLocationBtn;

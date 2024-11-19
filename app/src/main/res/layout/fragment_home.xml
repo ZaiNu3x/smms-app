@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".fragments.dashboard_menu.HomeFragment">
 
-    <org.osmdroid.views.MapView
+    <group.intelliboys.smms.components.ui.CustomMapView
         android:id="@+id/home_map"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
