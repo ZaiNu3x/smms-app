@@ -43,7 +43,6 @@ import org.osmdroid.events.ScrollEvent;
 import org.osmdroid.events.ZoomEvent;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
-import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.Polyline;
 
@@ -294,53 +293,7 @@ public class HomeFragment extends Fragment {
         });
 
         navContainerBtn.setOnClickListener(v -> {
-            if (navContainer.getVisibility() == View.VISIBLE) {
-                navContainer.animate().alpha(0f).setListener(new Animator.AnimatorListener() {
-                    @Override
-                    public void onAnimationStart(@NonNull Animator animator) {
-
-                    }
-
-                    @Override
-                    public void onAnimationEnd(@NonNull Animator animator) {
-                        navContainer.setVisibility(View.INVISIBLE);
-                        viewModel.setNavContainerVisible(false);
-                    }
-
-                    @Override
-                    public void onAnimationCancel(@NonNull Animator animator) {
-
-                    }
-
-                    @Override
-                    public void onAnimationRepeat(@NonNull Animator animator) {
-
-                    }
-                });
-            } else {
-                navContainer.animate().alpha(1f).setListener(new Animator.AnimatorListener() {
-                    @Override
-                    public void onAnimationStart(@NonNull Animator animator) {
-                        navContainer.setVisibility(View.VISIBLE);
-                        viewModel.setNavContainerVisible(true);
-                    }
-
-                    @Override
-                    public void onAnimationEnd(@NonNull Animator animator) {
-
-                    }
-
-                    @Override
-                    public void onAnimationCancel(@NonNull Animator animator) {
-
-                    }
-
-                    @Override
-                    public void onAnimationRepeat(@NonNull Animator animator) {
-
-                    }
-                });
-            }
+            navigationContainerClicked();
         });
 
         pointA.setOnLongClickListener(v -> {
@@ -488,22 +441,19 @@ public class HomeFragment extends Fragment {
             markerA = new Marker(mapView);
         }
 
-        mapView.getOverlays().remove(markerA);
-        mapView.getOverlays().remove(routeLine);
+        mapView.removeMarker(markerA);
+        mapView.removeRoute(routeLine);
         markerA.setPosition(geoPoint);
-        markerA.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+
         @SuppressLint({"UseCompatLoadingForDrawables", "ResourceType"})
         Drawable icon = getResources().getDrawable(R.drawable.ic_start_pin);
-        markerA.setIcon(icon);
-        mapView.getOverlays().add(markerA);
-        mapView.invalidate();
+        mapView.addMarker(markerA, icon);
     }
 
     public void deleteMarkerA() {
-        mapView.getOverlays().remove(markerA);
-        mapView.getOverlays().remove(routeLine);
+        mapView.removeMarker(markerA);
+        mapView.removeRoute(routeLine);
         markerA = null;
-        mapView.invalidate();
 
         viewModel.setMarkerACoordinates(null);
         viewModel.setRoutePoints(null);
@@ -515,22 +465,19 @@ public class HomeFragment extends Fragment {
             markerB = new Marker(mapView);
         }
 
-        mapView.getOverlays().remove(markerB);
-        mapView.getOverlays().remove(routeLine);
+        mapView.removeMarker(markerB);
+        mapView.removeRoute(routeLine);
         markerB.setPosition(geoPoint);
-        markerB.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+
         @SuppressLint({"UseCompatLoadingForDrawables", "ResourceType"})
         Drawable icon = getResources().getDrawable(R.drawable.ic_end_pin);
-        markerB.setIcon(icon);
-        mapView.getOverlays().add(markerB);
-        mapView.invalidate();
+        mapView.addMarker(markerB, icon);
     }
 
     public void deleteMarkerB() {
-        mapView.getOverlays().remove(markerB);
-        mapView.getOverlays().remove(routeLine);
+        mapView.removeMarker(markerB);
+        mapView.removeRoute(routeLine);
         markerB = null;
-        mapView.invalidate();
 
         viewModel.setMarkerBCoordinates(null);
         viewModel.setRoutePoints(null);
@@ -538,14 +485,14 @@ public class HomeFragment extends Fragment {
     }
 
     public void drawRouteOnMap(List<GeoPoint> geoPoints) {
-        mapView.getOverlays().remove(routeLine);
+        mapView.removeRoute(routeLine);
         routeLine.setPoints(geoPoints);
         routeLine.setColor(Color.rgb(62, 108, 237));
         routeLine.setWidth(10);
-        mapView.getOverlays().add(routeLine);
+        mapView.drawRoute(routeLine);
         viewModel.setRoutePoints(List.copyOf(geoPoints));
+        navigationContainerClicked();
         showRouteInfoContainer();
-        mapView.invalidate();
     }
 
     public void showRouteInfoContainer() {
@@ -574,7 +521,7 @@ public class HomeFragment extends Fragment {
 
                 }
             });
-        } else {
+        } else if (routeInfoContainer.getVisibility() == View.INVISIBLE && (markerA != null && markerB != null)) {
             routeInfoContainer.animate().alpha(1f).setListener(new Animator.AnimatorListener() {
                 @Override
                 public void onAnimationStart(@NonNull Animator animator) {
@@ -624,6 +571,56 @@ public class HomeFragment extends Fragment {
         }
 
         return polyline;
+    }
+
+    public void navigationContainerClicked() {
+        if (navContainer.getVisibility() == View.VISIBLE) {
+            navContainer.animate().alpha(0f).setListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(@NonNull Animator animator) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(@NonNull Animator animator) {
+                    navContainer.setVisibility(View.INVISIBLE);
+                    viewModel.setNavContainerVisible(false);
+                }
+
+                @Override
+                public void onAnimationCancel(@NonNull Animator animator) {
+
+                }
+
+                @Override
+                public void onAnimationRepeat(@NonNull Animator animator) {
+
+                }
+            });
+        } else {
+            navContainer.animate().alpha(1f).setListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(@NonNull Animator animator) {
+                    navContainer.setVisibility(View.VISIBLE);
+                    viewModel.setNavContainerVisible(true);
+                }
+
+                @Override
+                public void onAnimationEnd(@NonNull Animator animator) {
+
+                }
+
+                @Override
+                public void onAnimationCancel(@NonNull Animator animator) {
+
+                }
+
+                @Override
+                public void onAnimationRepeat(@NonNull Animator animator) {
+
+                }
+            });
+        }
     }
 
     @Override
