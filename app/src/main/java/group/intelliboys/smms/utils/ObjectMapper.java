@@ -4,12 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-import org.json.JSONArray;
-
 import java.util.List;
 import java.util.Map;
 
-import group.intelliboys.smms.models.data.user.User;
+import group.intelliboys.smms.orm.data.User;
+
 
 public class ObjectMapper {
     private static com.fasterxml.jackson.databind.ObjectMapper mapper;

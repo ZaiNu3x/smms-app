@@ -31,7 +31,7 @@ import group.intelliboys.smms.configs.NetworkConfig;
 import group.intelliboys.smms.fragments.forgot_password.ForgotPasswordFragment;
 import group.intelliboys.smms.fragments.forgot_password.ForgotPasswordVerificationFragment;
 import group.intelliboys.smms.fragments.forgot_password.SearchAccountFragment;
-import group.intelliboys.smms.models.data.user.User;
+import group.intelliboys.smms.orm.data.User;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.MediaType;
@@ -88,7 +88,6 @@ public class ServerAPIs {
                                     try {
                                         Map<?, ?> profileData = ObjectMapper.convertJsonToMapObject(body);
                                         User user = ObjectMapper.convertMapObjectToUser(profileData);
-                                        Log.i("", user.toString());
 
                                         // THIS CODE WILL BE EXECUTED AFTER USER PROFILE DATA SAVED INTO LOCAL DATABASE.
                                         Intent intent = new Intent(activity, HomeActivity.class);
