@@ -44,6 +44,9 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
     private ImageButton rightWarningIcon;
     private TextView speedTxtView;
     private TextView statusTxtView;
+    private TextView speedLimitTxtView;
+    private TextView roadTypeTxtView;
+    private TextView remDistanceTxtView;
 
     private MediaPlayer mediaPlayer;
     private SensorManager sensorManager;
@@ -67,14 +70,14 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
         rightWarningIcon = view.findViewById(R.id.rightWarningIcon);
         speedTxtView = view.findViewById(R.id.speedTextView);
         statusTxtView = view.findViewById(R.id.statusTextView);
+        remDistanceTxtView = view.findViewById(R.id.remainingDistance);
+        roadTypeTxtView = view.findViewById(R.id.roadType);
+        speedLimitTxtView = view.findViewById(R.id.speedLimit);
 
         mapView.setTileSource(TileSourceFactory.MAPNIK);
         mapView.setBuiltInZoomControls(false);
         mapView.setMultiTouchControls(true);
         mapView.setMinZoomLevel(5d);
-        mapView.getController().setCenter(new GeoPoint(12.975775121410635d,
-                121.79874219633962));
-        mapView.getController().setZoom(6.5d);
 
         viewModel = HomeFragmentViewModel.getInstance();
         routeLine = new Polyline(mapView);
@@ -238,11 +241,11 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
     }
 
     public void drawRouteOnMap(List<GeoPoint> geoPoints) {
-        mapView.getOverlays().remove(routeLine);
+        mapView.removeRoute(routeLine);
         routeLine.setPoints(geoPoints);
         routeLine.setColor(Color.rgb(62, 108, 237));
         routeLine.setWidth(10);
-        mapView.getOverlays().add(routeLine);
+        mapView.drawRoute(routeLine);
         mapView.invalidate();
     }
 }

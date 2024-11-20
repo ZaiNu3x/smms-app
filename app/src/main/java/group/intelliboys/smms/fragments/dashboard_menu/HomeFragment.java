@@ -248,7 +248,7 @@ public class HomeFragment extends Fragment {
                             });
                         } else if (pointB.hasFocus()) {
                             homeActivity.runOnUiThread(() -> {
-                                mapView.getOverlays().remove(myLocation);
+                                mapView.removeMarker(myLocation);
                                 setMarkerB(geoPoint);
                                 osrmService.getFullAddressOnCoordinates(geoPoint, pointB);
 
@@ -266,8 +266,8 @@ public class HomeFragment extends Fragment {
 
                             myLocation.setPosition(geoPoint);
                             myLocation.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-                            mapView.getOverlays().remove(myLocation);
-                            mapView.getOverlays().add(myLocation);
+                            mapView.removeMarker(myLocation);
+                            mapView.addMarker(myLocation);
 
                             if (isAnimated) {
                                 mapView.getController()

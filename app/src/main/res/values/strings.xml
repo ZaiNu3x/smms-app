@@ -38,7 +38,7 @@
     <string name="choose_where_to_start">Choose where to start</string>
     <string name="choose_destination">Choose destination</string>
     <string name="circle">circle</string>
-    <string name="agrresive_cornering">Status: Aggressive Cornering!</string>
+    <string name="agrresive_cornering">Status: Warning!</string>
     <string name="speed_text">Speed: %1$.2f km/h</string>
     <string name="status_over_speeding">Status: Over Speeding!</string>
     <string name="status_normal">Status: Normal</string>
