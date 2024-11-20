@@ -29,22 +29,22 @@ android {
 }
 
 dependencies {
-    implementation "androidx.room:room-runtime:2.4.2"
+    implementation 'org.projectlombok:lombok:1.18.24'
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
+    implementation "androidx.room:room-runtime:2.4.2" 
     annotationProcessor "androidx.room:room-compiler:2.4.2"
     implementation 'com.google.android.gms:play-services-maps:18.0.0'
     implementation 'com.google.maps.android:android-maps-utils:2.2.5'
     implementation 'org.osmdroid:osmdroid-android:6.1.10'
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.4.1'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1'
-    annotationProcessor 'org.projectlombok:lombok:1.18.24'
-    implementation 'org.projectlombok:lombok:1.18.24'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.9.0'
     implementation 'androidx.drawerlayout:drawerlayout:1.2.0'
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
     implementation 'com.google.android.gms:play-services-location:21.0.1'
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation "com.squareup.okhttp3:okhttp:4.12.0"
     implementation 'de.hdodenhof:circleimageview:3.1.0'
     implementation 'androidx.appcompat:appcompat:1.4.1'
     implementation 'com.google.android.material:material:1.5.0'

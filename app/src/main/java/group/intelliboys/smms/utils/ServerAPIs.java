@@ -32,6 +32,8 @@ import group.intelliboys.smms.fragments.forgot_password.ForgotPasswordFragment;
 import group.intelliboys.smms.fragments.forgot_password.ForgotPasswordVerificationFragment;
 import group.intelliboys.smms.fragments.forgot_password.SearchAccountFragment;
 import group.intelliboys.smms.orm.data.User;
+import group.intelliboys.smms.orm.repository.UserRepository;
+import group.intelliboys.smms.services.DatabaseService;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.MediaType;
@@ -47,12 +49,20 @@ public class ServerAPIs {
     private String serverIpAddress;
     private final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
+    private DatabaseService databaseService;
+
     public ServerAPIs(Activity activity) {
         this.okHttpClient = CustomOkHttpClient.getOkHttpClient(activity);
         this.activity = activity;
     }
 
-    // ==================================== USER SIGN IN ====================================
+    public ServerAPIs(Activity activity, DatabaseService service) {
+        okHttpClient = CustomOkHttpClient.getOkHttpClient(activity);
+        this.activity = activity;
+        databaseService = service;
+    }
+
+// ==================================== USER SIGN IN ====================================
 
     // THIS BLOCK OF CODE IS SPECIALLY CODED FOR SIGN IN ACTIVITY ONLY
     public void getUserProfileFromRemoteServer(String deviceId, String deviceName, String authToken) {
@@ -84,22 +94,23 @@ public class ServerAPIs {
                             String body = response.body().string();
 
                             if (!body.isEmpty()) {
-                                activity.runOnUiThread(() -> {
-                                    try {
-                                        Map<?, ?> profileData = ObjectMapper.convertJsonToMapObject(body);
-                                        User user = ObjectMapper.convertMapObjectToUser(profileData);
+                                try {
+                                    Map<?, ?> profileData = ObjectMapper.convertJsonToMapObject(body);
+                                    User user = ObjectMapper.convertMapObjectToUser(profileData);
+                                    user.setToken(authToken);
+                                    new UserRepository(databaseService).insertUser(user);
 
+                                    activity.runOnUiThread(() -> {
                                         // THIS CODE WILL BE EXECUTED AFTER USER PROFILE DATA SAVED INTO LOCAL DATABASE.
                                         Intent intent = new Intent(activity, HomeActivity.class);
                                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                         activity.startActivity(intent);
-
                                         postSignIn(signInActivity);
                                         Commons.toastMessage(activity, "Authentication Success!");
-                                    } catch (JsonProcessingException e) {
-                                        throw new RuntimeException(e);
-                                    }
-                                });
+                                    });
+                                } catch (JsonProcessingException e) {
+                                    throw new RuntimeException(e);
+                                }
                             }
                         }
                     }

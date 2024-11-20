@@ -4,12 +4,13 @@ import java.util.List;
 
 import group.intelliboys.smms.orm.dao.UserDao;
 import group.intelliboys.smms.orm.data.User;
+import group.intelliboys.smms.services.DatabaseService;
 
 public class UserRepository {
-    private UserDao userDao;
+    private final UserDao userDao;
 
-    public UserRepository(UserDao userDao) {
-        this.userDao = userDao;
+    public UserRepository(DatabaseService databaseService) {
+        userDao = databaseService.getAppDatabase().userDao();
     }
 
     public void insertUser(User user) {
