@@ -24,4 +24,17 @@ public class UserRepository {
     public List<User> getAllUser() {
         return userDao.getAllUsers();
     }
+
+    // THIS BLOCK OF CODE USE FOR CLEARING ALL USER INFORMATION IN DATABASE
+    public void deleteAllUsers() {
+        userDao.deleteAllUsers();
+    }
+
+    public void updateUser(User user) {
+        userDao.updateUser(user);
+    }
+
+    public User getAuthenticatedUser() {
+        return userDao.getAuthenticatedUser();
+    }
 }

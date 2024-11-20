@@ -30,6 +30,9 @@ import group.intelliboys.smms.fragments.dashboard_menu.SettingsFragment;
 import group.intelliboys.smms.fragments.dashboard_menu.TravelHistoryFragment;
 import group.intelliboys.smms.fragments.profile_update.ProfileFragment;
 import group.intelliboys.smms.models.data.view_models.HomeFragmentViewModel;
+import group.intelliboys.smms.orm.repository.UserRepository;
+import group.intelliboys.smms.services.DatabaseService;
+import group.intelliboys.smms.utils.Executor;
 
 public class HomeActivity extends AppCompatActivity implements NavigationView
         .OnNavigationItemSelectedListener {
@@ -115,12 +118,17 @@ public class HomeActivity extends AppCompatActivity implements NavigationView
                         .setTitle("Logout?")
                         .setMessage("Are you sure you want to logout?")
                         .setPositiveButton(android.R.string.yes, (dialogInterface, i) -> {
-                            HomeFragmentViewModel viewModel = HomeFragmentViewModel.getInstance();
-                            viewModel.destroy();
+                            Executor.run(() -> {
+                                HomeFragmentViewModel viewModel = HomeFragmentViewModel.getInstance();
+                                viewModel.destroy();
 
-                            Intent intent = new Intent(getApplicationContext(), SignInActivity.class);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                            startActivity(intent);
+                                new UserRepository(DatabaseService.getInstance(getApplicationContext()))
+                                        .deleteAllUsers();
+
+                                Intent intent = new Intent(getApplicationContext(), SignInActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                startActivity(intent);
+                            });
                         })
                         .setNegativeButton(android.R.string.no, ((dialogInterface, i) -> {
                             // CODE

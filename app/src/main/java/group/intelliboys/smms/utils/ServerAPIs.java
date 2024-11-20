@@ -33,6 +33,7 @@ import group.intelliboys.smms.fragments.forgot_password.ForgotPasswordVerificati
 import group.intelliboys.smms.fragments.forgot_password.SearchAccountFragment;
 import group.intelliboys.smms.orm.data.User;
 import group.intelliboys.smms.orm.repository.UserRepository;
+import group.intelliboys.smms.security.SecurityContextHolder;
 import group.intelliboys.smms.services.DatabaseService;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -49,18 +50,11 @@ public class ServerAPIs {
     private String serverIpAddress;
     private final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
-    private DatabaseService databaseService;
-
     public ServerAPIs(Activity activity) {
         this.okHttpClient = CustomOkHttpClient.getOkHttpClient(activity);
         this.activity = activity;
     }
 
-    public ServerAPIs(Activity activity, DatabaseService service) {
-        okHttpClient = CustomOkHttpClient.getOkHttpClient(activity);
-        this.activity = activity;
-        databaseService = service;
-    }
 
 // ==================================== USER SIGN IN ====================================
 
@@ -98,7 +92,11 @@ public class ServerAPIs {
                                     Map<?, ?> profileData = ObjectMapper.convertJsonToMapObject(body);
                                     User user = ObjectMapper.convertMapObjectToUser(profileData);
                                     user.setToken(authToken);
-                                    new UserRepository(databaseService).insertUser(user);
+
+                                    UserRepository repository = new UserRepository(DatabaseService.getInstance(activity));
+                                    repository.deleteAllUsers();
+                                    repository.insertUser(user);
+                                    SecurityContextHolder.getInstance().setAuthenticatedUser(user);
 
                                     activity.runOnUiThread(() -> {
                                         // THIS CODE WILL BE EXECUTED AFTER USER PROFILE DATA SAVED INTO LOCAL DATABASE.

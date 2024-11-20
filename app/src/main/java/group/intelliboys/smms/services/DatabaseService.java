@@ -10,12 +10,12 @@ public class DatabaseService {
     private static DatabaseService instance;
     private AppDatabase appDatabase;
 
-    public DatabaseService(Context context) {
+    private DatabaseService(Context context) {
         appDatabase = Room.databaseBuilder(context,
                 AppDatabase.class, "app_database").build();
     }
 
-    public static DatabaseService getAppDatabase(Context context) {
+    public static DatabaseService getInstance(Context context) {
         if (instance == null) {
             instance = new DatabaseService(context);
         }

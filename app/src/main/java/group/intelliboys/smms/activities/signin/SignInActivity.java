@@ -27,7 +27,6 @@ import group.intelliboys.smms.activities.forgot_password.ForgotPasswordActivity;
 import group.intelliboys.smms.activities.signup.SignUpActivity;
 import group.intelliboys.smms.configs.DeviceSpecs;
 import group.intelliboys.smms.configs.NetworkConfig;
-import group.intelliboys.smms.services.DatabaseService;
 import group.intelliboys.smms.utils.ServerAPIs;
 import lombok.Getter;
 
@@ -54,7 +53,6 @@ public class SignInActivity extends AppCompatActivity {
 
     private final NetworkConfig networkConfig = NetworkConfig.getInstance();
     private ServerAPIs serverAPIs;
-    private DatabaseService databaseService;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -69,8 +67,7 @@ public class SignInActivity extends AppCompatActivity {
         signUpButton = findViewById(R.id.signUpButton);
         signInProgress = findViewById(R.id.signInProgress);
 
-        databaseService = DatabaseService.getAppDatabase(getApplicationContext());
-        serverAPIs = new ServerAPIs(this, databaseService);
+        serverAPIs = new ServerAPIs(this);
 
         signInEmailField.addTextChangedListener(new TextWatcher() {
             private final Handler handler = new Handler(Looper.getMainLooper());
@@ -81,7 +78,6 @@ public class SignInActivity extends AppCompatActivity {
 
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
             }
 
             @Override
