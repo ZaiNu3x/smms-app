@@ -5,12 +5,16 @@ import java.util.List;
 import group.intelliboys.smms.orm.dao.UserDao;
 import group.intelliboys.smms.orm.data.User;
 import group.intelliboys.smms.services.DatabaseService;
+import group.intelliboys.smms.utils.ContextHolder;
 
 public class UserRepository {
     private final UserDao userDao;
 
-    public UserRepository(DatabaseService databaseService) {
-        userDao = databaseService.getAppDatabase().userDao();
+    public UserRepository() {
+        DatabaseService service = DatabaseService.getInstance(ContextHolder.getInstance()
+                .getContext());
+
+        userDao = service.getAppDatabase().userDao();
     }
 
     public void insertUser(User user) {

@@ -31,7 +31,6 @@ import group.intelliboys.smms.fragments.dashboard_menu.TravelHistoryFragment;
 import group.intelliboys.smms.fragments.profile_update.ProfileFragment;
 import group.intelliboys.smms.models.data.view_models.HomeFragmentViewModel;
 import group.intelliboys.smms.orm.repository.UserRepository;
-import group.intelliboys.smms.services.DatabaseService;
 import group.intelliboys.smms.utils.Executor;
 
 public class HomeActivity extends AppCompatActivity implements NavigationView
@@ -122,8 +121,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView
                                 HomeFragmentViewModel viewModel = HomeFragmentViewModel.getInstance();
                                 viewModel.destroy();
 
-                                new UserRepository(DatabaseService.getInstance(getApplicationContext()))
-                                        .deleteAllUsers();
+                                new UserRepository().deleteAllUsers();
 
                                 Intent intent = new Intent(getApplicationContext(), SignInActivity.class);
                                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

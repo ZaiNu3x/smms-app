@@ -9,7 +9,7 @@ import group.intelliboys.smms.activities.dashboard.HomeActivity;
 import group.intelliboys.smms.activities.signin.SignInActivity;
 import group.intelliboys.smms.orm.data.User;
 import group.intelliboys.smms.orm.repository.UserRepository;
-import group.intelliboys.smms.services.DatabaseService;
+import group.intelliboys.smms.utils.ContextHolder;
 import group.intelliboys.smms.utils.Executor;
 
 public class MainActivity extends AppCompatActivity {
@@ -17,10 +17,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // SETUP
+        ContextHolder.getInstance().setContext(getApplicationContext());
+
         Executor.run(() -> {
             // CHECK IF USER CACHE PRESENT IN THE DATABASE
-            User authenticatedUser = new UserRepository(DatabaseService.getInstance(getApplicationContext()))
-                    .getAuthenticatedUser();
+            User authenticatedUser = new UserRepository().getAuthenticatedUser();
 
             if (authenticatedUser != null) {
                 // PREPARE FIRST THE USER DATA BEFORE REDIRECTING TO HOME

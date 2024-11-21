@@ -34,7 +34,6 @@ import group.intelliboys.smms.fragments.forgot_password.SearchAccountFragment;
 import group.intelliboys.smms.orm.data.User;
 import group.intelliboys.smms.orm.repository.UserRepository;
 import group.intelliboys.smms.security.SecurityContextHolder;
-import group.intelliboys.smms.services.DatabaseService;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.MediaType;
@@ -93,7 +92,7 @@ public class ServerAPIs {
                                     User user = ObjectMapper.convertMapObjectToUser(profileData);
                                     user.setToken(authToken);
 
-                                    UserRepository repository = new UserRepository(DatabaseService.getInstance(activity));
+                                    UserRepository repository = new UserRepository();
                                     repository.deleteAllUsers();
                                     repository.insertUser(user);
                                     SecurityContextHolder.getInstance().setAuthenticatedUser(user);

@@ -4,15 +4,16 @@ import android.content.Context;
 
 import androidx.room.Room;
 
+import group.intelliboys.smms.configs.DatabaseConfig;
 import group.intelliboys.smms.orm.AppDatabase;
 
 public class DatabaseService {
     private static DatabaseService instance;
-    private AppDatabase appDatabase;
+    private final AppDatabase appDatabase;
 
     private DatabaseService(Context context) {
         appDatabase = Room.databaseBuilder(context,
-                AppDatabase.class, "app_database").build();
+                AppDatabase.class, DatabaseConfig.NAME).build();
     }
 
     public static DatabaseService getInstance(Context context) {
