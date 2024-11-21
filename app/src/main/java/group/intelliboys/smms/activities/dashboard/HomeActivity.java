@@ -30,7 +30,10 @@ import group.intelliboys.smms.fragments.dashboard_menu.SettingsFragment;
 import group.intelliboys.smms.fragments.dashboard_menu.TravelHistoryFragment;
 import group.intelliboys.smms.fragments.profile_update.ProfileFragment;
 import group.intelliboys.smms.models.data.view_models.HomeFragmentViewModel;
+import group.intelliboys.smms.orm.data.User;
 import group.intelliboys.smms.orm.repository.UserRepository;
+import group.intelliboys.smms.security.SecurityContextHolder;
+import group.intelliboys.smms.utils.Converter;
 import group.intelliboys.smms.utils.Executor;
 
 public class HomeActivity extends AppCompatActivity implements NavigationView
@@ -41,11 +44,16 @@ public class HomeActivity extends AppCompatActivity implements NavigationView
     private CircleImageView profilePic;
     private TextView navUsername;
     private TextView navUserEmail;
+    private User authenticatedUser;
 
     @SuppressLint({"CommitTransaction", "ResourceType", "MissingInflatedId", "SetTextI18n"})
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        authenticatedUser = SecurityContextHolder.getInstance()
+                .getAuthenticatedUser();
+
         setContentView(R.layout.activity_home);
         setTitle(null);
 
@@ -75,13 +83,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView
             navigationView.setCheckedItem(R.id.nav_home);
         }
 
-        navUsername.setText("ZaiNu3X");
-        navUserEmail.setText("zainu3x007@gmail.com");
-
-        profilePic.setOnClickListener((view) -> {
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, ProfileFragment.class, null).commit();
-            drawerLayout.closeDrawer(GravityCompat.START);
-        });
+        setupProfileInfo();
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -117,16 +119,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView
                         .setTitle("Logout?")
                         .setMessage("Are you sure you want to logout?")
                         .setPositiveButton(android.R.string.yes, (dialogInterface, i) -> {
-                            Executor.run(() -> {
-                                HomeFragmentViewModel viewModel = HomeFragmentViewModel.getInstance();
-                                viewModel.destroy();
-
-                                new UserRepository().deleteAllUsers();
-
-                                Intent intent = new Intent(getApplicationContext(), SignInActivity.class);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                startActivity(intent);
-                            });
+                            logout();
                         })
                         .setNegativeButton(android.R.string.no, ((dialogInterface, i) -> {
                             // CODE
@@ -137,6 +130,34 @@ public class HomeActivity extends AppCompatActivity implements NavigationView
 
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void logout() {
+        Executor.run(() -> {
+            HomeFragmentViewModel viewModel = HomeFragmentViewModel.getInstance();
+            viewModel.destroy();
+            new UserRepository().deleteAllUsers();
+
+            Intent intent = new Intent(getApplicationContext(), SignInActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+        });
+    }
+
+    public void setupProfileInfo() {
+        StringBuilder builder = new StringBuilder();
+        builder.append(authenticatedUser.getLastName()).append(", ")
+                .append(authenticatedUser.getFirstName());
+
+        // USER INFO SETUP
+        navUsername.setText(new String(builder));
+        navUserEmail.setText(authenticatedUser.getEmail());
+        profilePic.setImageBitmap(Converter.byteArrayToBitmap(authenticatedUser.getProfilePic()));
+
+        profilePic.setOnClickListener((view) -> {
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, ProfileFragment.class, null).commit();
+            drawerLayout.closeDrawer(GravityCompat.START);
+        });
     }
 
     @Override

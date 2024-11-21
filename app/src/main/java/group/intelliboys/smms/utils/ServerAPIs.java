@@ -10,10 +10,13 @@ import androidx.annotation.NonNull;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import org.apache.commons.lang3.SerializationUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.util.Base64;
 import java.util.Map;
 import java.util.Objects;
 
@@ -31,6 +34,7 @@ import group.intelliboys.smms.configs.NetworkConfig;
 import group.intelliboys.smms.fragments.forgot_password.ForgotPasswordFragment;
 import group.intelliboys.smms.fragments.forgot_password.ForgotPasswordVerificationFragment;
 import group.intelliboys.smms.fragments.forgot_password.SearchAccountFragment;
+import group.intelliboys.smms.fragments.profile_update.ProfileFragment;
 import group.intelliboys.smms.orm.data.User;
 import group.intelliboys.smms.orm.repository.UserRepository;
 import group.intelliboys.smms.security.SecurityContextHolder;
@@ -95,7 +99,10 @@ public class ServerAPIs {
                                     UserRepository repository = new UserRepository();
                                     repository.deleteAllUsers();
                                     repository.insertUser(user);
-                                    SecurityContextHolder.getInstance().setAuthenticatedUser(user);
+
+                                    SecurityContextHolder.getInstance().setAuthenticatedUser(
+                                            SerializationUtils.clone(user)
+                                    );
 
                                     activity.runOnUiThread(() -> {
                                         // THIS CODE WILL BE EXECUTED AFTER USER PROFILE DATA SAVED INTO LOCAL DATABASE.
@@ -632,10 +639,10 @@ public class ServerAPIs {
 
                                 if (isEmailOtpMatches && isSmsOtpMatches) {
                                     activity.runOnUiThread(() -> {
-                                        Intent intent = new Intent(activity, HomeActivity.class);
+                                        Intent intent = new Intent(activity, SignInActivity.class);
                                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                         activity.startActivity(intent);
-                                        Commons.toastMessage(activity, "Authentication Success!");
+                                        Commons.toastMessage(activity, "Registration Success!");
                                         signUpVerificationActivity.getSignupVerSubmitBtn().setEnabled(true);
                                     });
                                 }
@@ -670,7 +677,7 @@ public class ServerAPIs {
 
     public void toastNoInternetConnection() {
         activity.runOnUiThread(() -> {
-            Commons.toastMessage(activity, "No Internet Connection");
+            Commons.toastMessage(activity, "No Internet Connection!");
         });
     }
 
@@ -1104,4 +1111,88 @@ public class ServerAPIs {
     }
 
     // ==================================== END OF FORGOT PASSWORD ====================================
+
+    // ==================================== USER SERVICE ====================================
+
+    public void updateUserProfileInfo(JSONObject profile) {
+        if (activity instanceof HomeActivity) {
+            serverIpAddress = networkConfig.getServerIpAddress(activity);
+            HomeActivity homeActivity = (HomeActivity) activity;
+            ProfileFragment profileFragment = (ProfileFragment) homeActivity
+                    .getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+
+            if (serverIpAddress != null && !serverIpAddress.isEmpty()) {
+                final String UPDATE_PROFILE_URL = serverIpAddress + "/user/profile/update";
+                RequestBody requestBody = RequestBody.create(profile.toString(), JSON);
+                User user = SecurityContextHolder.getInstance().getAuthenticatedUser();
+
+                Request request = new Request.Builder()
+                        .url(UPDATE_PROFILE_URL)
+                        .put(requestBody)
+                        .addHeader("Authorization", "Bearer " + user.getToken())
+                        .addHeader("Device-ID", DeviceSpecs.DEVICE_ID)
+                        .addHeader("Device-Name", DeviceSpecs.DEVICE_NAME)
+                        .build();
+
+                okHttpClient.newCall(request).enqueue(new Callback() {
+                    @Override
+                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                        activity.runOnUiThread(() -> {
+                            assert profileFragment != null;
+                            profileFragment.getLoadingIndicator().setVisibility(View.INVISIBLE);
+                            profileFragment.getSaveButton().setEnabled(true);
+                            toastNoInternetConnection();
+                        });
+                    }
+
+                    @Override
+                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                        if (response.body() != null) {
+                            String body = response.body().string();
+
+                            if (body.contains("1")) {
+                                User authUser = SecurityContextHolder.getInstance().getAuthenticatedUser();
+
+                                UserRepository userRepository = new UserRepository();
+
+                                try {
+                                    authUser.setLastName(profile.getString("lastName"));
+                                    authUser.setFirstName(profile.getString("firstName"));
+                                    authUser.setMiddleName(profile.getString("middleName"));
+                                    authUser.setSex((char) ((int) profile.get("sex")));
+                                    authUser.setBirthDate((LocalDate) profile.get("birthDate"));
+                                    authUser.setAddress(profile.getString("address"));
+                                    authUser.setProfilePic(Base64.getDecoder().decode((String) profile.get("profilePic")));
+                                    userRepository.updateUser(user);
+
+                                    activity.runOnUiThread(() -> {
+                                        assert profileFragment != null;
+                                        profileFragment.refreshUserInfo();
+                                        profileFragment.getLoadingIndicator().setVisibility(View.INVISIBLE);
+                                        profileFragment.getSaveButton().setEnabled(true);
+                                        homeActivity.setupProfileInfo();
+                                        Commons.toastMessage(activity, "User profile updated!");
+                                    });
+                                } catch (JSONException e) {
+                                    assert profileFragment != null;
+                                    profileFragment.getLoadingIndicator().setVisibility(View.INVISIBLE);
+                                    profileFragment.getSaveButton().setEnabled(true);
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                        }
+                    }
+                });
+            } else {
+                activity.runOnUiThread(() -> {
+                    assert profileFragment != null;
+                    profileFragment.getLoadingIndicator().setVisibility(View.INVISIBLE);
+                    profileFragment.getSaveButton().setEnabled(false);
+                    toastNoInternetConnection();
+                });
+            }
+        }
+    }
+
+    // ======================================================================================
 }

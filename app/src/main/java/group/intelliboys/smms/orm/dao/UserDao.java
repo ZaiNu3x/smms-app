@@ -31,6 +31,6 @@ public interface UserDao {
     @Query("SELECT * FROM user")
     List<User> getAllUsers();
 
-    @Query("DELETE FROM user WHERE 1=1")
+    @Query("DELETE FROM user")
     void deleteAllUsers();
 }
