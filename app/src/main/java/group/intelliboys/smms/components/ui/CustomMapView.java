@@ -58,7 +58,7 @@ public class CustomMapView extends MapView {
     }
 
     public void drawRoute(Polyline route) {
-        getOverlays().add(route);
+        getOverlayManager().add(0, route);
         invalidate();
     }
 

@@ -10,8 +10,10 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.Location;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,8 +23,15 @@ import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
+
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.Priority;
 
 import org.osmdroid.config.Configuration;
 import org.osmdroid.library.BuildConfig;
@@ -36,6 +45,7 @@ import java.util.List;
 import group.intelliboys.smms.R;
 import group.intelliboys.smms.components.ui.CustomMapView;
 import group.intelliboys.smms.models.data.view_models.HomeFragmentViewModel;
+import group.intelliboys.smms.services.LocationService;
 import group.intelliboys.smms.utils.Commons;
 
 public class DrivingModeFragment extends Fragment implements SensorEventListener {
@@ -58,6 +68,11 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
     private Marker markerA;
     private Marker markerB;
     private Polyline routeLine;
+
+    private static final int LOCATION_REQUEST_CODE = 1;
+    private FusedLocationProviderClient locationProviderClient;
+    private LocationCallback locationCallback;
+    private LocationRequest locationRequest;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -117,17 +132,39 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
 
         if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
-        } else {
-            requestLocationUpdates();
         }
 
+        requestLocationUpdates();
         return view;
     }
 
     private void requestLocationUpdates() {
-        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(requireActivity(),
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_REQUEST_CODE);
         }
+
+        locationProviderClient = LocationService.getInstance().getLocationProviderClient();
+
+        if (locationRequest == null) {
+            locationRequest = new LocationRequest.Builder(3000)
+                    .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
+                    .build();
+        }
+
+        if (locationCallback == null) {
+            locationCallback = new LocationCallback() {
+                @Override
+                public void onLocationResult(@NonNull LocationResult locationResult) {
+                    Location location = locationResult.getLastLocation();
+                    assert location != null;
+                    Log.i("", location.toString());
+                }
+            };
+        }
+
+        locationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
     }
 
     @Override
@@ -142,61 +179,8 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
         if (sensorManager != null) {
             sensorManager.unregisterListener(this);
         }
-    }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        mapView.onResume();
-
-        if (sensorManager != null && accelerometer != null) {
-            sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-        }
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        mapView.onPause();
-
-        if (sensorManager != null) {
-            sensorManager.unregisterListener(this);
-        }
-    }
-
-    @Override
-    public void onSensorChanged(SensorEvent sensorEvent) {
-        // CODES
-        if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            float x = sensorEvent.values[0];
-            Log.i("", "X: " + x);
-
-            // LEFT LEANING
-            if (x >= 8) {
-                playWarningSound();
-                leftWarningIcon.setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
-                statusTxtView.setText(R.string.agrresive_cornering);
-            }
-
-            // RIGHT LEANING
-            else if (x <= -8) {
-                playWarningSound();
-                rightWarningIcon.setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
-                statusTxtView.setText(R.string.agrresive_cornering);
-            }
-
-            // NEUTRAL
-            else {
-                leftWarningIcon.setBackgroundColor(getResources().getColor(android.R.color.holo_blue_dark));
-                rightWarningIcon.setBackgroundColor(getResources().getColor(android.R.color.holo_blue_dark));
-                statusTxtView.setText(R.string.status_normal);
-            }
-        }
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int i) {
-        // CODES
+        locationProviderClient.removeLocationUpdates(locationCallback);
     }
 
     public void playWarningSound() {
@@ -247,5 +231,72 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
         routeLine.setWidth(10);
         mapView.drawRoute(routeLine);
         mapView.invalidate();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mapView.onResume();
+
+        if (sensorManager != null && accelerometer != null) {
+            sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        }
+
+        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(requireActivity(),
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_REQUEST_CODE);
+        }
+
+        locationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mapView.onPause();
+
+        if (sensorManager != null) {
+            sensorManager.unregisterListener(this);
+        }
+
+        locationProviderClient.removeLocationUpdates(locationCallback);
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent sensorEvent) {
+        // CODES
+        /*
+        if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            float x = sensorEvent.values[0];
+            Log.i("", "X: " + x);
+
+            // LEFT LEANING
+            if (x >= 8) {
+                playWarningSound();
+                leftWarningIcon.setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
+                statusTxtView.setText(R.string.agrresive_cornering);
+            }
+
+            // RIGHT LEANING
+            else if (x <= -8) {
+                playWarningSound();
+                rightWarningIcon.setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
+                statusTxtView.setText(R.string.agrresive_cornering);
+            }
+
+            // NEUTRAL
+            else {
+                leftWarningIcon.setBackgroundColor(getResources().getColor(android.R.color.holo_blue_dark));
+                rightWarningIcon.setBackgroundColor(getResources().getColor(android.R.color.holo_blue_dark));
+                statusTxtView.setText(R.string.status_normal);
+            }
+        }
+         */
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int i) {
+        // CODES
     }
 }
