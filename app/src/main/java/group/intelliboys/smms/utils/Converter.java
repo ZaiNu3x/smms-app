@@ -7,6 +7,7 @@ import androidx.room.TypeConverter;
 
 import java.io.ByteArrayOutputStream;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
@@ -21,6 +22,16 @@ public class Converter {
     @TypeConverter
     public static String localDateToString(LocalDate date) {
         return date == null ? null : date.format(formatter);
+    }
+
+    @TypeConverter
+    public static String localDateTimeToString(LocalDateTime dateTime) {
+        return dateTime == null ? null : dateTime.format(formatter);
+    }
+
+    @TypeConverter
+    public static LocalDateTime fromStringToLocalDateTime(String value) {
+        return value == null ? null : LocalDateTime.parse(value, formatter);
     }
 
     @TypeConverter

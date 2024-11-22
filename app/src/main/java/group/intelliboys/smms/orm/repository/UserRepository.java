@@ -11,10 +11,10 @@ public class UserRepository {
     private final UserDao userDao;
 
     public UserRepository() {
-        DatabaseService service = DatabaseService.getInstance(ContextHolder.getInstance()
+        DatabaseService databaseService = DatabaseService.getInstance(ContextHolder.getInstance()
                 .getContext());
 
-        userDao = service.getAppDatabase().userDao();
+        userDao = databaseService.getAppDatabase().userDao();
     }
 
     public void insertUser(User user) {
