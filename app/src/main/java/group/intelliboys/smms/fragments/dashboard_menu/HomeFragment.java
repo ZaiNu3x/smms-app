@@ -4,7 +4,9 @@ import android.Manifest;
 import android.animation.Animator;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
@@ -33,7 +35,6 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
 import com.google.maps.android.PolyUtil;
 
@@ -56,7 +57,11 @@ import group.intelliboys.smms.activities.dashboard.HomeActivity;
 import group.intelliboys.smms.components.ui.CustomMapView;
 import group.intelliboys.smms.fragments.driving_mode.DrivingModeFragment;
 import group.intelliboys.smms.models.data.view_models.HomeFragmentViewModel;
+import group.intelliboys.smms.orm.data.User;
+import group.intelliboys.smms.security.SecurityContextHolder;
+import group.intelliboys.smms.services.LocationService;
 import group.intelliboys.smms.services.OsrmService;
+import group.intelliboys.smms.utils.Converter;
 import lombok.Getter;
 
 @Getter
@@ -81,6 +86,7 @@ public class HomeFragment extends Fragment {
     private ConstraintLayout routeInfoContainer;
     private TextView distanceInKmLbl;
     private TextView durationTxtLbl;
+    private User authenticatedUser;
 
     @SuppressLint({"ClickableViewAccessibility", "MissingInflatedId", "SetTextI18n"})
     @Override
@@ -88,7 +94,8 @@ public class HomeFragment extends Fragment {
                              Bundle savedInstanceState) {
         Configuration.getInstance().setUserAgentValue(BuildConfig.APPLICATION_ID);
         View view = inflater.inflate(R.layout.fragment_home, container, false);
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
+        fusedLocationClient = LocationService.getInstance().getLocationProviderClient();
+        authenticatedUser = SecurityContextHolder.getInstance().getAuthenticatedUser();
 
         mapView = view.findViewById(R.id.home_map);
         pointA = view.findViewById(R.id.startPoint);
@@ -234,9 +241,22 @@ public class HomeFragment extends Fragment {
                         assert location != null;
                         GeoPoint geoPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
 
+                        if (myLocation == null) {
+                            myLocation = new Marker(mapView);
+                            myLocation.setPosition(geoPoint);
+                            myLocation.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+
+                            if (authenticatedUser != null && authenticatedUser.getProfilePic() != null) {
+                                Bitmap bitmap = Converter.byteArrayToBitmap(authenticatedUser.getProfilePic());
+                                Drawable drawable = new BitmapDrawable(bitmap);
+                                myLocation.setIcon(drawable);
+                            }
+
+                        }
+
                         if (pointA.hasFocus()) {
                             homeActivity.runOnUiThread(() -> {
-                                mapView.getOverlays().remove(myLocation);
+                                mapView.removeMarker(myLocation);
                                 setMarkerA(geoPoint);
                                 osrmService.getFullAddressOnCoordinates(geoPoint, pointA);
 
@@ -261,12 +281,6 @@ public class HomeFragment extends Fragment {
                                 viewModel.setMarkerBCoordinates(geoPoint);
                             });
                         } else {
-                            if (myLocation == null) {
-                                myLocation = new Marker(mapView);
-                            }
-
-                            myLocation.setPosition(geoPoint);
-                            myLocation.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
                             mapView.removeMarker(myLocation);
                             mapView.addMarker(myLocation);
 
