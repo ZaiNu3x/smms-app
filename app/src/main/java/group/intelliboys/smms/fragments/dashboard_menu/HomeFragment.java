@@ -4,9 +4,7 @@ import android.Manifest;
 import android.animation.Animator;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
@@ -61,7 +59,6 @@ import group.intelliboys.smms.orm.data.User;
 import group.intelliboys.smms.security.SecurityContextHolder;
 import group.intelliboys.smms.services.LocationService;
 import group.intelliboys.smms.services.OsrmService;
-import group.intelliboys.smms.utils.Converter;
 import lombok.Getter;
 
 @Getter
@@ -245,13 +242,6 @@ public class HomeFragment extends Fragment {
                             myLocation = new Marker(mapView);
                             myLocation.setPosition(geoPoint);
                             myLocation.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-
-                            if (authenticatedUser != null && authenticatedUser.getProfilePic() != null) {
-                                Bitmap bitmap = Converter.byteArrayToBitmap(authenticatedUser.getProfilePic());
-                                Drawable drawable = new BitmapDrawable(bitmap);
-                                myLocation.setIcon(drawable);
-                            }
-
                         }
 
                         if (pointA.hasFocus()) {
