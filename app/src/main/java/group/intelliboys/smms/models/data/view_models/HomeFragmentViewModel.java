@@ -26,6 +26,9 @@ public class HomeFragmentViewModel {
     private GeoPoint markerBCoordinates;
     @Getter
     @Setter
+    private GeoPoint myLocation;
+    @Getter
+    @Setter
     private IGeoPoint mapCenter;
     @Getter
     @Setter

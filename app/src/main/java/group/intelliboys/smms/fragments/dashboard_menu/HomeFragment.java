@@ -5,7 +5,13 @@ import android.animation.Animator;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
@@ -50,8 +56,8 @@ import org.osmdroid.views.overlay.Polyline;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.hdodenhof.circleimageview.BuildConfig;
 import de.hdodenhof.circleimageview.CircleImageView;
-import group.intelliboys.smms.BuildConfig;
 import group.intelliboys.smms.R;
 import group.intelliboys.smms.activities.dashboard.HomeActivity;
 import group.intelliboys.smms.components.ui.CustomMapView;
@@ -116,6 +122,7 @@ public class HomeFragment extends Fragment {
         mapView.setMultiTouchControls(true);
         mapView.setMinZoomLevel(5d);
 
+        myLocation = new Marker(mapView);
         routeLine = new Polyline(mapView);
 
         // ============================= MAP CONFIG INITIALIZATION =============================
@@ -240,24 +247,19 @@ public class HomeFragment extends Fragment {
 
                         assert location != null;
                         GeoPoint geoPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
+                        myLocation.setPosition(geoPoint);
+                        myLocation.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
 
-                        if (myLocation == null) {
-                            myLocation = new Marker(mapView);
-                            myLocation.setPosition(geoPoint);
-                            myLocation.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-
-                            if (authenticatedUser != null && authenticatedUser.getProfilePic() != null) {
-                                Bitmap bitmap = Converter.byteArrayToBitmap(authenticatedUser.getProfilePic());
-                                Drawable drawable = new BitmapDrawable(bitmap);
-                                myLocation.setIcon(drawable);
-                            }
-
+                        if (authenticatedUser != null && authenticatedUser.getProfilePic() != null) {
+                            Bitmap bitmap = Converter.byteArrayToBitmap(authenticatedUser.getProfilePic());
+                            Drawable drawable = new BitmapDrawable(getRoundedBitmap(bitmap));
+                            myLocation.setIcon(drawable);
                         }
 
                         if (pointA.hasFocus()) {
                             homeActivity.runOnUiThread(() -> {
-                                mapView.removeMarker(myLocation);
-                                setMarkerA(geoPoint);
+                                mapView.removeMarker(markerA);
+                                setMarkerA(myLocation);
                                 osrmService.getFullAddressOnCoordinates(geoPoint, pointA);
 
                                 if (isAnimated) {
@@ -269,8 +271,8 @@ public class HomeFragment extends Fragment {
                             });
                         } else if (pointB.hasFocus()) {
                             homeActivity.runOnUiThread(() -> {
-                                mapView.removeMarker(myLocation);
-                                setMarkerB(geoPoint);
+                                mapView.removeMarker(markerB);
+                                setMarkerB(myLocation);
                                 osrmService.getFullAddressOnCoordinates(geoPoint, pointB);
 
                                 if (isAnimated) {
@@ -465,6 +467,16 @@ public class HomeFragment extends Fragment {
         mapView.addMarker(markerA, icon);
     }
 
+    public void setMarkerA(Marker customMarker) {
+        if (markerA == null) {
+            markerA = customMarker;
+        }
+
+        mapView.removeMarker(markerA);
+        mapView.removeRoute(routeLine);
+        mapView.addMarker(markerA);
+    }
+
     public void deleteMarkerA() {
         mapView.removeMarker(markerA);
         mapView.removeRoute(routeLine);
@@ -487,6 +499,16 @@ public class HomeFragment extends Fragment {
         @SuppressLint({"UseCompatLoadingForDrawables", "ResourceType"})
         Drawable icon = getResources().getDrawable(R.drawable.ic_end_pin);
         mapView.addMarker(markerB, icon);
+    }
+
+    public void setMarkerB(Marker customMarker) {
+        if (markerB == null) {
+            markerB = customMarker;
+        }
+
+        mapView.removeMarker(markerB);
+        mapView.removeRoute(routeLine);
+        mapView.addMarker(markerB);
     }
 
     public void deleteMarkerB() {
@@ -636,6 +658,41 @@ public class HomeFragment extends Fragment {
                 }
             });
         }
+    }
+
+    private Bitmap getRoundedBitmap(Bitmap bitmap) {
+        int originalWidth = bitmap.getWidth();
+        int originalHeight = bitmap.getHeight();
+        int diameter = Math.min(originalWidth, originalHeight);
+
+        // Define the desired smaller size
+        int targetDiameter = diameter / 10;  // Adjust this as needed for your desired size
+
+        Bitmap output = Bitmap.createBitmap(targetDiameter, targetDiameter, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(output);
+
+        final Paint paint = new Paint();
+        final Rect rect = new Rect(0, 0, targetDiameter, targetDiameter);
+        final RectF rectF = new RectF(rect);
+
+        paint.setAntiAlias(true);
+        canvas.drawARGB(0, 0, 0, 0);
+        paint.setColor(Color.BLACK);
+        canvas.drawOval(rectF, paint);
+
+        // Scale the bitmap to fit the smaller size
+        Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, targetDiameter, targetDiameter, false);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        canvas.drawBitmap(scaledBitmap, rect, rect, paint);
+
+        // Draw the border
+        paint.setXfermode(null);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setColor(Color.RED); // Change to your desired border color
+        paint.setStrokeWidth(4);
+        canvas.drawOval(rectF, paint);
+
+        return output;
     }
 
     @Override
