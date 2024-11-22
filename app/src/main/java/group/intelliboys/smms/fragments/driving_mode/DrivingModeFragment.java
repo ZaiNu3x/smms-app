@@ -40,11 +40,17 @@ import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.Polyline;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import group.intelliboys.smms.R;
 import group.intelliboys.smms.components.ui.CustomMapView;
 import group.intelliboys.smms.models.data.view_models.HomeFragmentViewModel;
+import group.intelliboys.smms.orm.data.TravelHistory;
+import group.intelliboys.smms.orm.data.User;
+import group.intelliboys.smms.orm.repository.TravelHistoryRepository;
+import group.intelliboys.smms.security.SecurityContextHolder;
 import group.intelliboys.smms.services.LocationService;
 import group.intelliboys.smms.utils.Commons;
 
@@ -73,6 +79,11 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
     private FusedLocationProviderClient locationProviderClient;
     private LocationCallback locationCallback;
     private LocationRequest locationRequest;
+    private Location lastLocation;
+
+    private User user;
+    private TravelHistory travelEntry;
+    private TravelHistoryRepository travelHistoryRepository;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -121,6 +132,9 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
         sensorManager = (SensorManager) requireActivity().getSystemService(Context.SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
+        user = SecurityContextHolder.getInstance().getAuthenticatedUser();
+        travelHistoryRepository = new TravelHistoryRepository();
+
         ActivityResultLauncher<String> requestPermissionLauncher =
                 registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
                     if (isGranted) {
@@ -158,29 +172,29 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
                 @Override
                 public void onLocationResult(@NonNull LocationResult locationResult) {
                     Location location = locationResult.getLastLocation();
-                    assert location != null;
-                    Log.i("", location.toString());
+
+                    if (location != null) {
+                        if (travelEntry == null) {
+                            travelEntry = new TravelHistory();
+                            travelEntry.setTravelHistoryId(UUID.randomUUID().toString());
+                            travelEntry.setStartTime(LocalDateTime.now());
+                            travelEntry.setStartLatitude((float) location.getLatitude());
+                            travelEntry.setStartLongitude((float) location.getLongitude());
+                            travelEntry.setStartAltitude((float) location.getAltitude());
+                            travelEntry.setCreatedAt(LocalDateTime.now());
+                            travelEntry.setUserId(user.getEmail());
+                            travelHistoryRepository.insertTravelHistory(travelEntry);
+                            Log.i("", "Travel Entry Inserted!");
+                        }
+
+                        lastLocation = location;
+                    }
                 }
             };
         }
 
         locationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
-    }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mapView.onDetach();
-
-        if (mediaPlayer != null) {
-            mediaPlayer.release();
-        }
-
-        if (sensorManager != null) {
-            sensorManager.unregisterListener(this);
-        }
-
-        locationProviderClient.removeLocationUpdates(locationCallback);
     }
 
     public void playWarningSound() {
@@ -234,6 +248,30 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mapView.onDetach();
+
+        travelEntry.setEndTime(LocalDateTime.now());
+        travelEntry.setEndLatitude((float) lastLocation.getLatitude());
+        travelEntry.setEndLongitude((float) lastLocation.getLongitude());
+        travelEntry.setEndAltitude((float) lastLocation.getAltitude());
+
+        travelHistoryRepository.updateTravelHistory(travelEntry);
+        Log.i("", "Travel History Updated!");
+
+        if (mediaPlayer != null) {
+            mediaPlayer.release();
+        }
+
+        if (sensorManager != null) {
+            sensorManager.unregisterListener(this);
+        }
+
+        locationProviderClient.removeLocationUpdates(locationCallback);
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         mapView.onResume();
@@ -266,7 +304,7 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
         // CODES
-        /*
+
         if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             float x = sensorEvent.values[0];
             Log.i("", "X: " + x);
@@ -292,7 +330,6 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
                 statusTxtView.setText(R.string.status_normal);
             }
         }
-         */
     }
 
     @Override

@@ -9,16 +9,19 @@ import group.intelliboys.smms.utils.ContextHolder;
 
 public class UserRepository {
     private final UserDao userDao;
+    private final DatabaseService databaseService;
 
     public UserRepository() {
-        DatabaseService databaseService = DatabaseService.getInstance(ContextHolder.getInstance()
+        databaseService = DatabaseService.getInstance(ContextHolder.getInstance()
                 .getContext());
 
         userDao = databaseService.getAppDatabase().userDao();
     }
 
     public void insertUser(User user) {
-        userDao.insertUser(user);
+        databaseService.getAppDatabase().getTransactionExecutor().execute(() -> {
+            userDao.insertUser(user);
+        });
     }
 
     public User getUserByEmail(String email) {
@@ -31,11 +34,13 @@ public class UserRepository {
 
     // THIS BLOCK OF CODE USE FOR CLEARING ALL USER INFORMATION IN DATABASE
     public void deleteAllUsers() {
-        userDao.deleteAllUsers();
+        databaseService.getAppDatabase().getTransactionExecutor().execute(userDao::deleteAllUsers);
     }
 
     public void updateUser(User user) {
-        userDao.updateUser(user);
+        databaseService.getAppDatabase().getTransactionExecutor().execute(() -> {
+            userDao.updateUser(user);
+        });
     }
 
     public User getAuthenticatedUser() {
