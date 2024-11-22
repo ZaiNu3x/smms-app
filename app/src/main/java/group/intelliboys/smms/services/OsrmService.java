@@ -273,6 +273,7 @@ public class OsrmService {
 
                                 activity.runOnUiThread(() -> {
                                     homeFragment.drawRouteOnMap(geoPoints);
+                                    homeFragment.getMapView().centerRouteOnMap(geoPoints);
                                 });
 
                                 homeFragment.getViewModel().setDistance(distanceInKm);

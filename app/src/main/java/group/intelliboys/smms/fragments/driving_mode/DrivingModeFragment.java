@@ -31,16 +31,12 @@ import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.Polyline;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import group.intelliboys.smms.R;
 import group.intelliboys.smms.components.ui.CustomMapView;
 import group.intelliboys.smms.models.data.view_models.HomeFragmentViewModel;
-import group.intelliboys.smms.orm.data.TravelHistory;
-import group.intelliboys.smms.orm.repository.TravelHistoryRepository;
 import group.intelliboys.smms.utils.Commons;
-import group.intelliboys.smms.utils.Executor;
 
 public class DrivingModeFragment extends Fragment implements SensorEventListener {
     private CustomMapView mapView;

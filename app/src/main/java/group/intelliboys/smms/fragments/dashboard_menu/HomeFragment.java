@@ -159,17 +159,18 @@ public class HomeFragment extends Fragment {
         mapView.addMapListener(new MapListener() {
             @Override
             public boolean onScroll(ScrollEvent event) {
+                viewModel.setMapCenter(mapView.getMapCenter());
                 return false;
             }
 
             @Override
             public boolean onZoom(ZoomEvent event) {
-                viewModel.setMapCenter(mapView.getMapCenter());
                 viewModel.setZoomLevel((float) mapView.getZoomLevelDouble());
                 return false;
             }
         });
 
+        // ON LONG PRESS IN POINT A AND POINT B EDIT TEXT
         GestureDetector gestureDetector = new GestureDetector(requireActivity(), new GestureDetector.SimpleOnGestureListener() {
             @Override
             public void onLongPress(@NonNull MotionEvent e) {
