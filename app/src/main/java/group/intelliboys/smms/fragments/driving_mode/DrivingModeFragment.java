@@ -48,8 +48,10 @@ import group.intelliboys.smms.R;
 import group.intelliboys.smms.components.ui.CustomMapView;
 import group.intelliboys.smms.models.data.view_models.HomeFragmentViewModel;
 import group.intelliboys.smms.orm.data.TravelHistory;
+import group.intelliboys.smms.orm.data.TravelStatusUpdate;
 import group.intelliboys.smms.orm.data.User;
 import group.intelliboys.smms.orm.repository.TravelHistoryRepository;
+import group.intelliboys.smms.orm.repository.TravelStatusUpdateRepository;
 import group.intelliboys.smms.security.SecurityContextHolder;
 import group.intelliboys.smms.services.LocationService;
 import group.intelliboys.smms.utils.Commons;
@@ -75,6 +77,8 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
     private Marker markerB;
     private Polyline routeLine;
 
+    private float ridingAngle;
+
     private static final int LOCATION_REQUEST_CODE = 1;
     private FusedLocationProviderClient locationProviderClient;
     private LocationCallback locationCallback;
@@ -84,6 +88,7 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
     private User user;
     private TravelHistory travelEntry;
     private TravelHistoryRepository travelHistoryRepository;
+    private TravelStatusUpdateRepository travelStatusUpdateRepository;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -134,6 +139,7 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
 
         user = SecurityContextHolder.getInstance().getAuthenticatedUser();
         travelHistoryRepository = new TravelHistoryRepository();
+        travelStatusUpdateRepository = new TravelStatusUpdateRepository();
 
         ActivityResultLauncher<String> requestPermissionLauncher =
                 registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
@@ -187,6 +193,19 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
                             Log.i("", "Travel Entry Inserted!");
                         }
 
+                        TravelStatusUpdate statusUpdate = TravelStatusUpdate.builder()
+                                .travelStatusUpdateId(UUID.randomUUID().toString())
+                                .travelHistoryId(travelEntry.getTravelHistoryId())
+                                .latitude((float) location.getLatitude())
+                                .longitude((float) location.getLongitude())
+                                .altitude((float) location.getAltitude())
+                                .ridingAngle(ridingAngle)
+                                .speedInKmh((int) location.getSpeed())
+                                .createdAt(LocalDateTime.now())
+                                .build();
+
+                        travelStatusUpdateRepository.insertTravelStatusUpdate(statusUpdate);
+                        Log.i("", "Travel Status Inserted!");
                         lastLocation = location;
                     }
                 }
@@ -306,18 +325,18 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
         // CODES
 
         if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            float x = sensorEvent.values[0];
-            Log.i("", "X: " + x);
+            ridingAngle = sensorEvent.values[0];
+            Log.i("", "X: " + ridingAngle);
 
             // LEFT LEANING
-            if (x >= 8) {
+            if (ridingAngle >= 8) {
                 playWarningSound();
                 leftWarningIcon.setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
                 statusTxtView.setText(R.string.agrresive_cornering);
             }
 
             // RIGHT LEANING
-            else if (x <= -8) {
+            else if (ridingAngle <= -8) {
                 playWarningSound();
                 rightWarningIcon.setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
                 statusTxtView.setText(R.string.agrresive_cornering);
