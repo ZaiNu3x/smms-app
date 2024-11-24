@@ -33,7 +33,7 @@ import group.intelliboys.smms.models.data.view_models.HomeFragmentViewModel;
 import group.intelliboys.smms.orm.data.User;
 import group.intelliboys.smms.orm.repository.UserRepository;
 import group.intelliboys.smms.security.SecurityContextHolder;
-import group.intelliboys.smms.utils.Converter;
+import group.intelliboys.smms.utils.converters.ImageConverter;
 import group.intelliboys.smms.utils.Executor;
 
 public class HomeActivity extends AppCompatActivity implements NavigationView
@@ -152,7 +152,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView
         // USER INFO SETUP
         navUsername.setText(new String(builder));
         navUserEmail.setText(authenticatedUser.getEmail());
-        profilePic.setImageBitmap(Converter.byteArrayToBitmap(authenticatedUser.getProfilePic()));
+        profilePic.setImageBitmap(ImageConverter.byteArrayToBitmap(authenticatedUser.getProfilePic()));
 
         profilePic.setOnClickListener((view) -> {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, ProfileFragment.class, null).commit();

@@ -1,5 +1,6 @@
 package group.intelliboys.smms.orm.data;
 
+import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
@@ -25,8 +26,9 @@ import lombok.NoArgsConstructor;
                 onDelete = ForeignKey.CASCADE))
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TravelHistory implements Serializable {
-    @PrimaryKey(autoGenerate = true)
-    private long travelHistoryId;
+    @NonNull
+    @PrimaryKey
+    private String travelHistoryId;
     private String userId;
     private boolean isSync;
     private LocalDateTime startTime;

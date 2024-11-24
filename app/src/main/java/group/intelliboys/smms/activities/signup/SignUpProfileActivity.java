@@ -22,7 +22,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.Calendar;
@@ -34,7 +33,7 @@ import java.util.regex.Pattern;
 import de.hdodenhof.circleimageview.CircleImageView;
 import group.intelliboys.smms.R;
 import group.intelliboys.smms.utils.Commons;
-import group.intelliboys.smms.utils.Converter;
+import group.intelliboys.smms.utils.converters.ImageConverter;
 import group.intelliboys.smms.utils.ServerAPIs;
 import lombok.Getter;
 
@@ -381,7 +380,7 @@ public class SignUpProfileActivity extends AppCompatActivity {
             Uri uri = data.getData();
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
-                profilePicData = Converter.bitmapToByteArray(bitmap);
+                profilePicData = ImageConverter.bitmapToByteArray(bitmap);
                 signupProfilePic.setImageBitmap(bitmap);
                 isProfilePicValid = true;
             } catch (IOException e) {

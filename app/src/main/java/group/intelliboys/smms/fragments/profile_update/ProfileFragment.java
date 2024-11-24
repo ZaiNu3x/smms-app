@@ -33,7 +33,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 import group.intelliboys.smms.R;
 import group.intelliboys.smms.orm.data.User;
 import group.intelliboys.smms.security.SecurityContextHolder;
-import group.intelliboys.smms.utils.Converter;
+import group.intelliboys.smms.utils.converters.ImageConverter;
 import group.intelliboys.smms.utils.ServerAPIs;
 import lombok.Getter;
 
@@ -105,7 +105,7 @@ public class ProfileFragment extends Fragment {
 
             Drawable drawable = profilePicView.getDrawable();
             Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
-            byte[] profilePic = Converter.bitmapToByteArray(bitmap);
+            byte[] profilePic = ImageConverter.bitmapToByteArray(bitmap);
 
             try {
                 JSONObject profile = new JSONObject();
@@ -139,7 +139,7 @@ public class ProfileFragment extends Fragment {
         builder.append(authenticatedUser.getLastName()).append(", ")
                 .append(authenticatedUser.getFirstName());
 
-        profilePicView.setImageBitmap(Converter.byteArrayToBitmap(authenticatedUser.getProfilePic()));
+        profilePicView.setImageBitmap(ImageConverter.byteArrayToBitmap(authenticatedUser.getProfilePic()));
         usernameTxtView.setText(new String(builder));
         emailTxtView.setText(authenticatedUser.getEmail());
         lastNameEditTxt.setText(authenticatedUser.getLastName());
@@ -177,7 +177,7 @@ public class ProfileFragment extends Fragment {
             Uri uri = data.getData();
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(requireActivity().getContentResolver(), uri);
-                profilePicData = Converter.bitmapToByteArray(bitmap);
+                profilePicData = ImageConverter.bitmapToByteArray(bitmap);
                 profilePicView.setImageBitmap(bitmap);
             } catch (IOException e) {
                 Log.i("", Objects.requireNonNull(e.getMessage()));

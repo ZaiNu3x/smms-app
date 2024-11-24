@@ -6,20 +6,25 @@ import group.intelliboys.smms.services.DatabaseService;
 import group.intelliboys.smms.utils.ContextHolder;
 
 public class TravelHistoryRepository {
-    private TravelHistoryDao travelHistoryDao;
+    private final TravelHistoryDao travelHistoryDao;
+    private final DatabaseService databaseService;
 
     public TravelHistoryRepository() {
-        DatabaseService service = DatabaseService.getInstance(ContextHolder.getInstance()
+        databaseService = DatabaseService.getInstance(ContextHolder.getInstance()
                 .getContext());
 
-        travelHistoryDao = service.getAppDatabase().travelHistoryDao();
+        travelHistoryDao = databaseService.getAppDatabase().travelHistoryDao();
     }
 
     public void insertTravelHistory(TravelHistory travelHistory) {
-        travelHistoryDao.insertTravelHistory(travelHistory);
+        databaseService.getAppDatabase().getTransactionExecutor().execute(() -> {
+            travelHistoryDao.insertTravelHistory(travelHistory);
+        });
     }
 
-    public void getTravelHistoryByUserEmail(String userId) {
-        travelHistoryDao.getTravelHistoryByUserId(userId);
+    public void updateTravelHistory(TravelHistory travelHistory) {
+        databaseService.getAppDatabase().getTransactionExecutor().execute(() -> {
+            travelHistoryDao.updateTravelHistory(travelHistory);
+        });
     }
 }
