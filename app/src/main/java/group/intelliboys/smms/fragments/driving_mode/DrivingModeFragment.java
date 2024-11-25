@@ -271,13 +271,13 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
         super.onDestroy();
         mapView.onDetach();
 
-        travelEntry.setEndTime(LocalDateTime.now());
-        travelEntry.setEndLatitude((float) lastLocation.getLatitude());
-        travelEntry.setEndLongitude((float) lastLocation.getLongitude());
-        travelEntry.setEndAltitude((float) lastLocation.getAltitude());
-
-        travelHistoryRepository.updateTravelHistory(travelEntry);
-        Log.i("", "Travel History Updated!");
+        if (travelEntry != null) {
+            travelEntry.setEndTime(LocalDateTime.now());
+            travelEntry.setEndLatitude((float) lastLocation.getLatitude());
+            travelEntry.setEndLongitude((float) lastLocation.getLongitude());
+            travelEntry.setEndAltitude((float) lastLocation.getAltitude());
+            travelHistoryRepository.updateTravelHistory(travelEntry);
+        }
 
         if (mediaPlayer != null) {
             mediaPlayer.release();

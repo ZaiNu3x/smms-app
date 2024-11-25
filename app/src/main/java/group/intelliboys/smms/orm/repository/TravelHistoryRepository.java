@@ -1,5 +1,7 @@
 package group.intelliboys.smms.orm.repository;
 
+import java.util.List;
+
 import group.intelliboys.smms.orm.dao.TravelHistoryDao;
 import group.intelliboys.smms.orm.data.TravelHistory;
 import group.intelliboys.smms.services.DatabaseService;
@@ -26,5 +28,13 @@ public class TravelHistoryRepository {
         databaseService.getAppDatabase().getTransactionExecutor().execute(() -> {
             travelHistoryDao.updateTravelHistory(travelHistory);
         });
+    }
+
+    public List<TravelHistory> getTravelHistoriesWithNullStartLocation() {
+        return travelHistoryDao.getTravelHistoriesWithNullStartLocation();
+    }
+
+    public List<TravelHistory> getTravelHistoriesWithNullEndLocation() {
+        return travelHistoryDao.getTravelHistoriesWithNullEndLocation();
     }
 }
