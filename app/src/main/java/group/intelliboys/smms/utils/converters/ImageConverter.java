@@ -8,7 +8,7 @@ import java.io.ByteArrayOutputStream;
 public class ImageConverter {
     public static byte[] bitmapToByteArray(Bitmap bitmap) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 50, stream);
         return stream.toByteArray();
     }
 
