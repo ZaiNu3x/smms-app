@@ -24,4 +24,7 @@ public interface TravelHistoryDao {
 
     @Query("SELECT * FROM travel_history WHERE endLocationName IS NULL")
     List<TravelHistory> getTravelHistoriesWithNullEndLocation();
+
+    @Query("SELECT * FROM travel_history")
+    List<TravelHistory> getAllTravelHistories();
 }

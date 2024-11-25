@@ -59,6 +59,8 @@ import group.intelliboys.smms.orm.data.User;
 import group.intelliboys.smms.security.SecurityContextHolder;
 import group.intelliboys.smms.services.LocationService;
 import group.intelliboys.smms.services.OsrmService;
+import group.intelliboys.smms.services.TravelHistoryService;
+import group.intelliboys.smms.utils.Executor;
 import lombok.Getter;
 
 @Getter
@@ -436,6 +438,11 @@ public class HomeFragment extends Fragment {
                         // CODE
                     }))
                     .show();
+        });
+
+        Executor.run(() -> {
+            TravelHistoryService.getInstance().updateNullStartLocation();
+            TravelHistoryService.getInstance().updateNullEndLocation();
         });
 
         return view;

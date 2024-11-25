@@ -37,4 +37,8 @@ public class TravelHistoryRepository {
     public List<TravelHistory> getTravelHistoriesWithNullEndLocation() {
         return travelHistoryDao.getTravelHistoriesWithNullEndLocation();
     }
+
+    public List<TravelHistory> getAllTravelHistories() {
+        return travelHistoryDao.getAllTravelHistories();
+    }
 }

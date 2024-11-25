@@ -193,6 +193,8 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
                             Log.i("", "Travel Entry Inserted!");
                         }
 
+                        int speed = (int) (location.getSpeed() * 3.6f);
+
                         TravelStatusUpdate statusUpdate = TravelStatusUpdate.builder()
                                 .travelStatusUpdateId(UUID.randomUUID().toString())
                                 .travelHistoryId(travelEntry.getTravelHistoryId())
@@ -200,7 +202,7 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
                                 .longitude((float) location.getLongitude())
                                 .altitude((float) location.getAltitude())
                                 .ridingAngle(ridingAngle)
-                                .speedInKmh((int) location.getSpeed())
+                                .speedInKmh(speed)
                                 .createdAt(LocalDateTime.now())
                                 .build();
 
