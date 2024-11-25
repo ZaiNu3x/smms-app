@@ -33,8 +33,8 @@ import java.util.regex.Pattern;
 import de.hdodenhof.circleimageview.CircleImageView;
 import group.intelliboys.smms.R;
 import group.intelliboys.smms.utils.Commons;
-import group.intelliboys.smms.utils.converters.ImageConverter;
 import group.intelliboys.smms.utils.ServerAPIs;
+import group.intelliboys.smms.utils.converters.ImageConverter;
 import lombok.Getter;
 
 public class SignUpProfileActivity extends AppCompatActivity {
@@ -325,7 +325,10 @@ public class SignUpProfileActivity extends AppCompatActivity {
                 form.put("sex", sex);
                 form.put("birthDate", birthDate);
                 form.put("address", address);
-                form.put("profilePic", Base64.getEncoder().encodeToString(profilePicData));
+
+                if (profilePicData != null) {
+                    form.put("profilePic", Base64.getEncoder().encodeToString(profilePicData));
+                }
 
                 serverAPIs.submitUserRegistrationForm(form);
             } catch (Exception e) {
