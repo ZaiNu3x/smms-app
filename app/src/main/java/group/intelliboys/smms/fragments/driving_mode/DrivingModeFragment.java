@@ -293,6 +293,7 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
                             .accidentHistoryId(UUID.randomUUID().toString())
                             .travelStatusUpdateId(statusUpdate.getTravelStatusUpdateId())
                             .message("Accident Detected!")
+                            .createdAt(LocalDateTime.now())
                             .build();
 
                     Log.i("", "Accident Detected: " + accidentEntry.toString());
