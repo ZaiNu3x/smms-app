@@ -58,7 +58,9 @@ import group.intelliboys.smms.orm.repository.TravelHistoryRepository;
 import group.intelliboys.smms.orm.repository.TravelStatusUpdateRepository;
 import group.intelliboys.smms.security.SecurityContextHolder;
 import group.intelliboys.smms.services.LocationService;
+import group.intelliboys.smms.services.TravelHistoryService;
 import group.intelliboys.smms.utils.Commons;
+import group.intelliboys.smms.utils.Executor;
 
 public class DrivingModeFragment extends Fragment implements SensorEventListener {
     private CustomMapView mapView;
@@ -210,6 +212,7 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
                 @Override
                 public void onLocationResult(@NonNull LocationResult locationResult) {
                     Location location = locationResult.getLastLocation();
+                    lastLocation = location;
 
                     if (location != null) {
                         if (travelEntry == null) {
@@ -221,7 +224,10 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
                             travelEntry.setStartAltitude((float) location.getAltitude());
                             travelEntry.setCreatedAt(LocalDateTime.now());
                             travelEntry.setUserId(user.getEmail());
-                            travelHistoryRepository.insertTravelHistory(travelEntry);
+
+                            Executor.run(() -> {
+                                travelHistoryRepository.insertTravelHistory(travelEntry);
+                            });
                         }
 
                         point.setLatitude(location.getLatitude());
@@ -252,7 +258,6 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
                                 .build();
 
                         travelStatusUpdateRepository.insertTravelStatusUpdate(statusUpdate);
-                        lastLocation = location;
                     }
                 }
             };
@@ -315,14 +320,17 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mapView.onDetach();
 
         if (travelEntry != null) {
-            travelEntry.setEndTime(LocalDateTime.now());
-            travelEntry.setEndLatitude((float) lastLocation.getLatitude());
-            travelEntry.setEndLongitude((float) lastLocation.getLongitude());
-            travelEntry.setEndAltitude((float) lastLocation.getAltitude());
-            travelHistoryRepository.updateTravelHistory(travelEntry);
+            Executor.run(() -> {
+                travelEntry.setEndTime(LocalDateTime.now());
+                travelEntry.setEndLatitude((float) lastLocation.getLatitude());
+                travelEntry.setEndLongitude((float) lastLocation.getLongitude());
+                travelEntry.setEndAltitude((float) lastLocation.getAltitude());
+                travelHistoryRepository.updateTravelHistory(travelEntry);
+                TravelHistoryService.getInstance().updateNullStartLocation();
+                TravelHistoryService.getInstance().updateNullEndLocation();
+            });
         }
 
         if (mediaPlayer != null) {
@@ -334,12 +342,12 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
         }
 
         locationProviderClient.removeLocationUpdates(locationCallback);
+        mapView.onDetach();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        mapView.onResume();
 
         if (sensorManager != null && accelerometer != null) {
             sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
@@ -352,18 +360,20 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
         }
 
         locationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
+        mapView.onResume();
     }
 
+    @SuppressLint("MissingSuperCall")
     @Override
     public void onPause() {
         super.onPause();
-        mapView.onPause();
 
         if (sensorManager != null) {
             sensorManager.unregisterListener(this);
         }
 
         locationProviderClient.removeLocationUpdates(locationCallback);
+        mapView.onPause();
     }
 
     @Override

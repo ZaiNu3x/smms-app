@@ -3,7 +3,6 @@ package group.intelliboys.smms.orm.dao;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
-import androidx.room.Transaction;
 import androidx.room.Update;
 
 import java.util.List;
@@ -15,7 +14,6 @@ public interface TravelHistoryDao {
     @Insert
     void insertTravelHistory(TravelHistory travelHistory);
 
-    @Transaction
     @Update
     void updateTravelHistory(TravelHistory travelHistory);
 
@@ -27,4 +25,7 @@ public interface TravelHistoryDao {
 
     @Query("SELECT * FROM travel_history ORDER BY createdAt")
     List<TravelHistory> getAllTravelHistories();
+
+    @Query("SELECT * FROM travel_history WHERE travelHistoryId = :id")
+    TravelHistory getTravelHistoryById(String id);
 }

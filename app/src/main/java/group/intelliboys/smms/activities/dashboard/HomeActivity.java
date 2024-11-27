@@ -33,6 +33,7 @@ import group.intelliboys.smms.models.data.view_models.HomeFragmentViewModel;
 import group.intelliboys.smms.orm.data.User;
 import group.intelliboys.smms.orm.repository.UserRepository;
 import group.intelliboys.smms.security.SecurityContextHolder;
+import group.intelliboys.smms.services.TravelHistoryService;
 import group.intelliboys.smms.utils.Executor;
 import group.intelliboys.smms.utils.converters.ImageConverter;
 
@@ -84,6 +85,10 @@ public class HomeActivity extends AppCompatActivity implements NavigationView
         }
 
         setupProfileInfo();
+        Executor.run(() -> {
+            TravelHistoryService.getInstance().updateNullStartLocation();
+            TravelHistoryService.getInstance().updateNullEndLocation();
+        });
     }
 
     @SuppressLint("NonConstantResourceId")
