@@ -40,11 +40,12 @@ public class TravelHistoryAdapter extends RecyclerView.Adapter<TravelHistoryAdap
 
         if (!TextUtils.isEmpty(travelHistory.getStartLocationName())) {
             holder.startLocation.setText("FROM: " + travelHistory.getStartLocationName());
-        }
+        } else holder.startLocation.setText("FROM: " + travelHistory.getStartAltitude() + ", " + travelHistory.getStartLongitude());
 
         if (!TextUtils.isEmpty(travelHistory.getEndLocationName())) {
             holder.endLocation.setText("TO: " + travelHistory.getEndLocationName());
         }
+        else holder.endLocation.setText("TO: " + travelHistory.getEndLatitude() + ", " + travelHistory.getEndLongitude());
 
         if (travelHistory.getStartTime() != null && travelHistory.getEndTime() != null) {
             Duration duration = Duration.between(travelHistory.getStartTime(), travelHistory.getEndTime());

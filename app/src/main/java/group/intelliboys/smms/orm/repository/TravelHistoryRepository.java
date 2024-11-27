@@ -19,15 +19,11 @@ public class TravelHistoryRepository {
     }
 
     public void insertTravelHistory(TravelHistory travelHistory) {
-        databaseService.getAppDatabase().getTransactionExecutor().execute(() -> {
-            travelHistoryDao.insertTravelHistory(travelHistory);
-        });
+        travelHistoryDao.insertTravelHistory(travelHistory);
     }
 
     public void updateTravelHistory(TravelHistory travelHistory) {
-        databaseService.getAppDatabase().getTransactionExecutor().execute(() -> {
-            travelHistoryDao.updateTravelHistory(travelHistory);
-        });
+        travelHistoryDao.updateTravelHistory(travelHistory);
     }
 
     public List<TravelHistory> getTravelHistoriesWithNullStartLocation() {
@@ -40,5 +36,9 @@ public class TravelHistoryRepository {
 
     public List<TravelHistory> getAllTravelHistories() {
         return travelHistoryDao.getAllTravelHistories();
+    }
+
+    public TravelHistory getTravelHistoryById(String id) {
+        return travelHistoryDao.getTravelHistoryById(id);
     }
 }

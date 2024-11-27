@@ -18,6 +18,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -34,6 +35,9 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.Priority;
 
 import org.osmdroid.config.Configuration;
+import org.osmdroid.events.MapListener;
+import org.osmdroid.events.ScrollEvent;
+import org.osmdroid.events.ZoomEvent;
 import org.osmdroid.library.BuildConfig;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
@@ -54,7 +58,9 @@ import group.intelliboys.smms.orm.repository.TravelHistoryRepository;
 import group.intelliboys.smms.orm.repository.TravelStatusUpdateRepository;
 import group.intelliboys.smms.security.SecurityContextHolder;
 import group.intelliboys.smms.services.LocationService;
+import group.intelliboys.smms.services.TravelHistoryService;
 import group.intelliboys.smms.utils.Commons;
+import group.intelliboys.smms.utils.Executor;
 
 public class DrivingModeFragment extends Fragment implements SensorEventListener {
     private CustomMapView mapView;
@@ -65,6 +71,7 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
     private TextView speedLimitTxtView;
     private TextView roadTypeTxtView;
     private TextView remDistanceTxtView;
+    private Button backToDrivingMode;
 
     private MediaPlayer mediaPlayer;
     private SensorManager sensorManager;
@@ -73,6 +80,8 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
     private static final int SPEED_LIMIT = 45;
 
     private HomeFragmentViewModel viewModel;
+    private Marker myLocation;
+    private boolean isFocusOnMyLocationMarker;
     private Marker markerA;
     private Marker markerB;
     private Polyline routeLine;
@@ -104,6 +113,7 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
         remDistanceTxtView = view.findViewById(R.id.remainingDistance);
         roadTypeTxtView = view.findViewById(R.id.roadType);
         speedLimitTxtView = view.findViewById(R.id.speedLimit);
+        backToDrivingMode = view.findViewById(R.id.backToDrivingBtn);
 
         mapView.setTileSource(TileSourceFactory.MAPNIK);
         mapView.setBuiltInZoomControls(false);
@@ -155,6 +165,28 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
         }
 
         requestLocationUpdates();
+
+        mapView.addMapListener(new MapListener() {
+            @Override
+            public boolean onScroll(ScrollEvent event) {
+                isFocusOnMyLocationMarker = false;
+                backToDrivingMode.setVisibility(View.VISIBLE);
+                return false;
+            }
+
+            @Override
+            public boolean onZoom(ZoomEvent event) {
+                isFocusOnMyLocationMarker = false;
+                backToDrivingMode.setVisibility(View.VISIBLE);
+                return false;
+            }
+        });
+
+        backToDrivingMode.setOnClickListener(v -> {
+            isFocusOnMyLocationMarker = true;
+            backToDrivingMode.setVisibility(View.INVISIBLE);
+        });
+
         return view;
     }
 
@@ -175,9 +207,12 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
 
         if (locationCallback == null) {
             locationCallback = new LocationCallback() {
+                private GeoPoint point = new GeoPoint(0f, 0f);
+
                 @Override
                 public void onLocationResult(@NonNull LocationResult locationResult) {
                     Location location = locationResult.getLastLocation();
+                    lastLocation = location;
 
                     if (location != null) {
                         if (travelEntry == null) {
@@ -189,9 +224,25 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
                             travelEntry.setStartAltitude((float) location.getAltitude());
                             travelEntry.setCreatedAt(LocalDateTime.now());
                             travelEntry.setUserId(user.getEmail());
-                            travelHistoryRepository.insertTravelHistory(travelEntry);
-                            Log.i("", "Travel Entry Inserted!");
+
+                            Executor.run(() -> {
+                                travelHistoryRepository.insertTravelHistory(travelEntry);
+                            });
                         }
+
+                        point.setLatitude(location.getLatitude());
+                        point.setLongitude(location.getLongitude());
+
+                        if (myLocation == null) {
+                            myLocation = new Marker(mapView);
+                            mapView.addMarker(myLocation);
+                            myLocation.setPosition(point);
+                            mapView.getController()
+                                    .animateTo(myLocation.getPosition(), 17d, 3000L);
+                        }
+
+                        myLocation.setPosition(point);
+                        mapView.invalidate();
 
                         int speed = (int) (location.getSpeed() * 3.6f);
 
@@ -207,8 +258,6 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
                                 .build();
 
                         travelStatusUpdateRepository.insertTravelStatusUpdate(statusUpdate);
-                        Log.i("", "Travel Status Inserted!");
-                        lastLocation = location;
                     }
                 }
             };
@@ -271,14 +320,17 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mapView.onDetach();
 
         if (travelEntry != null) {
-            travelEntry.setEndTime(LocalDateTime.now());
-            travelEntry.setEndLatitude((float) lastLocation.getLatitude());
-            travelEntry.setEndLongitude((float) lastLocation.getLongitude());
-            travelEntry.setEndAltitude((float) lastLocation.getAltitude());
-            travelHistoryRepository.updateTravelHistory(travelEntry);
+            Executor.run(() -> {
+                travelEntry.setEndTime(LocalDateTime.now());
+                travelEntry.setEndLatitude((float) lastLocation.getLatitude());
+                travelEntry.setEndLongitude((float) lastLocation.getLongitude());
+                travelEntry.setEndAltitude((float) lastLocation.getAltitude());
+                travelHistoryRepository.updateTravelHistory(travelEntry);
+                TravelHistoryService.getInstance().updateNullStartLocation();
+                TravelHistoryService.getInstance().updateNullEndLocation();
+            });
         }
 
         if (mediaPlayer != null) {
@@ -290,12 +342,12 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
         }
 
         locationProviderClient.removeLocationUpdates(locationCallback);
+        mapView.onDetach();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        mapView.onResume();
 
         if (sensorManager != null && accelerometer != null) {
             sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
@@ -308,18 +360,20 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
         }
 
         locationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
+        mapView.onResume();
     }
 
+    @SuppressLint("MissingSuperCall")
     @Override
     public void onPause() {
         super.onPause();
-        mapView.onPause();
 
         if (sensorManager != null) {
             sensorManager.unregisterListener(this);
         }
 
         locationProviderClient.removeLocationUpdates(locationCallback);
+        mapView.onPause();
     }
 
     @Override
