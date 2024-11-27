@@ -13,6 +13,7 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -51,9 +52,11 @@ import java.util.UUID;
 import group.intelliboys.smms.R;
 import group.intelliboys.smms.components.ui.CustomMapView;
 import group.intelliboys.smms.models.data.view_models.HomeFragmentViewModel;
+import group.intelliboys.smms.orm.data.AccidentHistory;
 import group.intelliboys.smms.orm.data.TravelHistory;
 import group.intelliboys.smms.orm.data.TravelStatusUpdate;
 import group.intelliboys.smms.orm.data.User;
+import group.intelliboys.smms.orm.repository.AccidentHistoryRepository;
 import group.intelliboys.smms.orm.repository.TravelHistoryRepository;
 import group.intelliboys.smms.orm.repository.TravelStatusUpdateRepository;
 import group.intelliboys.smms.security.SecurityContextHolder;
@@ -82,6 +85,7 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
     private HomeFragmentViewModel viewModel;
     private Marker myLocation;
     private boolean isFocusOnMyLocationMarker;
+    private boolean isCountdownRunning;
     private Marker markerA;
     private Marker markerB;
     private Polyline routeLine;
@@ -97,7 +101,9 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
     private User user;
     private TravelHistory travelEntry;
     private TravelHistoryRepository travelHistoryRepository;
+    private TravelStatusUpdate statusUpdate;
     private TravelStatusUpdateRepository travelStatusUpdateRepository;
+    private AccidentHistoryRepository accidentHistoryRepository;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -150,6 +156,7 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
         user = SecurityContextHolder.getInstance().getAuthenticatedUser();
         travelHistoryRepository = new TravelHistoryRepository();
         travelStatusUpdateRepository = new TravelStatusUpdateRepository();
+        accidentHistoryRepository = new AccidentHistoryRepository();
 
         ActivityResultLauncher<String> requestPermissionLauncher =
                 registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
@@ -207,7 +214,7 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
 
         if (locationCallback == null) {
             locationCallback = new LocationCallback() {
-                private GeoPoint point = new GeoPoint(0f, 0f);
+                private final GeoPoint point = new GeoPoint(0f, 0f);
 
                 @Override
                 public void onLocationResult(@NonNull LocationResult locationResult) {
@@ -246,7 +253,7 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
 
                         int speed = (int) (location.getSpeed() * 3.6f);
 
-                        TravelStatusUpdate statusUpdate = TravelStatusUpdate.builder()
+                        statusUpdate = TravelStatusUpdate.builder()
                                 .travelStatusUpdateId(UUID.randomUUID().toString())
                                 .travelHistoryId(travelEntry.getTravelHistoryId())
                                 .latitude((float) location.getLatitude())
@@ -265,6 +272,37 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
 
         locationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
 
+    }
+
+    public void onAccidentDetected() {
+        isCountdownRunning = true;
+
+        CountDownTimer countDownTimer = new CountDownTimer(3000, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                if (!(ridingAngle >= 8 || ridingAngle <= -8)) {
+                    this.cancel();
+                    isCountdownRunning = false;
+                }
+            }
+
+            @Override
+            public void onFinish() {
+                if (ridingAngle >= 8 || ridingAngle <= -8) {
+                    AccidentHistory accidentEntry = AccidentHistory.builder()
+                            .accidentHistoryId(UUID.randomUUID().toString())
+                            .travelStatusUpdateId(statusUpdate.getTravelStatusUpdateId())
+                            .message("Accident Detected!")
+                            .build();
+
+                    Log.i("", "Accident Detected: " + accidentEntry.toString());
+                }
+
+                isCountdownRunning = false;
+            }
+        };
+
+        countDownTimer.start();
     }
 
     public void playWarningSound() {
@@ -363,7 +401,6 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
         mapView.onResume();
     }
 
-    @SuppressLint("MissingSuperCall")
     @Override
     public void onPause() {
         super.onPause();
@@ -389,6 +426,11 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
                 playWarningSound();
                 leftWarningIcon.setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
                 statusTxtView.setText(R.string.agrresive_cornering);
+
+                if (!isCountdownRunning) {
+                    onAccidentDetected();
+                }
+
             }
 
             // RIGHT LEANING
@@ -396,6 +438,10 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
                 playWarningSound();
                 rightWarningIcon.setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
                 statusTxtView.setText(R.string.agrresive_cornering);
+
+                if (!isCountdownRunning) {
+                    onAccidentDetected();
+                }
             }
 
             // NEUTRAL
