@@ -351,8 +351,6 @@ public class HomeFragment extends Fragment {
 
                         Executors.newSingleThreadExecutor().submit(() -> {
                             locations = repository.getSearchedLocationsByKeywords("% " + value.toString() + "%");
-                            Log.i("", locations.toString());
-
                             ArrayAdapter<SearchedLocation> listOfResult = new ArrayAdapter<>(HomeFragment.this.requireActivity(),
                                     android.R.layout.simple_dropdown_item_1line, locations);
 
@@ -431,8 +429,6 @@ public class HomeFragment extends Fragment {
 
                         Executors.newSingleThreadExecutor().submit(() -> {
                             locations = repository.getSearchedLocationsByKeywords("% " + value.toString() + "%");
-                            Log.i("", locations.toString());
-
                             ArrayAdapter<SearchedLocation> listOfResult = new ArrayAdapter<>(HomeFragment.this.requireActivity(),
                                     android.R.layout.simple_dropdown_item_1line, locations);
 
