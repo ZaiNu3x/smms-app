@@ -19,6 +19,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.TextView;
@@ -47,6 +48,7 @@ import org.osmdroid.views.overlay.Polyline;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import group.intelliboys.smms.BuildConfig;
@@ -55,7 +57,9 @@ import group.intelliboys.smms.activities.dashboard.HomeActivity;
 import group.intelliboys.smms.components.ui.CustomMapView;
 import group.intelliboys.smms.fragments.driving_mode.DrivingModeFragment;
 import group.intelliboys.smms.models.data.view_models.HomeFragmentViewModel;
+import group.intelliboys.smms.orm.data.SearchedLocation;
 import group.intelliboys.smms.orm.data.User;
+import group.intelliboys.smms.orm.repository.SearchedLocationRepository;
 import group.intelliboys.smms.security.SecurityContextHolder;
 import group.intelliboys.smms.services.LocationService;
 import group.intelliboys.smms.services.OsrmService;
@@ -319,7 +323,9 @@ public class HomeFragment extends Fragment {
         pointA.addTextChangedListener(new TextWatcher() {
             private final Handler handler = new Handler(Looper.getMainLooper());
             private Runnable runnable;
-            private final long DELAY = 150;
+            private final long DELAY = 500;
+            private SearchedLocationRepository repository = new SearchedLocationRepository();
+            private List<SearchedLocation> locations;
 
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -342,6 +348,19 @@ public class HomeFragment extends Fragment {
                         deleteMarkerA();
                     } else {
                         viewModel.setPointAValue(value.toString());
+
+                        Executors.newSingleThreadExecutor().submit(() -> {
+                            locations = repository.getSearchedLocationsByKeywords("% " + value.toString() + "%");
+                            Log.i("", locations.toString());
+
+                            ArrayAdapter<SearchedLocation> listOfResult = new ArrayAdapter<>(HomeFragment.this.requireActivity(),
+                                    android.R.layout.simple_dropdown_item_1line, locations);
+
+                            requireActivity().runOnUiThread(() -> {
+                                pointA.setAdapter(listOfResult);
+                                pointA.showDropDown();
+                            });
+                        });
                     }
                 };
 
@@ -356,7 +375,11 @@ public class HomeFragment extends Fragment {
         });
 
         pointA.setOnItemClickListener((adapterView, v, i, l) -> {
-
+            SearchedLocation selectedItem = (SearchedLocation) adapterView.getItemAtPosition(i);
+            GeoPoint point = new GeoPoint(selectedItem.getLatitude(), selectedItem.getLongitude());
+            setMarkerA(point);
+            mapView.getController()
+                    .animateTo(markerA.getPosition(), 17d, 3000L);
         });
 
         pointB.setOnLongClickListener(v -> {
@@ -381,7 +404,9 @@ public class HomeFragment extends Fragment {
         pointB.addTextChangedListener(new TextWatcher() {
             private final Handler handler = new Handler(Looper.getMainLooper());
             private Runnable runnable;
-            private final long DELAY = 150;
+            private final long DELAY = 500;
+            private SearchedLocationRepository repository = new SearchedLocationRepository();
+            private List<SearchedLocation> locations;
 
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -403,6 +428,19 @@ public class HomeFragment extends Fragment {
                         deleteMarkerB();
                     } else {
                         viewModel.setPointBValue(value.toString());
+
+                        Executors.newSingleThreadExecutor().submit(() -> {
+                            locations = repository.getSearchedLocationsByKeywords("% " + value.toString() + "%");
+                            Log.i("", locations.toString());
+
+                            ArrayAdapter<SearchedLocation> listOfResult = new ArrayAdapter<>(HomeFragment.this.requireActivity(),
+                                    android.R.layout.simple_dropdown_item_1line, locations);
+
+                            requireActivity().runOnUiThread(() -> {
+                                pointB.setAdapter(listOfResult);
+                                pointB.showDropDown();
+                            });
+                        });
                     }
                 };
 

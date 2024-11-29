@@ -3,6 +3,7 @@ package group.intelliboys.smms.services;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.util.Log;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 
 import androidx.annotation.NonNull;
@@ -20,6 +21,9 @@ import java.util.Map;
 import java.util.Objects;
 
 import group.intelliboys.smms.fragments.dashboard_menu.HomeFragment;
+import group.intelliboys.smms.orm.data.SearchedLocation;
+import group.intelliboys.smms.orm.repository.SearchedLocationRepository;
+import group.intelliboys.smms.utils.Commons;
 import group.intelliboys.smms.utils.ObjectMapper;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -118,6 +122,8 @@ public class OsrmService {
                         .build();
 
                 okHttpClient.newCall(request).enqueue(new Callback() {
+                    private SearchedLocationRepository repository = new SearchedLocationRepository();
+
                     @SuppressLint("SetTextI18n")
                     @Override
                     public void onFailure(@NonNull Call call, @NonNull IOException e) {
@@ -130,22 +136,56 @@ public class OsrmService {
                             if (response.body() != null) {
                                 String body = response.body().string();
                                 List<Map<String, Object>> data = ObjectMapper.convertJsonToListOfMap(body);
-                                String displayName = (String) data.get(0).get("display_name");
-                                float lat = Float.parseFloat((String) Objects.requireNonNull(data.get(0).get("lat")));
-                                float lon = Float.parseFloat((String) Objects.requireNonNull(data.get(0).get("lon")));
-                                GeoPoint geoPoint = new GeoPoint(lat, lon);
+                                Log.i("", "Data Length: " + data.size());
 
-                                activity.runOnUiThread(() -> {
-                                    homeFragment.getPointA().setText(displayName);
-                                    homeFragment.setMarkerA(geoPoint);
-                                    homeFragment.getViewModel().setMarkerACoordinates(geoPoint);
+                                if (data.size() == 1) {
+                                    SearchedLocation location = SearchedLocation.builder()
+                                            .displayName((String) data.get(0).get("display_name"))
+                                            .latitude(Float.parseFloat((String) data.get(0).get("lat")))
+                                            .longitude(Float.parseFloat((String) data.get(0).get("lon")))
+                                            .build();
 
-                                    if (homeFragment.getMarkerA() != null && homeFragment.getMarkerB() != null) {
-                                        GeoPoint pointA = homeFragment.getMarkerA().getPosition();
-                                        GeoPoint pointB = homeFragment.getMarkerB().getPosition();
-                                        getRouteFromPointAToPointB(pointA, pointB);
-                                    }
-                                });
+                                    repository.insertSearchedLocation(location);
+                                    GeoPoint geoPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
+
+                                    activity.runOnUiThread(() -> {
+                                        homeFragment.getPointA().setText(location.getDisplayName());
+                                        homeFragment.setMarkerA(geoPoint);
+                                        homeFragment.getViewModel().setMarkerACoordinates(geoPoint);
+
+                                        if (homeFragment.getMarkerA() != null && homeFragment.getMarkerB() != null) {
+                                            GeoPoint pointA = homeFragment.getMarkerA().getPosition();
+                                            GeoPoint pointB = homeFragment.getMarkerB().getPosition();
+                                            getRouteFromPointAToPointB(pointA, pointB);
+                                        }
+                                    });
+                                } else if (data.size() > 1) {
+                                    List<SearchedLocation> locations = new ArrayList<>();
+
+                                    data.forEach(o -> {
+                                        SearchedLocation location = SearchedLocation.builder()
+                                                .displayName((String) o.get("display_name"))
+                                                .latitude(Float.parseFloat((String) o.get("lat")))
+                                                .longitude(Float.parseFloat((String) o.get("lon")))
+                                                .build();
+
+                                        locations.add(location);
+                                        repository.insertSearchedLocation(location);
+                                    });
+
+                                    Log.i("", locations.toString());
+
+                                    activity.runOnUiThread(() -> {
+                                        ArrayAdapter<SearchedLocation> listOfResult = new ArrayAdapter<>(activity, android.R.layout.simple_dropdown_item_1line, locations);
+                                        homeFragment.getPointA().setAdapter(listOfResult);
+                                        homeFragment.getPointA().showDropDown();
+                                    });
+
+                                } else {
+                                    activity.runOnUiThread(() -> {
+                                        Commons.toastMessage(activity, "NOT FOUND!");
+                                    });
+                                }
                             }
                         } catch (Exception e) {
                             Log.i("", Objects.requireNonNull(e.getMessage()));
@@ -174,6 +214,8 @@ public class OsrmService {
                         .build();
 
                 okHttpClient.newCall(request).enqueue(new Callback() {
+                    private SearchedLocationRepository repository = new SearchedLocationRepository();
+
                     @SuppressLint("SetTextI18n")
                     @Override
                     public void onFailure(@NonNull Call call, @NonNull IOException e) {
@@ -186,22 +228,50 @@ public class OsrmService {
                             if (response.body() != null) {
                                 String body = response.body().string();
                                 List<Map<String, Object>> data = ObjectMapper.convertJsonToListOfMap(body);
-                                String displayName = (String) data.get(0).get("display_name");
-                                float lat = Float.parseFloat((String) Objects.requireNonNull(data.get(0).get("lat")));
-                                float lon = Float.parseFloat((String) Objects.requireNonNull(data.get(0).get("lon")));
-                                GeoPoint geoPoint = new GeoPoint(lat, lon);
 
-                                activity.runOnUiThread(() -> {
-                                    homeFragment.getPointB().setText(displayName);
-                                    homeFragment.setMarkerB(geoPoint);
-                                    homeFragment.getViewModel().setMarkerBCoordinates(geoPoint);
+                                if (data.size() == 1) {
+                                    String displayName = (String) data.get(0).get("display_name");
+                                    float lat = Float.parseFloat((String) Objects.requireNonNull(data.get(0).get("lat")));
+                                    float lon = Float.parseFloat((String) Objects.requireNonNull(data.get(0).get("lon")));
+                                    GeoPoint geoPoint = new GeoPoint(lat, lon);
 
-                                    if (homeFragment.getMarkerA() != null && homeFragment.getMarkerB() != null) {
-                                        GeoPoint pointA = homeFragment.getMarkerA().getPosition();
-                                        GeoPoint pointB = homeFragment.getMarkerB().getPosition();
-                                        getRouteFromPointAToPointB(pointA, pointB);
-                                    }
-                                });
+                                    activity.runOnUiThread(() -> {
+                                        homeFragment.getPointB().setText(displayName);
+                                        homeFragment.setMarkerB(geoPoint);
+                                        homeFragment.getViewModel().setMarkerBCoordinates(geoPoint);
+
+                                        if (homeFragment.getMarkerA() != null && homeFragment.getMarkerB() != null) {
+                                            GeoPoint pointA = homeFragment.getMarkerA().getPosition();
+                                            GeoPoint pointB = homeFragment.getMarkerB().getPosition();
+                                            getRouteFromPointAToPointB(pointA, pointB);
+                                        }
+                                    });
+                                } else if (data.size() > 1) {
+                                    List<SearchedLocation> locations = new ArrayList<>();
+
+                                    data.forEach(o -> {
+                                        SearchedLocation location = SearchedLocation.builder()
+                                                .displayName((String) o.get("display_name"))
+                                                .latitude(Float.parseFloat((String) o.get("lat")))
+                                                .longitude(Float.parseFloat((String) o.get("lon")))
+                                                .build();
+
+                                        locations.add(location);
+                                        repository.insertSearchedLocation(location);
+                                    });
+
+                                    Log.i("", locations.toString());
+
+                                    activity.runOnUiThread(() -> {
+                                        ArrayAdapter<SearchedLocation> listOfResult = new ArrayAdapter<>(activity, android.R.layout.simple_dropdown_item_1line, locations);
+                                        homeFragment.getPointB().setAdapter(listOfResult);
+                                        homeFragment.getPointB().showDropDown();
+                                    });
+                                } else {
+                                    activity.runOnUiThread(() -> {
+                                        Commons.toastMessage(activity, "NOT FOUND!");
+                                    });
+                                }
                             }
                         } catch (Exception e) {
                             Log.i("", Objects.requireNonNull(e.getMessage()));

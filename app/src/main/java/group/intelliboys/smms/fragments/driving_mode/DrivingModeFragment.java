@@ -48,6 +48,7 @@ import org.osmdroid.views.overlay.Polyline;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Executors;
 
 import group.intelliboys.smms.R;
 import group.intelliboys.smms.components.ui.CustomMapView;
@@ -296,7 +297,10 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
                             .createdAt(LocalDateTime.now())
                             .build();
 
-                    Log.i("", "Accident Detected: " + accidentEntry.toString());
+                    Executors.newSingleThreadExecutor().submit(() -> {
+                        accidentHistoryRepository.insertAccidentHistory(accidentEntry);
+                        Log.i("", "Accident Detected: " + accidentEntry.toString());
+                    });
                 }
 
                 isCountdownRunning = false;
