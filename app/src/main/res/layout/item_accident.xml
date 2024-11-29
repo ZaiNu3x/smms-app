@@ -16,7 +16,7 @@
 
         <!-- Map Preview or Icon -->
         <ImageView
-            android:id="@+id/img_map"
+            android:id="@+id/accident_img"
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:layout_marginEnd="16dp"
@@ -32,7 +32,7 @@
 
             <!-- Location -->
             <TextView
-                android:id="@+id/start_location"
+                android:id="@+id/accident_location"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Location"
@@ -42,7 +42,7 @@
 
             <!-- Time -->
             <TextView
-                android:id="@+id/tv_time"
+                android:id="@+id/accident_time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Time"
@@ -50,7 +50,7 @@
 
             <!-- Date -->
             <TextView
-                android:id="@+id/tv_date"
+                android:id="@+id/accident_date"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Date"

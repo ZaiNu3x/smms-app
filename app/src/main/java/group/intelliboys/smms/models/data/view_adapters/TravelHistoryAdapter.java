@@ -78,8 +78,8 @@ public class TravelHistoryAdapter extends RecyclerView.Adapter<TravelHistoryAdap
 
         public TravelHistoryViewHolder(@NonNull View itemView) {
             super(itemView);
-            imageView = itemView.findViewById(R.id.img_map);
-            startLocation = itemView.findViewById(R.id.start_location);
+            imageView = itemView.findViewById(R.id.accident_img);
+            startLocation = itemView.findViewById(R.id.accident_location);
             endLocation = itemView.findViewById(R.id.end_location);
             duration = itemView.findViewById(R.id.travel_duration);
             date = itemView.findViewById(R.id.travel_date);

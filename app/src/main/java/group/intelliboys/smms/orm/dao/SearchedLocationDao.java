@@ -15,6 +15,6 @@ public interface SearchedLocationDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insertSearchedLocation(SearchedLocation searchedLocation);
 
-    @Query("SELECT * FROM searched_location WHERE displayName LIKE :keywords")
+    @Query("SELECT * FROM SearchedLocation WHERE displayName LIKE :keywords")
     List<SearchedLocation> getSearchedLocationsByKeyword(String keywords);
 }

@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Entity(tableName = "user")
+@Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class User implements Serializable {
     @NonNull
