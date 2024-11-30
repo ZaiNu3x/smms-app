@@ -12,6 +12,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Looper;
@@ -22,11 +23,18 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.camera.core.Camera;
+import androidx.camera.core.CameraSelector;
+import androidx.camera.core.ImageCapture;
+import androidx.camera.core.ImageCaptureException;
+import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -34,6 +42,7 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.Priority;
+import com.google.common.util.concurrent.ListenableFuture;
 
 import org.osmdroid.config.Configuration;
 import org.osmdroid.events.MapListener;
@@ -45,9 +54,11 @@ import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.Polyline;
 
+import java.io.File;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
 import group.intelliboys.smms.R;
@@ -107,6 +118,11 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
     private TravelStatusUpdateRepository travelStatusUpdateRepository;
     private AccidentHistoryRepository accidentHistoryRepository;
 
+    private static final int CAMERA_PERMISSION_CODE = 100;
+    private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
+
+    private ImageCapture imageCapture;
+
     @SuppressLint("MissingInflatedId")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -154,6 +170,7 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
         mediaPlayer = MediaPlayer.create(requireContext(), R.raw.alert_sound2);
         sensorManager = (SensorManager) requireActivity().getSystemService(Context.SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        requestPermissionForCameraAccess();
 
         user = SecurityContextHolder.getInstance().getAuthenticatedUser();
         travelHistoryRepository = new TravelHistoryRepository();
@@ -194,9 +211,20 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
         backToDrivingMode.setOnClickListener(v -> {
             isFocusOnMyLocationMarker = true;
             backToDrivingMode.setVisibility(View.INVISIBLE);
+            takePhoto();
         });
 
         return view;
+    }
+
+    private void requestPermissionForCameraAccess() {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            Commons.toastMessage(requireActivity(), "Camera permission granted");
+            setUpCamera();
+        } else {
+            ActivityCompat.requestPermissions(requireActivity(), new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_CODE);
+        }
+
     }
 
     private void requestLocationUpdates() {
@@ -360,6 +388,65 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
         routeLine.setWidth(10);
         mapView.drawRoute(routeLine);
         mapView.invalidate();
+    }
+
+    public void setUpCamera() {
+        ListenableFuture<ProcessCameraProvider> cameraProviderListenableFuture = ProcessCameraProvider
+                .getInstance(requireActivity());
+
+        cameraProviderListenableFuture.addListener(() -> {
+            try {
+                ProcessCameraProvider cameraProvider = cameraProviderListenableFuture.get();
+                startCamera(cameraProvider); // Call startCamera method here
+            } catch (ExecutionException | InterruptedException e) {
+                Log.e("CameraX", "Camera initialization failed", e);
+            }
+        }, ContextCompat.getMainExecutor(requireActivity()));
+    }
+
+    private void startCamera(@NonNull ProcessCameraProvider cameraProvider) {
+        CameraSelector cameraSelector = new CameraSelector.Builder()
+                .requireLensFacing(CameraSelector.LENS_FACING_FRONT)
+                .build();
+
+        imageCapture = new ImageCapture.Builder().build();
+
+        try {
+            // Unbind use cases before rebinding
+            cameraProvider.unbindAll();
+            // Bind use cases to camera
+            Camera camera = cameraProvider.bindToLifecycle(
+                    this, cameraSelector, imageCapture);
+        } catch (Exception e) {
+            Log.e("CameraX", "Use case binding failed", e);
+        }
+    }
+
+    private void takePhoto() {
+        File photoFile = new File(requireActivity().getExternalFilesDir(null), LocalDateTime.now().toString() + ".jpg");
+        ImageCapture.OutputFileOptions outputFileOptions =
+                new ImageCapture.OutputFileOptions.Builder(photoFile).build();
+
+        imageCapture.takePicture(
+                outputFileOptions, ContextCompat.getMainExecutor(requireActivity()),
+                new ImageCapture.OnImageSavedCallback() {
+                    @Override
+                    public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
+                        Uri savedUri = outputFileResults.getSavedUri() != null ?
+                                outputFileResults.getSavedUri() : Uri.fromFile(photoFile);
+                        String msg = "Photo capture succeeded: " + savedUri;
+                        Toast.makeText(requireActivity(), msg, Toast.LENGTH_SHORT).show();
+                        Log.d("CameraX", msg);
+                    }
+
+                    @Override
+                    public void onError(@NonNull ImageCaptureException exception) {
+                        String msg = "Photo capture failed: " + exception.getMessage();
+                        Toast.makeText(requireActivity(), msg, Toast.LENGTH_SHORT).show();
+                        Log.e("CameraX", msg, exception);
+                    }
+                }
+        );
     }
 
     @Override
