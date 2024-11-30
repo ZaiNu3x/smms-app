@@ -63,6 +63,7 @@ import group.intelliboys.smms.orm.repository.TravelStatusUpdateRepository;
 import group.intelliboys.smms.security.SecurityContextHolder;
 import group.intelliboys.smms.services.LocationService;
 import group.intelliboys.smms.services.TravelHistoryService;
+import group.intelliboys.smms.services.TravelStatusUpdateService;
 import group.intelliboys.smms.utils.Commons;
 import group.intelliboys.smms.utils.Executor;
 
@@ -299,7 +300,8 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
 
                     Executors.newSingleThreadExecutor().submit(() -> {
                         accidentHistoryRepository.insertAccidentHistory(accidentEntry);
-                        Log.i("", "Accident Detected: " + accidentEntry.toString());
+                        TravelStatusUpdateService.getInstance()
+                                .updateAddress(statusUpdate.getTravelStatusUpdateId());
                     });
                 }
 

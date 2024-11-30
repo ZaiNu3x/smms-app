@@ -47,7 +47,7 @@ public class AccidentHistoryAdapter extends RecyclerView.Adapter<AccidentHistory
                 holder.accidentLocation.setText(statusUpdate.getAddress());
             } else {
                 // CODES IF ADDRESS NULL OR EMPTY
-                String coordinates = statusUpdate.getLatitude() + ", " + statusUpdate.getLongitude();
+                String coordinates = "lat: " + statusUpdate.getLatitude() + ", lon: " + statusUpdate.getLongitude();
                 holder.accidentLocation.setText(coordinates);
             }
         }
