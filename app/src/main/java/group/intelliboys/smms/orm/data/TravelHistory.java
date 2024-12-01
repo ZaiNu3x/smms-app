@@ -19,8 +19,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Entity(tableName = "travel_history",
-        foreignKeys = @ForeignKey(entity = User.class,
+@Entity(foreignKeys = @ForeignKey(entity = User.class,
                 parentColumns = "email",
                 childColumns = "userId",
                 onDelete = ForeignKey.CASCADE))

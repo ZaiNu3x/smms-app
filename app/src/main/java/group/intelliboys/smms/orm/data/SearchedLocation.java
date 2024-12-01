@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Entity(tableName = "searched_location")
+@Entity
 public class SearchedLocation {
     @NonNull
     @PrimaryKey

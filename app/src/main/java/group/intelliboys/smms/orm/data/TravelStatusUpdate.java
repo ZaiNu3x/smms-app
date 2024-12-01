@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Entity(tableName = "travel_status_update", foreignKeys = @ForeignKey(entity = TravelHistory.class,
+@Entity(foreignKeys = @ForeignKey(entity = TravelHistory.class,
         parentColumns = "travelHistoryId",
         childColumns = "travelHistoryId",
         onDelete = ForeignKey.CASCADE))
@@ -32,6 +32,7 @@ public class TravelStatusUpdate implements Serializable {
     private float latitude;
     private float longitude;
     private float altitude;
+    private String address;
     private int speedInKmh;
     private String direction;
     private float ridingAngle;

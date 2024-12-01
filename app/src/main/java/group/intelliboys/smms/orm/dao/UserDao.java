@@ -19,10 +19,10 @@ public interface UserDao {
     @Delete
     void deleteUser(User user);
 
-    @Query("SELECT * FROM user WHERE email = :email")
+    @Query("SELECT * FROM User WHERE email = :email")
     User getUserByEmail(String email);
 
-    @Query("SELECT * FROM user LIMIT 1")
+    @Query("SELECT * FROM User LIMIT 1")
     User getAuthenticatedUser();
 
     @Update

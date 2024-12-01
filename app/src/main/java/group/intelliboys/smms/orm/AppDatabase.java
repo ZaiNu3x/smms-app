@@ -8,6 +8,7 @@ import group.intelliboys.smms.configs.DatabaseConfig;
 import group.intelliboys.smms.orm.dao.AccidentHistoryDao;
 import group.intelliboys.smms.orm.dao.SearchedLocationDao;
 import group.intelliboys.smms.orm.dao.TravelHistoryDao;
+import group.intelliboys.smms.orm.dao.TravelStatusUpdateAccidentHistoryDao;
 import group.intelliboys.smms.orm.dao.TravelStatusUpdateDao;
 import group.intelliboys.smms.orm.dao.UserDao;
 import group.intelliboys.smms.orm.data.AccidentHistory;
@@ -32,4 +33,6 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract AccidentHistoryDao accidentHistoryDao();
 
     public abstract SearchedLocationDao searchedLocationDao();
+
+    public abstract TravelStatusUpdateAccidentHistoryDao statusUpdateAccidentHistoryDao();
 }

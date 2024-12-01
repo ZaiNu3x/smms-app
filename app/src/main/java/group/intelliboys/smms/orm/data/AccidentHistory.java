@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Entity(tableName = "accident_history", foreignKeys = @ForeignKey(
+@Entity(foreignKeys = @ForeignKey(
         entity = TravelStatusUpdate.class,
         parentColumns = "travelStatusUpdateId",
         childColumns = "travelStatusUpdateId",

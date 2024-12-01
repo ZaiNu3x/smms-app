@@ -58,8 +58,10 @@ import group.intelliboys.smms.components.ui.CustomMapView;
 import group.intelliboys.smms.fragments.driving_mode.DrivingModeFragment;
 import group.intelliboys.smms.models.data.view_models.HomeFragmentViewModel;
 import group.intelliboys.smms.orm.data.SearchedLocation;
+import group.intelliboys.smms.orm.data.TravelStatusUpdateWithAccidentHistory;
 import group.intelliboys.smms.orm.data.User;
 import group.intelliboys.smms.orm.repository.SearchedLocationRepository;
+import group.intelliboys.smms.orm.repository.TravelStatusUpdateAccidentHistoryRepository;
 import group.intelliboys.smms.security.SecurityContextHolder;
 import group.intelliboys.smms.services.LocationService;
 import group.intelliboys.smms.services.OsrmService;
@@ -351,8 +353,6 @@ public class HomeFragment extends Fragment {
 
                         Executors.newSingleThreadExecutor().submit(() -> {
                             locations = repository.getSearchedLocationsByKeywords("% " + value.toString() + "%");
-                            Log.i("", locations.toString());
-
                             ArrayAdapter<SearchedLocation> listOfResult = new ArrayAdapter<>(HomeFragment.this.requireActivity(),
                                     android.R.layout.simple_dropdown_item_1line, locations);
 
@@ -431,8 +431,6 @@ public class HomeFragment extends Fragment {
 
                         Executors.newSingleThreadExecutor().submit(() -> {
                             locations = repository.getSearchedLocationsByKeywords("% " + value.toString() + "%");
-                            Log.i("", locations.toString());
-
                             ArrayAdapter<SearchedLocation> listOfResult = new ArrayAdapter<>(HomeFragment.this.requireActivity(),
                                     android.R.layout.simple_dropdown_item_1line, locations);
 
@@ -474,6 +472,12 @@ public class HomeFragment extends Fragment {
                         // CODE
                     }))
                     .show();
+        });
+
+        Executors.newSingleThreadExecutor().submit(() -> {
+            TravelStatusUpdateAccidentHistoryRepository repository = new TravelStatusUpdateAccidentHistoryRepository();
+            List<TravelStatusUpdateWithAccidentHistory> list = repository.getAccidentHistories();
+            Log.i("", list.toString());
         });
 
         return view;

@@ -17,15 +17,15 @@ public interface TravelHistoryDao {
     @Update
     void updateTravelHistory(TravelHistory travelHistory);
 
-    @Query("SELECT * FROM travel_history WHERE startLocationName IS NULL")
+    @Query("SELECT * FROM TravelHistory WHERE startLocationName IS NULL")
     List<TravelHistory> getTravelHistoriesWithNullStartLocation();
 
-    @Query("SELECT * FROM travel_history WHERE endLocationName IS NULL")
+    @Query("SELECT * FROM TravelHistory WHERE endLocationName IS NULL")
     List<TravelHistory> getTravelHistoriesWithNullEndLocation();
 
-    @Query("SELECT * FROM travel_history ORDER BY createdAt")
+    @Query("SELECT * FROM TravelHistory ORDER BY createdAt")
     List<TravelHistory> getAllTravelHistories();
 
-    @Query("SELECT * FROM travel_history WHERE travelHistoryId = :id")
+    @Query("SELECT * FROM TravelHistory WHERE travelHistoryId = :id")
     TravelHistory getTravelHistoryById(String id);
 }

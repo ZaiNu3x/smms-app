@@ -230,13 +230,17 @@ public class OsrmService {
                                 List<Map<String, Object>> data = ObjectMapper.convertJsonToListOfMap(body);
 
                                 if (data.size() == 1) {
-                                    String displayName = (String) data.get(0).get("display_name");
-                                    float lat = Float.parseFloat((String) Objects.requireNonNull(data.get(0).get("lat")));
-                                    float lon = Float.parseFloat((String) Objects.requireNonNull(data.get(0).get("lon")));
-                                    GeoPoint geoPoint = new GeoPoint(lat, lon);
+                                    SearchedLocation location = SearchedLocation.builder()
+                                            .displayName((String) data.get(0).get("display_name"))
+                                            .latitude(Float.parseFloat((String) data.get(0).get("lat")))
+                                            .longitude(Float.parseFloat((String) data.get(0).get("lon")))
+                                            .build();
+
+                                    repository.insertSearchedLocation(location);
+                                    GeoPoint geoPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
 
                                     activity.runOnUiThread(() -> {
-                                        homeFragment.getPointB().setText(displayName);
+                                        homeFragment.getPointB().setText(location.getDisplayName());
                                         homeFragment.setMarkerB(geoPoint);
                                         homeFragment.getViewModel().setMarkerBCoordinates(geoPoint);
 
