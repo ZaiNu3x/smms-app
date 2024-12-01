@@ -17,4 +17,8 @@ public class AccidentHistoryRepository {
     public void insertAccidentHistory(AccidentHistory accidentHistory) {
         accidentHistoryDao.insertAccidentHistory(accidentHistory);
     }
+
+    public void updateAccidentHistory(AccidentHistory accidentHistory) {
+        accidentHistoryDao.updateAccidentHistory(accidentHistory);
+    }
 }

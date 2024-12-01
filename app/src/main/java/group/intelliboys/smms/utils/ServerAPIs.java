@@ -1194,5 +1194,35 @@ public class ServerAPIs {
         }
     }
 
+    public void sendAccidentEntry(JSONObject accidentEntry) {
+        serverIpAddress = networkConfig.getServerIpAddress(activity);
+
+        if (serverIpAddress != null && !serverIpAddress.isEmpty()) {
+            User user = SecurityContextHolder.getInstance().getAuthenticatedUser();
+            final String SEND_ACCIDENT = serverIpAddress + "/push/notification/accident";
+            RequestBody requestBody = RequestBody.create(accidentEntry.toString(), JSON);
+
+            Request request = new Request.Builder()
+                    .url(SEND_ACCIDENT)
+                    .post(requestBody)
+                    .addHeader("Authorization", "Bearer " + user.getToken())
+                    .addHeader("Device-ID", DeviceSpecs.DEVICE_ID)
+                    .addHeader("Device-Name", DeviceSpecs.DEVICE_NAME)
+                    .build();
+
+            okHttpClient.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                    Log.i("", Objects.requireNonNull(e.getMessage()));
+                }
+
+                @Override
+                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                    Log.i("", response.body().string());
+                }
+            });
+        }
+    }
+
     // ======================================================================================
 }

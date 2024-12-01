@@ -5,6 +5,7 @@ import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
@@ -21,7 +22,7 @@ import lombok.NoArgsConstructor;
         parentColumns = "travelStatusUpdateId",
         childColumns = "travelStatusUpdateId",
         onDelete = ForeignKey.CASCADE))
-public class AccidentHistory {
+public class AccidentHistory implements Serializable {
     @NonNull
     @PrimaryKey
     private String accidentHistoryId;

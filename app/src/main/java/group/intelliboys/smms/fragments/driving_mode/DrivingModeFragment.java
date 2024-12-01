@@ -44,6 +44,8 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.Priority;
 import com.google.common.util.concurrent.ListenableFuture;
 
+import org.apache.commons.lang3.SerializationUtils;
+import org.json.JSONObject;
 import org.osmdroid.config.Configuration;
 import org.osmdroid.events.MapListener;
 import org.osmdroid.events.ScrollEvent;
@@ -55,12 +57,17 @@ import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.Polyline;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
+import group.intelliboys.smms.MainActivity;
 import group.intelliboys.smms.R;
 import group.intelliboys.smms.components.ui.CustomMapView;
 import group.intelliboys.smms.models.data.view_models.HomeFragmentViewModel;
@@ -73,10 +80,16 @@ import group.intelliboys.smms.orm.repository.TravelHistoryRepository;
 import group.intelliboys.smms.orm.repository.TravelStatusUpdateRepository;
 import group.intelliboys.smms.security.SecurityContextHolder;
 import group.intelliboys.smms.services.LocationService;
+import group.intelliboys.smms.services.OsmService;
+import group.intelliboys.smms.services.OsrmService;
 import group.intelliboys.smms.services.TravelHistoryService;
 import group.intelliboys.smms.services.TravelStatusUpdateService;
 import group.intelliboys.smms.utils.Commons;
 import group.intelliboys.smms.utils.Executor;
+import group.intelliboys.smms.utils.ServerAPIs;
+import group.intelliboys.smms.utils.converters.ImageConverter;
+import lombok.Getter;
+import lombok.Setter;
 
 public class DrivingModeFragment extends Fragment implements SensorEventListener {
     private CustomMapView mapView;
@@ -84,17 +97,19 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
     private ImageButton rightWarningIcon;
     private TextView speedTxtView;
     private TextView statusTxtView;
+    @Getter
     private TextView speedLimitTxtView;
+    @Getter
     private TextView roadTypeTxtView;
+    @Getter
     private TextView remDistanceTxtView;
     private Button backToDrivingMode;
-
+    private OsrmService osrmService;
     private MediaPlayer mediaPlayer;
     private SensorManager sensorManager;
     private Sensor accelerometer;
-
-    private static final int SPEED_LIMIT = 45;
-
+    @Setter
+    private int speedLimit = 60;
     private HomeFragmentViewModel viewModel;
     private Marker myLocation;
     private boolean isFocusOnMyLocationMarker;
@@ -102,26 +117,26 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
     private Marker markerA;
     private Marker markerB;
     private Polyline routeLine;
-
     private float ridingAngle;
-
     private static final int LOCATION_REQUEST_CODE = 1;
     private FusedLocationProviderClient locationProviderClient;
     private LocationCallback locationCallback;
+    private OsmService osmService;
     private LocationRequest locationRequest;
     private Location lastLocation;
-
     private User user;
     private TravelHistory travelEntry;
     private TravelHistoryRepository travelHistoryRepository;
     private TravelStatusUpdate statusUpdate;
     private TravelStatusUpdateRepository travelStatusUpdateRepository;
     private AccidentHistoryRepository accidentHistoryRepository;
-
     private static final int CAMERA_PERMISSION_CODE = 100;
-    private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
-
     private ImageCapture imageCapture;
+    private AccidentHistory accident;
+    private byte[] frontCameraSnapImage;
+    private byte[] backCameraSnapImage;
+
+    private ServerAPIs serverAPIs;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -138,6 +153,9 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
         roadTypeTxtView = view.findViewById(R.id.roadType);
         speedLimitTxtView = view.findViewById(R.id.speedLimit);
         backToDrivingMode = view.findViewById(R.id.backToDrivingBtn);
+
+        osrmService = new OsrmService(this);
+        serverAPIs = new ServerAPIs(requireActivity());
 
         mapView.setTileSource(TileSourceFactory.MAPNIK);
         mapView.setBuiltInZoomControls(false);
@@ -177,6 +195,8 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
         travelStatusUpdateRepository = new TravelStatusUpdateRepository();
         accidentHistoryRepository = new AccidentHistoryRepository();
 
+        osmService = new OsmService(this);
+
         ActivityResultLauncher<String> requestPermissionLauncher =
                 registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
                     if (isGranted) {
@@ -208,10 +228,12 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
             }
         });
 
+        setUpCamera();
+
         backToDrivingMode.setOnClickListener(v -> {
             isFocusOnMyLocationMarker = true;
             backToDrivingMode.setVisibility(View.INVISIBLE);
-            takePhoto();
+            Executors.newSingleThreadExecutor().submit(this::updateRoadInfo);
         });
 
         return view;
@@ -246,11 +268,10 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
             locationCallback = new LocationCallback() {
                 private final GeoPoint point = new GeoPoint(0f, 0f);
 
+                @SuppressLint("SetTextI18n")
                 @Override
                 public void onLocationResult(@NonNull LocationResult locationResult) {
                     Location location = locationResult.getLastLocation();
-                    lastLocation = location;
-
                     if (location != null) {
                         if (travelEntry == null) {
                             travelEntry = new TravelHistory();
@@ -295,19 +316,37 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
                                 .build();
 
                         travelStatusUpdateRepository.insertTravelStatusUpdate(statusUpdate);
+
+                        requireActivity().runOnUiThread(() -> {
+                            speedTxtView.setText("Speed: " + speed + " Km/hr");
+                        });
+
+                        lastLocation = location;
                     }
                 }
             };
         }
 
         locationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
+    }
 
+    private void updateRoadInfo() {
+        if (lastLocation != null) {
+            GeoPoint geoPoint = new GeoPoint(lastLocation.getLatitude(), lastLocation.getLongitude());
+            osmService.getRoadTypeAndSpeedLimit(geoPoint);
+
+            if (markerB != null) {
+                GeoPoint myPoint = new GeoPoint(lastLocation.getLatitude(), lastLocation.getLongitude());
+                osrmService.getRemainingDistance(myPoint, markerB.getPosition());
+            }
+
+            Log.i("", "Road Info Updated!");
+        }
     }
 
     public void onAccidentDetected() {
         isCountdownRunning = true;
-
-        CountDownTimer countDownTimer = new CountDownTimer(3000, 1000) {
+        CountDownTimer countDownTimer = new CountDownTimer(5000, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
                 if (!(ridingAngle >= 8 || ridingAngle <= -8)) {
@@ -328,15 +367,16 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
 
                     Executors.newSingleThreadExecutor().submit(() -> {
                         accidentHistoryRepository.insertAccidentHistory(accidentEntry);
+                        accident = SerializationUtils.clone(accidentEntry);
                         TravelStatusUpdateService.getInstance()
                                 .updateAddress(statusUpdate.getTravelStatusUpdateId());
+                        takePhoto();
                     });
                 }
 
                 isCountdownRunning = false;
             }
         };
-
         countDownTimer.start();
     }
 
@@ -390,6 +430,8 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
         mapView.invalidate();
     }
 
+    private int lens = CameraSelector.LENS_FACING_FRONT;
+
     public void setUpCamera() {
         ListenableFuture<ProcessCameraProvider> cameraProviderListenableFuture = ProcessCameraProvider
                 .getInstance(requireActivity());
@@ -406,7 +448,7 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
 
     private void startCamera(@NonNull ProcessCameraProvider cameraProvider) {
         CameraSelector cameraSelector = new CameraSelector.Builder()
-                .requireLensFacing(CameraSelector.LENS_FACING_FRONT)
+                .requireLensFacing(lens)
                 .build();
 
         imageCapture = new ImageCapture.Builder().build();
@@ -417,6 +459,10 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
             // Bind use cases to camera
             Camera camera = cameraProvider.bindToLifecycle(
                     this, cameraSelector, imageCapture);
+
+            if (lens == CameraSelector.LENS_FACING_BACK) {
+                takePhoto();
+            }
         } catch (Exception e) {
             Log.e("CameraX", "Use case binding failed", e);
         }
@@ -434,9 +480,54 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
                     public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
                         Uri savedUri = outputFileResults.getSavedUri() != null ?
                                 outputFileResults.getSavedUri() : Uri.fromFile(photoFile);
+
                         String msg = "Photo capture succeeded: " + savedUri;
                         Toast.makeText(requireActivity(), msg, Toast.LENGTH_SHORT).show();
                         Log.d("CameraX", msg);
+
+                        if (lens == CameraSelector.LENS_FACING_FRONT) {
+                            frontCameraSnapImage = ImageConverter.compressImage(outputFileResultsToByteArray(outputFileResults), 50);
+                            Log.i("", String.valueOf(frontCameraSnapImage.length));
+                            lens = CameraSelector.LENS_FACING_BACK;
+                        } else {
+                            backCameraSnapImage = ImageConverter.compressImage(outputFileResultsToByteArray(outputFileResults), 50);
+                            Log.i("", String.valueOf(backCameraSnapImage.length));
+                            lens = CameraSelector.LENS_FACING_FRONT;
+                        }
+
+                        if (accident != null && frontCameraSnapImage != null && backCameraSnapImage != null) {
+                            // UPDATE ACCIDENT ENTRY
+                            Executor.run(() -> {
+                                accident.setFrontCameraSnap(frontCameraSnapImage);
+                                accident.setBackCameraSnap(backCameraSnapImage);
+
+                                accidentHistoryRepository.updateAccidentHistory(accident);
+                                Log.d("", "Accident Entry Updated!");
+
+                                try {
+                                    JSONObject jsonObject = new JSONObject();
+                                    jsonObject.put("accidentHistoryId", accident.getAccidentHistoryId());
+                                    jsonObject.put("latitude", lastLocation.getLatitude());
+                                    jsonObject.put("longitude", lastLocation.getLongitude());
+                                    jsonObject.put("frontCameraSnap", Base64.getEncoder().encodeToString(accident.getFrontCameraSnap()));
+                                    jsonObject.put("backCameraSnap", Base64.getEncoder().encodeToString(accident.getBackCameraSnap()));
+                                    jsonObject.put("email", MainActivity.accidentEmailRecipient);
+                                    jsonObject.put("createdAt", accident.getCreatedAt());
+                                    Log.i("", String.valueOf(Log.d("", "Detected: " + jsonObject.toString())));
+
+                                    serverAPIs.sendAccidentEntry(jsonObject);
+                                } catch (Exception e) {
+                                    Log.i("", Objects.requireNonNull(e.getMessage()));
+                                }
+
+                                // EXECUTE AFTER UPDATING ACCIDENT ENTRY
+                                accident = null;
+                                frontCameraSnapImage = null;
+                                backCameraSnapImage = null;
+                            });
+                        }
+
+                        setUpCamera();
                     }
 
                     @Override
@@ -448,6 +539,24 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
                 }
         );
     }
+
+    public byte[] outputFileResultsToByteArray(ImageCapture.OutputFileResults outputFileResults) {
+        Uri savedUri = outputFileResults.getSavedUri();
+        File file = new File(savedUri.getPath());
+        byte[] byteArray = null;
+
+        try {
+            FileInputStream inputStream = new FileInputStream(file);
+            byteArray = new byte[(int) file.length()];
+            inputStream.read(byteArray);
+            inputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return byteArray;
+    }
+
 
     @Override
     public void onDestroy() {
@@ -510,7 +619,6 @@ public class DrivingModeFragment extends Fragment implements SensorEventListener
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
         // CODES
-
         if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             ridingAngle = sensorEvent.values[0];
             Log.i("", "X: " + ridingAngle);

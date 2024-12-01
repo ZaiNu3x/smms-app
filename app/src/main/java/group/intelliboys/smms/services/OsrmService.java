@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import group.intelliboys.smms.fragments.dashboard_menu.HomeFragment;
+import group.intelliboys.smms.fragments.driving_mode.DrivingModeFragment;
 import group.intelliboys.smms.orm.data.SearchedLocation;
 import group.intelliboys.smms.orm.repository.SearchedLocationRepository;
 import group.intelliboys.smms.utils.Commons;
@@ -361,6 +362,48 @@ public class OsrmService {
             }
         } catch (Exception e) {
             Log.i("", Objects.requireNonNull(e.getMessage()));
+        }
+    }
+
+    public void getRemainingDistance(GeoPoint pointA, GeoPoint pointB) {
+        if (fragment instanceof DrivingModeFragment) {
+            DrivingModeFragment drivingModeFragment = (DrivingModeFragment) fragment;
+
+            final String API = "https://routing.openstreetmap.de/routed-car/route/v1/driving/" + pointA.getLongitude() +
+                    "," + pointA.getLatitude() + ";" + pointB.getLongitude() + "," + pointB.getLatitude() +
+                    "?overview=false&alternatives=true&steps=true&annotations=speed";
+
+            Request request = new Request.Builder()
+                    .url(API)
+                    .addHeader("Referer", "https://map.project-osrm.org/")
+                    .get()
+                    .build();
+
+            try {
+                Response response = okHttpClient.newCall(request).execute();
+
+                if (response.body() != null) {
+                    String body = response.body().string();
+                    Map<?, ?> data = ObjectMapper.convertJsonToMapObject(body);
+
+                    try {
+                        JSONObject routeData = new JSONObject(data);
+                        JSONArray routes = routeData.getJSONArray("routes");
+                        JSONObject route = routes.getJSONObject(0);
+
+                        DecimalFormat decimalFormat = new DecimalFormat("#.##");
+                        double distanceInKm = Double.parseDouble(decimalFormat.format(route
+                                .getDouble("distance") / 1000));
+                        drivingModeFragment.getRemDistanceTxtView().setText(distanceInKm + "KM");
+                    } catch (Exception e) {
+                        Log.i("", Objects.requireNonNull(e.getMessage()));
+                    }
+                }
+
+                response.close();
+            } catch (Exception e) {
+                Log.i("", Objects.requireNonNull(e.getMessage()));
+            }
         }
     }
 }

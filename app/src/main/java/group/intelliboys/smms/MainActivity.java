@@ -16,6 +16,8 @@ import group.intelliboys.smms.utils.ContextHolder;
 import group.intelliboys.smms.utils.Executor;
 
 public class MainActivity extends AppCompatActivity {
+    public static String accidentEmailRecipient;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
